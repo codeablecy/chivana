@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  /* Secondary section background (neutral) */
+  .bg-section {
+    background-color: var(--section-bg);
+  }
+}
+
+@layer base {
+  :root {
+    /* Section secondary background (neutral, matches Wix corvid fallback) */
+    --section-bg: hsl(30 25% 97%);
+    --background: 30 25% 97%;
+    --foreground: 20 10% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 20 10% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 10% 15%;
+    --primary: 18 55% 42%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 30 20% 92%;
+    --secondary-foreground: 20 10% 15%;
+    --muted: 30 15% 94%;
+    --muted-foreground: 20 5% 45%;
+    --accent: 35 80% 50%;
+    --accent-foreground: 0 0% 100%;
+    /* Navy - secondary/brand (navbar, headers) */
+    --navy: 217 35% 18%;
+    --navy-foreground: 0 0% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 30 15% 88%;
+    --input: 30 15% 88%;
+    --ring: 18 55% 42%;
+    --chart-1: 18 55% 42%;
+    --chart-2: 35 80% 50%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

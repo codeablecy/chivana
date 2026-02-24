@@ -1,0 +1,611 @@
+"use client"
+
+import * as React from "react"
+import { useRouter } from "next/navigation"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { TagInput } from "./tag-input"
+import { MapPicker } from "./map-picker"
+import { GalleryEditor } from "./gallery-editor"
+import { MediaSectionEditor } from "./media-section-editor"
+import {
+  updateProjectFull,
+  updateGallery,
+  updateHeroImage,
+  deleteProject,
+} from "@/app/admin/actions"
+import { toast } from "sonner"
+import type { Project } from "@/lib/types"
+
+const SUGGESTED_TAGS = [
+  "En Construcción",
+  "Últimas Unidades",
+  "Proximamente",
+  "Piscina",
+  "Gimnasio",
+  "Seguridad",
+  "Jardín",
+]
+
+const STATUS_OPTIONS: { value: Project["status"]; label: string }[] = [
+  { value: "coming-soon", label: "Proximamente" },
+  { value: "active", label: "En Venta" },
+  { value: "sold-out", label: "Agotado" },
+]
+
+export interface ProjectEditorSheetProps {
+  project: Project
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
+
+/** Full project edit form with live preview and floating action bar. */
+export function ProjectEditorSheet({
+  project,
+  open,
+  onOpenChange,
+}: ProjectEditorSheetProps) {
+  const router = useRouter()
+  const [saving, setSaving] = React.useState(false)
+  const [deleteConfirm, setDeleteConfirm] = React.useState("")
+  const [form, setForm] = React.useState({
+    name: project.name,
+    tagline: project.tagline,
+    description: project.description,
+    status: project.status,
+    totalUnits: String(project.totalUnits),
+    constructionStartDate: project.constructionStartDate ?? "",
+    constructionEndDate: project.constructionEndDate ?? "",
+    mapEmbedUrl: project.mapEmbedUrl ?? "",
+    address: project.location.address,
+    city: project.location.city,
+    province: project.location.province,
+    postalCode: project.location.postalCode,
+    lat: project.location.lat,
+    lng: project.location.lng,
+    tags: [...project.tags],
+    galleryPhotos: [...project.gallery.photos],
+    galleryConstruction: [...(project.gallery.construction ?? [])],
+    galleryVideos: [...(project.gallery.videos ?? [])],
+    galleryTour360: [...(project.gallery.tour360 ?? [])],
+    galleryParcela: [...(project.gallery.parcela ?? [])],
+    heroImage: project.heroImage,
+  })
+
+  React.useEffect(() => {
+    if (open) {
+      setForm({
+        name: project.name,
+        tagline: project.tagline,
+        description: project.description,
+        status: project.status,
+        totalUnits: String(project.totalUnits),
+        constructionStartDate: project.constructionStartDate ?? "",
+        constructionEndDate: project.constructionEndDate ?? "",
+        mapEmbedUrl: project.mapEmbedUrl ?? "",
+        address: project.location.address,
+        city: project.location.city,
+        province: project.location.province,
+        postalCode: project.location.postalCode,
+        lat: project.location.lat,
+        lng: project.location.lng,
+        tags: [...project.tags],
+        galleryPhotos: [...project.gallery.photos],
+        galleryConstruction: [...(project.gallery.construction ?? [])],
+        galleryVideos: [...(project.gallery.videos ?? [])],
+        galleryTour360: [...(project.gallery.tour360 ?? [])],
+        galleryParcela: [...(project.gallery.parcela ?? [])],
+        heroImage: project.heroImage,
+      })
+    }
+  }, [open, project])
+
+  const isDirty = React.useMemo(() => {
+    return (
+      form.name !== project.name ||
+      form.tagline !== project.tagline ||
+      form.description !== project.description ||
+      form.status !== project.status ||
+      form.totalUnits !== String(project.totalUnits) ||
+      form.constructionStartDate !== (project.constructionStartDate ?? "") ||
+      form.constructionEndDate !== (project.constructionEndDate ?? "") ||
+      form.mapEmbedUrl !== (project.mapEmbedUrl ?? "") ||
+      form.address !== project.location.address ||
+      form.city !== project.location.city ||
+      form.province !== project.location.province ||
+      form.postalCode !== project.location.postalCode ||
+      form.lat !== project.location.lat ||
+      form.lng !== project.location.lng ||
+      JSON.stringify(form.tags) !== JSON.stringify(project.tags) ||
+      JSON.stringify(form.galleryPhotos) !==
+        JSON.stringify(project.gallery.photos) ||
+      JSON.stringify(form.galleryConstruction) !==
+        JSON.stringify(project.gallery.construction ?? []) ||
+      JSON.stringify(form.galleryVideos) !==
+        JSON.stringify(project.gallery.videos ?? []) ||
+      JSON.stringify(form.galleryTour360) !==
+        JSON.stringify(project.gallery.tour360 ?? []) ||
+      JSON.stringify(form.galleryParcela) !==
+        JSON.stringify(project.gallery.parcela ?? []) ||
+      form.heroImage !== project.heroImage
+    )
+  }, [form, project])
+
+  const update = (partial: Partial<typeof form>) =>
+    setForm((prev) => ({ ...prev, ...partial }))
+
+  const handleDiscard = () => {
+    setForm({
+      name: project.name,
+      tagline: project.tagline,
+      description: project.description,
+      status: project.status,
+      totalUnits: String(project.totalUnits),
+      constructionStartDate: project.constructionStartDate ?? "",
+      constructionEndDate: project.constructionEndDate ?? "",
+      mapEmbedUrl: project.mapEmbedUrl ?? "",
+      address: project.location.address,
+      city: project.location.city,
+      province: project.location.province,
+      postalCode: project.location.postalCode,
+      lat: project.location.lat,
+      lng: project.location.lng,
+      tags: [...project.tags],
+      galleryPhotos: [...project.gallery.photos],
+      galleryConstruction: [...(project.gallery.construction ?? [])],
+      galleryVideos: [...(project.gallery.videos ?? [])],
+      galleryTour360: [...(project.gallery.tour360 ?? [])],
+      galleryParcela: [...(project.gallery.parcela ?? [])],
+      heroImage: project.heroImage,
+    })
+  }
+
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      await updateProjectFull(project.slug, {
+        name: form.name,
+        tagline: form.tagline,
+        description: form.description,
+        status: form.status,
+        totalUnits: parseInt(form.totalUnits, 10) || project.totalUnits,
+        constructionStartDate: form.constructionStartDate || undefined,
+        constructionEndDate: form.constructionEndDate || undefined,
+        mapEmbedUrl: form.mapEmbedUrl || undefined,
+        location: {
+          address: form.address,
+          city: form.city,
+          province: form.province,
+          postalCode: form.postalCode,
+          lat: form.lat,
+          lng: form.lng,
+        },
+        tags: form.tags,
+      })
+      const galleryChanged =
+        JSON.stringify(form.galleryPhotos) !==
+          JSON.stringify(project.gallery.photos) ||
+        JSON.stringify(form.galleryConstruction) !==
+          JSON.stringify(project.gallery.construction ?? []) ||
+        JSON.stringify(form.galleryVideos) !==
+          JSON.stringify(project.gallery.videos ?? []) ||
+        JSON.stringify(form.galleryTour360) !==
+          JSON.stringify(project.gallery.tour360 ?? []) ||
+        JSON.stringify(form.galleryParcela) !==
+          JSON.stringify(project.gallery.parcela ?? [])
+      if (galleryChanged) {
+        await updateGallery(project.slug, form.galleryPhotos, form.galleryConstruction, form.galleryVideos, form.galleryTour360, form.galleryParcela)
+      }
+      if (form.heroImage !== project.heroImage) {
+        await updateHeroImage(project.slug, form.heroImage)
+      }
+      toast.success("Proyecto actualizado", {
+        description: "Los cambios se han guardado correctamente.",
+      })
+      router.refresh()
+      onOpenChange(false)
+    } catch {
+      toast.error("Error al guardar", {
+        description: "No se pudieron guardar los cambios.",
+      })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (deleteConfirm !== project.name) return
+    setSaving(true)
+    try {
+      const res = await deleteProject(project.slug)
+      if (res.success) {
+        toast.success("Proyecto eliminado")
+        router.push("/projects")
+        onOpenChange(false)
+      } else {
+        toast.error("No se pudo eliminar el proyecto")
+      }
+    } catch {
+      toast.error("Error al eliminar")
+    } finally {
+      setSaving(false)
+      setDeleteConfirm("")
+    }
+  }
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent
+        side="right"
+        className="w-full sm:max-w-2xl lg:max-w-4xl flex flex-col p-0"
+      >
+        <SheetHeader className="px-6 pt-6 pb-4 border-b">
+          <SheetTitle>Editar proyecto</SheetTitle>
+        </SheetHeader>
+
+        <ScrollArea className="flex-1">
+          <div className="px-6 py-4 space-y-6">
+            {/* Live preview */}
+            <div className="rounded-xl border border-border bg-muted/30 p-4">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">
+                Vista previa
+              </p>
+              <div className="flex items-end gap-4">
+                <div className="flex-1 min-w-0">
+                  <p className="font-serif text-xl font-bold truncate">
+                    {form.name || "Nombre del proyecto"}
+                  </p>
+                  <p className="text-sm text-muted-foreground truncate">
+                    {form.tagline || "Slogan"}
+                  </p>
+                  {form.city && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {form.city}
+                      {form.province && `, ${form.province}`}
+                    </p>
+                  )}
+                </div>
+                {form.heroImage && (
+                  <div className="relative w-24 h-16 rounded-lg overflow-hidden shrink-0">
+                    <img
+                      src={form.heroImage}
+                      alt=""
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <Tabs defaultValue="core" className="w-full">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="core">Core</TabsTrigger>
+                <TabsTrigger value="location">Ubicación</TabsTrigger>
+                <TabsTrigger value="specs">Especificaciones</TabsTrigger>
+                <TabsTrigger value="media">Medios</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="core" className="space-y-4 mt-4">
+                <div>
+                  <Label htmlFor="name">Nombre</Label>
+                  <Input
+                    id="name"
+                    value={form.name}
+                    onChange={(e) => update({ name: e.target.value })}
+                    placeholder="Nombre del proyecto"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="tagline">Slogan</Label>
+                  <Input
+                    id="tagline"
+                    value={form.tagline}
+                    onChange={(e) => update({ tagline: e.target.value })}
+                    placeholder="Casas exclusivas..."
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="description">Descripción</Label>
+                  <Textarea
+                    id="description"
+                    value={form.description}
+                    onChange={(e) => update({ description: e.target.value })}
+                    placeholder="Descripción del proyecto"
+                    rows={4}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>Etiquetas (amenidades)</Label>
+                  <TagInput
+                    value={form.tags}
+                    onChange={(tags) => update({ tags })}
+                    suggestedTags={SUGGESTED_TAGS}
+                    placeholder="Piscina, Gimnasio..."
+                    className="mt-1"
+                  />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="location" className="space-y-4 mt-4">
+                <div>
+                  <Label htmlFor="address">Dirección</Label>
+                  <Input
+                    id="address"
+                    value={form.address}
+                    onChange={(e) => update({ address: e.target.value })}
+                    placeholder="Calle, número"
+                    className="mt-1"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="city">Ciudad</Label>
+                    <Input
+                      id="city"
+                      value={form.city}
+                      onChange={(e) => update({ city: e.target.value })}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="province">Provincia</Label>
+                    <Input
+                      id="province"
+                      value={form.province}
+                      onChange={(e) => update({ province: e.target.value })}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="postalCode">Código postal</Label>
+                  <Input
+                    id="postalCode"
+                    value={form.postalCode}
+                    onChange={(e) => update({ postalCode: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+                <MapPicker
+                  lat={form.lat}
+                  lng={form.lng}
+                  onLatLngChange={(lat, lng) => update({ lat, lng })}
+                />
+                <div>
+                  <Label htmlFor="mapEmbedUrl">URL de Google Maps (embed)</Label>
+                  <Input
+                    id="mapEmbedUrl"
+                    value={form.mapEmbedUrl}
+                    onChange={(e) => update({ mapEmbedUrl: e.target.value })}
+                    placeholder="https://www.google.com/maps/embed?..."
+                    className="mt-1"
+                  />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="specs" className="space-y-4 mt-4">
+                <div>
+                  <Label htmlFor="status">Estado</Label>
+                  <Select
+                    value={form.status}
+                    onValueChange={(v) =>
+                      update({ status: v as Project["status"] })
+                    }
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {STATUS_OPTIONS.map((o) => (
+                        <SelectItem key={o.value} value={o.value}>
+                          {o.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="totalUnits">Total de unidades</Label>
+                  <Input
+                    id="totalUnits"
+                    type="number"
+                    min={1}
+                    value={form.totalUnits}
+                    onChange={(e) => update({ totalUnits: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="constructionStart">Inicio construcción</Label>
+                  <Input
+                    id="constructionStart"
+                    value={form.constructionStartDate}
+                    onChange={(e) =>
+                      update({ constructionStartDate: e.target.value })
+                    }
+                    placeholder="Enero 2024"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="constructionEnd">Fin construcción</Label>
+                  <Input
+                    id="constructionEnd"
+                    value={form.constructionEndDate}
+                    onChange={(e) =>
+                      update({ constructionEndDate: e.target.value })
+                    }
+                    placeholder="Julio 2026"
+                    className="mt-1"
+                  />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="media" className="space-y-4 mt-4">
+                <p className="text-xs text-muted-foreground">
+                  Arrastra para reordenar. Haz clic en la estrella para marcar como imagen hero.
+                </p>
+                <Tabs defaultValue="fotos" className="w-full">
+                  <TabsList className="flex flex-wrap gap-2 p-2 rounded-full bg-muted/80 w-full h-auto">
+                    <TabsTrigger
+                      value="fotos"
+                      className="rounded-full data-[state=active]:bg-accent data-[state=active]:text-accent-foreground px-4 py-2"
+                    >
+                      Fotos
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="videos"
+                      className="rounded-full data-[state=active]:bg-accent data-[state=active]:text-accent-foreground px-4 py-2"
+                    >
+                      Vídeos
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="tour360"
+                      className="rounded-full data-[state=active]:bg-accent data-[state=active]:text-accent-foreground px-4 py-2"
+                    >
+                      Tour 360°
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="parcela"
+                      className="rounded-full data-[state=active]:bg-accent data-[state=active]:text-accent-foreground px-4 py-2"
+                    >
+                      Parcela
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="construccion"
+                      className="rounded-full data-[state=active]:bg-accent data-[state=active]:text-accent-foreground px-4 py-2"
+                    >
+                      Construccion
+                    </TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="fotos" className="mt-0">
+                    <GalleryEditor
+                      photos={form.galleryPhotos}
+                      heroImage={form.heroImage}
+                      onReorder={(photos) => update({ galleryPhotos: photos })}
+                      onHeroChange={(src) => update({ heroImage: src })}
+                    />
+                  </TabsContent>
+                  <TabsContent value="videos" className="mt-0">
+                    <MediaSectionEditor
+                      items={form.galleryVideos}
+                      onChange={(items) => update({ galleryVideos: items })}
+                      type="videos"
+                      addPlaceholder="URL de video o thumbnail"
+                    />
+                  </TabsContent>
+                  <TabsContent value="tour360" className="mt-0">
+                    <MediaSectionEditor
+                      items={form.galleryTour360}
+                      onChange={(items) => update({ galleryTour360: items })}
+                      type="tour360"
+                    />
+                  </TabsContent>
+                  <TabsContent value="parcela" className="mt-0">
+                    <MediaSectionEditor
+                      items={form.galleryParcela}
+                      onChange={(items) => update({ galleryParcela: items })}
+                      type="parcela"
+                      addPlaceholder="URL de imagen de parcela"
+                    />
+                  </TabsContent>
+                  <TabsContent value="construccion" className="mt-0">
+                    <MediaSectionEditor
+                      items={form.galleryConstruction}
+                      onChange={(items) => update({ galleryConstruction: items })}
+                      type="photos"
+                      addPlaceholder="URL de imagen de obra"
+                    />
+                  </TabsContent>
+                </Tabs>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </ScrollArea>
+
+        {/* Floating Action Bar */}
+        {isDirty && (
+          <div className="border-t bg-background px-6 py-4 flex items-center justify-between gap-4 shrink-0">
+            <Button variant="outline" onClick={handleDiscard} disabled={saving}>
+              Descartar cambios
+            </Button>
+            <Button onClick={handleSave} disabled={saving}>
+              {saving ? "Guardando…" : "Guardar cambios"}
+            </Button>
+          </div>
+        )}
+
+        {/* Safe Delete - always visible at bottom */}
+        <div className="border-t px-6 py-4 shrink-0">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm" className="w-full">
+                Eliminar proyecto
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Eliminar proyecto</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Esta acción no se puede deshacer. Para confirmar, escribe el
+                  nombre del proyecto:{" "}
+                  <strong className="text-foreground">{project.name}</strong>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <Input
+                value={deleteConfirm}
+                onChange={(e) => setDeleteConfirm(e.target.value)}
+                placeholder={project.name}
+                className="mt-4"
+                aria-label="Confirmar nombre del proyecto"
+              />
+              <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => setDeleteConfirm("")}>
+                  Cancelar
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDelete}
+                  disabled={deleteConfirm !== project.name || saving}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Eliminar
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </SheetContent>
+    </Sheet>
+  )
+}
