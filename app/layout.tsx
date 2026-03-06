@@ -1,19 +1,21 @@
 import React from "react"
 import type { Metadata, Viewport } from 'next'
-import { Inter, Playfair_Display } from 'next/font/google'
+import { Barlow, Belleza } from 'next/font/google'
 
 import './globals.css'
 import { Toaster } from "sonner"
 import { CtaBar } from "@/components/cta-bar"
 
-const inter = Inter({
+const barlow = Barlow({
   subsets: ['latin'],
-  variable: '--font-inter',
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-barlow',
 })
 
-const playfair = Playfair_Display({
+const belleza = Belleza({
   subsets: ['latin'],
-  variable: '--font-playfair',
+  weight: ['400'],
+  variable: '--font-belleza',
 })
 
 export const metadata: Metadata = {
@@ -23,7 +25,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#1e2d3d',
+  themeColor: '#234457',
 }
 
 export default function RootLayout({
@@ -34,7 +36,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body
-        className={`${inter.variable} ${playfair.variable} font-sans antialiased`}
+        className={`${barlow.variable} ${belleza.variable} font-sans antialiased`}
       >
         {children}
         <CtaBar />

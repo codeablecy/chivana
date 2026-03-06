@@ -72,8 +72,8 @@ const config: Config = {
         sm: 'calc(var(--radius) - 4px)',
       },
       fontFamily: {
-        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
-        serif: ['var(--font-playfair)', 'Georgia', 'serif'],
+        sans: ['var(--font-barlow)', 'system-ui', 'sans-serif'],
+        serif: ['var(--font-belleza)', 'Georgia', 'serif'],
       },
       keyframes: {
         'accordion-down': {
