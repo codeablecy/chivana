@@ -56,7 +56,7 @@ export function Contact() {
                 </div>
                 <div>
                   <p className="text-sm text-accent-foreground/70">Oficina de Ventas</p>
-                  <p className="font-medium">Cuesta de la Higuera, El Viso de San Juan</p>
+                  <p className="font-medium">Urb. Apr 19, 1P, 45215 El Viso de San Juan, Toledo, Spain</p>
                 </div>
               </div>
             </div>

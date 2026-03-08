@@ -28,8 +28,8 @@ export function ProjectCreator() {
     totalUnits: "",
     address: "",
     city: "El Viso de San Juan",
-    lat: "40.0716",
-    lng: "-3.9397",
+    lat: "40.14199365784348",
+    lng: "-3.924643621440974",
   })
   const [pricing, setPricing] = useState<PricingItem[]>([])
   const [galleryPhotos, setGalleryPhotos] = useState<{ src: string; alt: string }[]>([])
@@ -125,8 +125,8 @@ export function ProjectCreator() {
               totalUnits: "",
               address: "",
               city: "El Viso de San Juan",
-              lat: "40.0716",
-              lng: "-3.9397",
+              lat: "40.14199365784348",
+              lng: "-3.924643621440974",
             })
             setPricing([])
             setGalleryPhotos([])
@@ -239,7 +239,7 @@ export function ProjectCreator() {
                     id="address"
                     value={formData.address}
                     onChange={(e) => updateField("address", e.target.value)}
-                    placeholder="Cuesta de la Higuera, 19"
+                    placeholder="Urb. Apr 19, 1P"
                     className="mt-1"
                   />
                 </div>
@@ -264,7 +264,7 @@ export function ProjectCreator() {
                     type="text"
                     value={formData.lat}
                     onChange={(e) => updateField("lat", e.target.value)}
-                    placeholder="40.0716"
+                    placeholder="40.14199365784348"
                     className="mt-1"
                   />
                 </div>
@@ -277,7 +277,7 @@ export function ProjectCreator() {
                     type="text"
                     value={formData.lng}
                     onChange={(e) => updateField("lng", e.target.value)}
-                    placeholder="-3.9397"
+                    placeholder="-3.924643621440974"
                     className="mt-1"
                   />
                 </div>

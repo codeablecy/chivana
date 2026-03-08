@@ -19,7 +19,8 @@ const amenityLabels: Record<Amenity["type"], string> = {
 }
 
 export function ProjectLocation({ project }: { project: Project }) {
-  const mapSrc = `https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d3060!2d${project.location.lng}!3d${project.location.lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1ses!2ses!4v1700000000000`
+  const { lat, lng } = project.location
+  const mapSrc = `https://www.google.com/maps?q=${lat},${lng}&hl=es&z=15&output=embed`
 
   const amenitiesByType = project.location.amenities.reduce(
     (acc, amenity) => {

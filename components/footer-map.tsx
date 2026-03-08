@@ -3,8 +3,8 @@
 import * as React from "react"
 import { MapPin, ExternalLink } from "lucide-react"
 
-const OFFICE_LAT = 40.0716
-const OFFICE_LNG = -3.9397
+const OFFICE_LAT = 40.14199365784348
+const OFFICE_LNG = -3.924643621440974
 const GOOGLE_MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${OFFICE_LAT},${OFFICE_LNG}`
 const EMBED_URL = `https://www.google.com/maps?q=${OFFICE_LAT},${OFFICE_LNG}&hl=es&z=15&output=embed`
 
@@ -44,10 +44,10 @@ export function FooterMap() {
           <MapPin className="h-5 w-5 text-accent shrink-0 mt-0.5" aria-hidden />
           <div>
             <p className="text-navy-foreground font-medium text-sm">
-              Cuesta de la Higuera, 19
+              Urb. Apr 19, 1P
             </p>
             <p className="text-navy-foreground/70 text-xs">
-              El Viso de San Juan, 45215 Toledo
+              45215 El Viso de San Juan, Toledo, Spain
             </p>
           </div>
         </div>
@@ -85,7 +85,7 @@ export function FooterMap() {
               </div>
             )}
             <iframe
-              title="Oficina Chivana Real Estate — Cuesta de la Higuera, El Viso de San Juan"
+              title="Oficina Chivana Real Estate — Urb. Apr 19, 1P, El Viso de San Juan"
               src={EMBED_URL}
               width="100%"
               height="100%"

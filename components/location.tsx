@@ -43,10 +43,10 @@ export function Location() {
                 <div>
                   <h3 className="font-semibold text-foreground mb-1">Direccion</h3>
                   <p className="text-muted-foreground text-sm leading-relaxed">
-                    Cuesta de la Higuera, 19<br />
+                    Urb. Apr 19, 1P<br />
                     El Viso de San Juan<br />
-                    La Sagra, Toledo<br />
-                    CP: 45215, Espana
+                    Toledo<br />
+                    CP: 45215, España
                   </p>
                 </div>
               </div>

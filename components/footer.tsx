@@ -70,8 +70,8 @@ export function Footer() {
                 >
                   info@chivana-realestate.com
                 </a>
-                <p>Cuesta de la Higuera, 19</p>
-                <p>El Viso de San Juan, Toledo</p>
+                <p>Urb. Apr 19, 1P</p>
+                <p>45215 El Viso de San Juan, Toledo, Spain</p>
               </div>
             </div>
           </div>

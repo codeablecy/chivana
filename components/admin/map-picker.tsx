@@ -6,8 +6,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 
-const DEFAULT_LAT = 40.0716
-const DEFAULT_LNG = -3.9397
+const DEFAULT_LAT = 40.14199365784348
+const DEFAULT_LNG = -3.924643621440974
 
 function latLngToBbox(lat: number, lng: number, zoom = 0.01) {
   return `${lng - zoom},${lat - zoom},${lng + zoom},${lat + zoom}`
@@ -73,7 +73,7 @@ export function MapPicker({
             value={latStr}
             onChange={(e) => handleLatChange(e.target.value)}
             className="mt-1"
-            placeholder="40.0716"
+            placeholder="40.14199365784348"
           />
         </div>
         <div>
@@ -87,7 +87,7 @@ export function MapPicker({
             value={lngStr}
             onChange={(e) => handleLngChange(e.target.value)}
             className="mt-1"
-            placeholder="-3.9397"
+            placeholder="-3.924643621440974"
           />
         </div>
       </div>
