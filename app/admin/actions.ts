@@ -197,6 +197,8 @@ export async function addProject(data: {
   pricing?: PricingItem[]
   location?: { address?: string; city?: string; lat?: number; lng?: number }
   galleryPhotos?: { src: string; alt: string }[]
+  /** 360° tour embed URLs – Matterport, Wizio, etc. (optional, add more in project editor) */
+  galleryTour360?: { url: string; thumb?: string }[]
 }): Promise<{ success: boolean; slug?: string }> {
   const existing = getProject(data.slug)
   if (existing) return { success: false }
@@ -239,6 +241,9 @@ export async function addProject(data: {
     gallery: {
       photos: data.galleryPhotos ?? [],
       construction: [],
+      videos: [],
+      tour360: data.galleryTour360 ?? [],
+      parcela: [],
     },
     qualities: [],
     status: "coming-soon",

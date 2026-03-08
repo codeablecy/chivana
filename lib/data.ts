@@ -223,6 +223,11 @@ export const projects: Project[] = [
         { src: "/images/hero.jpg", alt: "Vista general del proyecto" },
         { src: "/images/exterior.jpg", alt: "Fachada en construccion" },
       ],
+      tour360: [
+        {
+          url: "https://my.matterport.com/show/?m=exJgkPPjZJc&ss=2&sr=,-.66",
+        },
+      ],
     },
     qualities: [
       {

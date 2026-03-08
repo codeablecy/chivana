@@ -33,6 +33,7 @@ export function ProjectCreator() {
   })
   const [pricing, setPricing] = useState<PricingItem[]>([])
   const [galleryPhotos, setGalleryPhotos] = useState<{ src: string; alt: string }[]>([])
+  const [tour360Url, setTour360Url] = useState("")
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
@@ -81,6 +82,9 @@ export function ProjectCreator() {
       },
       galleryPhotos:
         galleryPhotos.length > 0 ? galleryPhotos : undefined,
+      galleryTour360: tour360Url.trim()
+        ? [{ url: tour360Url.trim() }]
+        : undefined,
     })
 
     if (result.success) {
@@ -126,6 +130,7 @@ export function ProjectCreator() {
             })
             setPricing([])
             setGalleryPhotos([])
+            setTour360Url("")
           }}
           className="bg-primary text-primary-foreground hover:bg-primary/90"
         >
@@ -363,6 +368,21 @@ export function ProjectCreator() {
               />
               <p className="text-xs text-muted-foreground mt-1">
                 Ruta relativa en /public
+              </p>
+            </div>
+            <div>
+              <Label htmlFor="tour360Url">Tour 360°</Label>
+              <Input
+                id="tour360Url"
+                type="url"
+                value={tour360Url}
+                onChange={(e) => setTour360Url(e.target.value)}
+                placeholder="https://... (Matterport, Wizio, etc.)"
+                className="mt-1.5"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Opcional. URL de embed del tour 360° (Matterport, Wizio u otra
+                plataforma). Puedes añadir más en el editor → Medios → Tour 360°.
               </p>
             </div>
             <div>

@@ -103,7 +103,7 @@ export function MediaSectionEditor<T extends MediaItem | Tour360Item>({
       {/* Add new */}
       <div className="flex flex-col sm:flex-row gap-2">
         <Input
-          placeholder={type === "tour360" ? "URL del tour 360°" : addPlaceholder}
+          placeholder={type === "tour360" ? "URL de embed (Matterport, Wizio, etc.)" : addPlaceholder}
           value={newUrl}
           onChange={(e) => setNewUrl(e.target.value)}
           className="flex-1"

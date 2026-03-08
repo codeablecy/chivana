@@ -4,6 +4,12 @@ import { useState, useEffect } from "react"
 import Image from "next/image"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@/components/ui/dialog"
+
 const TABS = ["Fotos", "Vídeos", "Tour 360°", "Parcela", "Construccion"] as const
 type TabId = (typeof TABS)[number]
 
@@ -21,6 +27,22 @@ export function ProjectGallery({
   const [activeTab, setActiveTab] = useState<TabId>("Fotos")
   const [activeIndex, setActiveIndex] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
+  const [tour360LightboxUrl, setTour360LightboxUrl] = useState<string | null>(
+    null
+  )
+  const [tour360PreviewLoaded, setTour360PreviewLoaded] = useState(false)
+  const [tour360SelectedIndex, setTour360SelectedIndex] = useState(0)
+
+  const isTour360Tab = activeTab === "Tour 360°"
+  const tour360Tours = gallery.tour360 ?? []
+  const hasTour360 = tour360Tours.length > 0
+  const currentTour360Url = hasTour360
+    ? tour360Tours[tour360SelectedIndex]?.url ?? tour360Tours[0].url
+    : null
+
+  useEffect(() => {
+    if (!isTour360Tab) setTour360PreviewLoaded(false)
+  }, [isTour360Tab])
 
   const getImagesForTab = (tab: TabId) => {
     switch (tab) {
@@ -91,7 +113,57 @@ export function ProjectGallery({
             ))}
         </div>
 
-        {hasImages ? (
+        {isTour360Tab && hasTour360 && currentTour360Url ? (
+          <div className="space-y-4">
+            <div className="relative w-full aspect-[16/10] rounded-xl overflow-hidden bg-muted">
+              {!tour360PreviewLoaded && (
+                <div
+                  className="absolute inset-0 flex items-center justify-center bg-muted"
+                  aria-hidden
+                >
+                  <div className="h-10 w-10 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                </div>
+              )}
+              <iframe
+                key={currentTour360Url}
+                src={currentTour360Url}
+                title="Tour 360° - Vista previa"
+                className="absolute inset-0 h-full w-full border-0"
+                allow="fullscreen; xr-spatial-tracking"
+                allowFullScreen
+                onLoad={() => setTour360PreviewLoaded(true)}
+              />
+              <button
+                type="button"
+                onClick={() => setTour360LightboxUrl(currentTour360Url)}
+                className="absolute bottom-4 right-4 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                Abrir en pantalla completa
+              </button>
+            </div>
+            {tour360Tours.length > 1 && (
+              <div className="flex flex-wrap justify-center gap-2">
+                {tour360Tours.map((tour, idx) => (
+                  <button
+                    key={tour.url}
+                    type="button"
+                    onClick={() => {
+                      setTour360SelectedIndex(idx)
+                      setTour360PreviewLoaded(false)
+                    }}
+                    className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                      tour360SelectedIndex === idx
+                        ? "bg-accent text-accent-foreground"
+                        : "bg-muted text-muted-foreground hover:bg-muted/80"
+                    }`}
+                  >
+                    Tour {idx + 1}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : hasImages ? (
           <div className="space-y-4">
             {/* Main featured image with nav buttons */}
             <div className="relative w-full aspect-[16/10] rounded-xl overflow-hidden bg-muted group">
@@ -248,6 +320,27 @@ export function ProjectGallery({
           </p>
         </div>
       )}
+
+      {/* Tour 360° lightbox (iframe: Matterport, Wizio, etc.) */}
+      <Dialog
+        open={!!tour360LightboxUrl}
+        onOpenChange={(open) => !open && setTour360LightboxUrl(null)}
+      >
+        <DialogContent
+          className="max-w-[95vw] w-full h-[90vh] p-0 gap-0 overflow-hidden border-0 bg-black [&>button]:text-white [&>button]:opacity-90 [&>button]:hover:opacity-100 [&>button]:z-10"
+        >
+          <DialogTitle className="sr-only">Tour 360° - Vista inmersiva</DialogTitle>
+          {tour360LightboxUrl && (
+            <iframe
+              src={tour360LightboxUrl}
+              title="Tour 360°"
+              className="absolute inset-0 w-full h-full border-0"
+              allow="fullscreen; xr-spatial-tracking"
+              allowFullScreen
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </section>
   )
 }

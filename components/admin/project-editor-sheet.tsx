@@ -526,6 +526,10 @@ export function ProjectEditorSheet({
                     />
                   </TabsContent>
                   <TabsContent value="tour360" className="mt-0">
+                    <p className="text-xs text-muted-foreground mb-3">
+                      URLs de embed de tours 360° (Matterport, Wizio u otra plataforma).
+                      Se muestran en la pestaña &quot;Tour 360°&quot; de la galería del proyecto.
+                    </p>
                     <MediaSectionEditor
                       items={form.galleryTour360}
                       onChange={(items) => update({ galleryTour360: items })}

@@ -53,7 +53,8 @@ export default async function ProjectDetailPage({
       <main>
         <ProjectHero project={project} />
         {project.phases.length > 0 && <ProjectPhases phases={project.phases} />}
-        {project.gallery.photos.length > 0 && (
+        {(project.gallery.photos.length > 0 ||
+          (project.gallery.tour360?.length ?? 0) > 0) && (
           <ProjectGallery gallery={project.gallery} />
         )}
         <ProjectAbout project={project} />
