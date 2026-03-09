@@ -66,7 +66,7 @@ function HeroBrand() {
               className="border-card/30 text-card hover:bg-card/10 text-base px-8 bg-transparent"
               asChild
             >
-              <a href="#contacto">Contactar</a>
+              <Link href="#contacto">Contactar</Link>
             </Button>
           </div>
         </div>

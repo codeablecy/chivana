@@ -45,10 +45,10 @@ export function CtaBar() {
           <Link href="/citas-visitas" className={buttonClass}>
             Pedir Cita
           </Link>
-          <a href="#mapa" className={buttonClass}>
+          <Link href="#mapa" className={buttonClass}>
             <span className="sm:hidden">Ver Oficina</span>
             <span className="hidden sm:inline">Visitar Oficina De Ventas</span>
-          </a>
+          </Link>
         </div>
     </aside>
   )

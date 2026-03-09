@@ -61,15 +61,15 @@ export function Footer() {
             <div>
               <h4 className="text-navy-foreground font-semibold text-sm mb-3">Contacto</h4>
               <div className="flex flex-col gap-2 text-sm text-navy-foreground/70">
-                <a href="tel:+34655754978" className="hover:text-accent transition-colors">
+                <Link href="tel:+34655754978" className="hover:text-accent transition-colors">
                   +34 655 754 978
-                </a>
-                <a
+                </Link>
+                <Link
                   href="mailto:info@chivana-realestate.com"
                   className="hover:text-accent transition-colors"
                 >
                   info@chivana-realestate.com
-                </a>
+                </Link>
                 <p>Urb. Apr 19, 1P</p>
                 <p>45215 El Viso de San Juan, Toledo, Spain</p>
               </div>
@@ -84,12 +84,12 @@ export function Footer() {
             Chivana Real Estate. Todos los derechos reservados.
           </p>
           <div className="flex items-center gap-4">
-            <a href="#" className="text-navy-foreground/60 text-xs hover:text-accent transition-colors">
+            <Link href="#" className="text-navy-foreground/60 text-xs hover:text-accent transition-colors">
               Politica de Privacidad
-            </a>
-            <a href="#" className="text-navy-foreground/60 text-xs hover:text-accent transition-colors">
+            </Link>
+            <Link href="#" className="text-navy-foreground/60 text-xs hover:text-accent transition-colors">
               Aviso Legal
-            </a>
+            </Link>
           </div>
         </div>
       </div>

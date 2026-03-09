@@ -1,4 +1,5 @@
 import Image from "next/image"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Home, Bath, Ruler, TreePine } from "lucide-react"
 
@@ -56,7 +57,7 @@ export function Hero() {
               className="text-base px-8"
               asChild
             >
-              <a href="#viviendas">Descubrir Tipologias</a>
+              <Link href="#viviendas">Descubrir Tipologias</Link>
             </Button>
             <Button
               size="lg"
@@ -64,7 +65,7 @@ export function Hero() {
               className="border-card/30 text-card hover:bg-card/10 text-base px-8 bg-transparent"
               asChild
             >
-              <a href="#precios">Ver Precios</a>
+              <Link href="#precios">Ver Precios</Link>
             </Button>
           </div>
         </div>

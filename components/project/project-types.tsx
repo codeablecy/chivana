@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import type { PricingItem } from "@/lib/types";
+import Link from "next/link";
 import {
   Bath,
   BedDouble,
@@ -178,7 +179,7 @@ export function ProjectTypes({ pricing }: { pricing: PricingItem[] }) {
             </div>
 
             <Button className="w-full sm:w-auto" asChild>
-              <a href="#precios">Ver Precios</a>
+              <Link href="#precios">Ver Precios</Link>
             </Button>
           </div>
         </div>

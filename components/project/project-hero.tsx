@@ -81,7 +81,7 @@ export function ProjectHero({ project }: { project: Project }) {
                 className="text-base px-8"
                 asChild
               >
-                <a href="#viviendas">Descubrir Tipologias</a>
+                <Link href="#viviendas">Descubrir Tipologias</Link>
               </Button>
               <Button
                 size="lg"
@@ -89,7 +89,7 @@ export function ProjectHero({ project }: { project: Project }) {
                 className="border-card/30 text-card hover:bg-card/10 text-base px-8 bg-transparent"
                 asChild
               >
-                <a href="#precios">Ver Precios</a>
+                <Link href="#precios">Ver Precios</Link>
               </Button>
             </div>
           )}

@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import { format, addDays, isBefore, isAfter, setHours, setMinutes } from "date-fns"
 import { es } from "date-fns/locale"
 import {
@@ -14,7 +15,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Calendar } from "@/components/ui/calendar"
-import { Mail, CalendarPlus } from "lucide-react"
+import { Mail, CalendarPlus, ExternalLink } from "lucide-react"
+import { getCalComBookingUrl } from "@/lib/cal"
 
 const TIME_SLOTS = [
   "10:00",
@@ -120,16 +122,43 @@ export function BookingRequestDialog({
       ? googleCalendarUrl(calendarTitle, date, time, calendarDetails)
       : ""
 
+  const calComUrl = getCalComBookingUrl(bookingType)
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="font-serif">
+      <DialogContent
+        className={
+          calComUrl
+            ? "w-[95vw] max-w-4xl sm:max-w-5xl lg:max-w-6xl h-[88vh] max-h-[900px] overflow-hidden flex flex-col p-0 gap-0 sm:rounded-xl rounded-lg"
+            : "max-w-lg max-h-[90vh] overflow-y-auto"
+        }
+      >
+        <DialogHeader className={calComUrl ? "px-4 pt-4 pb-2 sm:px-6 sm:pt-6 shrink-0 border-b border-border/50" : ""}>
+          <DialogTitle className="font-serif text-base sm:text-lg pr-8">
             Solicitud de reserva — {typeLabel}
           </DialogTitle>
         </DialogHeader>
 
-        {step === "datetime" && (
+        {calComUrl ? (
+          <div className="flex flex-1 flex-col min-h-0 px-4 pb-4 sm:px-6 sm:pb-6 overflow-hidden">
+            <iframe
+              src={calComUrl}
+              title={`Reservar cita: ${typeLabel}`}
+              className="w-full flex-1 min-h-[60vh] sm:min-h-[65vh] rounded-lg border border-border bg-muted/30"
+            />
+            <Link
+              href={calComUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 mt-3 text-sm text-muted-foreground hover:text-foreground transition-colors shrink-0"
+            >
+              <ExternalLink className="h-4 w-4 shrink-0" />
+              Abrir en nueva pestaña
+            </Link>
+          </div>
+        ) : (
+          <>
+            {step === "datetime" && (
           <div className="space-y-6">
             <div>
               <Label className="mb-2 block">Elige fecha</Label>
@@ -284,7 +313,7 @@ export function BookingRequestDialog({
               Gracias. Te confirmaremos la cita lo antes posible.
             </p>
             {gCalUrl && (
-              <a
+              <Link
                 href={gCalUrl}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -292,9 +321,11 @@ export function BookingRequestDialog({
               >
                 <CalendarPlus className="h-4 w-4" />
                 Añadir a Google Calendar
-              </a>
+              </Link>
             )}
           </div>
+        )}
+          </>
         )}
       </DialogContent>
     </Dialog>

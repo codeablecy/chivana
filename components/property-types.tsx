@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Image from "next/image"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight, Ruler, BedDouble, Bath, TreePine } from "lucide-react"
 
@@ -146,7 +147,7 @@ export function PropertyTypes() {
             </div>
 
             <Button asChild>
-              <a href="#precios">Ver Precios</a>
+              <Link href="#precios">Ver Precios</Link>
             </Button>
           </div>
         </div>
