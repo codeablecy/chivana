@@ -1,8 +1,10 @@
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
-import { ProjectCard } from "@/components/project-card"
-import { projects } from "@/lib/data"
+import { ProjectsGrid } from "@/components/projects-grid"
+import { getAllProjects } from "@/lib/store"
 import type { Metadata } from "next"
+
+export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
   title: "Proyectos | Chivana Real Estate",
@@ -10,7 +12,9 @@ export const metadata: Metadata = {
     "Descubre nuestros proyectos de viviendas exclusivas cerca de Madrid y Toledo.",
 }
 
-export default function ProjectsPage() {
+export default async function ProjectsPage() {
+  const projects = await getAllProjects()
+
   return (
     <>
       <Navbar />
@@ -30,11 +34,7 @@ export default function ProjectsPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-2 max-w-4xl mx-auto">
-              {projects.map((project) => (
-                <ProjectCard key={project.slug} project={project} />
-              ))}
-            </div>
+            <ProjectsGrid projects={projects} />
           </div>
         </section>
       </main>

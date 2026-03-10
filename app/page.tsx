@@ -17,6 +17,8 @@ import {
   MapPin,
 } from "lucide-react"
 
+export const dynamic = "force-dynamic"
+
 // hero video id from youtube
 // const HERO_VIDEO_ID = "kjqXD-HJZKU"
 const HERO_VIDEO_ID = process.env.NEXT_PUBLIC_HERO_VIDEO_ID || ""
@@ -138,8 +140,8 @@ function WhyChivana() {
   )
 }
 
-function FeaturedProjects() {
-  const projects = getActiveProjects()
+async function FeaturedProjects() {
+  const projects = await getActiveProjects()
 
   return (
     <section className="py-16 px-4 lg:py-24 lg:px-8 bg-background">
@@ -174,8 +176,8 @@ function FeaturedProjects() {
   )
 }
 
-function BlogPreview() {
-  const posts = getPublishedPosts().slice(0, 3)
+async function BlogPreview() {
+  const posts = (await getPublishedPosts()).slice(0, 3)
 
   return (
     <section className="py-16 px-4 lg:py-24 lg:px-8 bg-card">

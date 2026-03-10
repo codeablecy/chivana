@@ -30,6 +30,7 @@ import {
   fetchProjects,
   updatePricing,
   updateTags,
+  updateStatus,
   setCustomField,
   deleteCustomField,
   updatePhases,
@@ -301,17 +302,40 @@ export function InventoryManager() {
               </p>
             </div>
             <div className="bg-card border border-border rounded-xl p-4">
-              <p className="text-xs text-muted-foreground uppercase tracking-wide">Estado</p>
-              <Badge
-                className={
-                  currentProject.status === "active"
-                    ? "bg-primary text-primary-foreground mt-1"
-                    : "bg-accent text-accent-foreground mt-1"
-                }
+              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">Estado</p>
+              <Select
+                value={currentProject.status}
+                onValueChange={async (value) => {
+                  const status = value as Project["status"]
+                  setSaving(true)
+                  const res = await updateStatus(currentProject.slug, status)
+                  if (res.success) {
+                    await loadProjects()
+                    toast.success("Estado actualizado", { description: status === "active" ? "En Venta" : status === "sold-out" ? "Agotado" : "Próximamente" })
+                  } else toast.error("No se pudo actualizar el estado")
+                  setSaving(false)
+                }}
+                disabled={saving}
               >
-                {currentProject.status === "active" ? "En Venta" : "Proximamente"}
-              </Badge>
+                <SelectTrigger className="h-9 w-full bg-muted/50 border-border">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="coming-soon">Próximamente</SelectItem>
+                  <SelectItem value="active">En Venta</SelectItem>
+                  <SelectItem value="sold-out">Agotado</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-[10px] text-muted-foreground mt-1.5">Define el estado principal en listados y ficha.</p>
             </div>
+          </div>
+
+          {/* Where to edit the project page bar (Tipología, Disponibles, Ubicación) */}
+          <div className="mb-6 rounded-xl border border-accent/30 bg-accent/5 px-4 py-3">
+            <p className="text-xs font-semibold text-foreground mb-1">Dónde editar la barra de la ficha del proyecto</p>
+            <p className="text-xs text-muted-foreground">
+              <strong>Tipología</strong> (ej. &quot;Viviendas de 4 dormitorios&quot;) y <strong>Disponibles</strong> (X de Y viviendas) → esta página, en la tabla de tipologías más abajo. <strong>Ubicación</strong> (dirección, ciudad, provincia) → abre &quot;Editar proyecto&quot; y usa la pestaña <strong>Ubicación</strong>.
+            </p>
           </div>
 
           {/* Phase Manager - Avance de Ventas */}
@@ -503,6 +527,9 @@ export function InventoryManager() {
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <div className="px-4 pb-4 pt-1 border-t border-border">
+                  <p className="text-xs text-muted-foreground mb-3">
+                    Las etiquetas se muestran en la tarjeta del proyecto y en la ficha pública junto al estado (Próximamente / En Venta / Agotado).
+                  </p>
                   <div className="flex flex-wrap gap-2 mb-3">
                     {(currentProject.tags ?? []).map((tag) => (
                       <Badge
@@ -579,6 +606,7 @@ export function InventoryManager() {
               onUpdate={handlePricingUpdate}
               onRemove={handlePricingRemove}
               addButtonLabel="Añadir tipología"
+              projectSlug={currentProject.slug}
             />
           </div>
 

@@ -8,6 +8,7 @@ import {
   BedDouble,
   ChevronLeft,
   ChevronRight,
+  FileText,
   Ruler,
   TreePine,
 } from "lucide-react";
@@ -178,9 +179,23 @@ export function ProjectTypes({ pricing }: { pricing: PricingItem[] }) {
               )}
             </div>
 
-            <Button className="w-full sm:w-auto" asChild>
-              <Link href="#precios">Ver Precios</Link>
-            </Button>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <Button className="w-full sm:w-auto" asChild>
+                <Link href="#precios">Ver Precios</Link>
+              </Button>
+              {item.planPdf && (
+                <Button
+                  variant="outline"
+                  className="w-full sm:w-auto gap-2"
+                  asChild
+                >
+                  <a href={item.planPdf} target="_blank" rel="noopener noreferrer">
+                    <FileText className="h-4 w-4 shrink-0" />
+                    Descargar plano
+                  </a>
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </div>

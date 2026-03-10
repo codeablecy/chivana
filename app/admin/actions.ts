@@ -75,7 +75,7 @@ export async function updatePricing(
   typeName: string,
   data: Partial<PricingItem>,
 ): Promise<{ success: boolean }> {
-  const ok = updatePricingItem(slug, typeName, data)
+  const ok = await updatePricingItem(slug, typeName, data)
   return { success: ok }
 }
 
@@ -83,7 +83,7 @@ export async function addPricingRow(
   slug: string,
   data: PricingItem,
 ): Promise<{ success: boolean }> {
-  const ok = addPricingItem(slug, data)
+  const ok = await addPricingItem(slug, data)
   return { success: ok }
 }
 
@@ -91,7 +91,7 @@ export async function removePricingRow(
   slug: string,
   typeName: string,
 ): Promise<{ success: boolean }> {
-  const ok = removePricingItem(slug, typeName)
+  const ok = await removePricingItem(slug, typeName)
   return { success: ok }
 }
 
@@ -99,7 +99,7 @@ export async function updateTags(
   slug: string,
   tags: string[],
 ): Promise<{ success: boolean }> {
-  const ok = updateProjectTags(slug, tags)
+  const ok = await updateProjectTags(slug, tags)
   return { success: ok }
 }
 
@@ -107,7 +107,7 @@ export async function updateStatus(
   slug: string,
   status: Project["status"],
 ): Promise<{ success: boolean }> {
-  const ok = updateProjectStatus(slug, status)
+  const ok = await updateProjectStatus(slug, status)
   return { success: ok }
 }
 
@@ -116,7 +116,7 @@ export async function setCustomField(
   key: string,
   value: string,
 ): Promise<{ success: boolean }> {
-  const ok = updateProjectCustomField(slug, key, value)
+  const ok = await updateProjectCustomField(slug, key, value)
   return { success: ok }
 }
 
@@ -124,7 +124,7 @@ export async function deleteCustomField(
   slug: string,
   key: string,
 ): Promise<{ success: boolean }> {
-  const ok = removeProjectCustomField(slug, key)
+  const ok = await removeProjectCustomField(slug, key)
   return { success: ok }
 }
 
@@ -132,7 +132,7 @@ export async function updatePhases(
   slug: string,
   phases: Phase[],
 ): Promise<{ success: boolean }> {
-  const ok = updateProjectPhases(slug, phases)
+  const ok = await updateProjectPhases(slug, phases)
   return { success: ok }
 }
 
@@ -151,14 +151,31 @@ export async function updateProjectFull(
     tags: string[]
   }>,
 ): Promise<{ success: boolean }> {
-  const project = getProject(slug)
+  const project = await getProject(slug)
   if (!project) return { success: false }
-  const merged = {
-    ...project,
-    ...data,
-    location: data.location ? { ...project.location, ...data.location } : project.location,
+
+  const merged: Partial<Project> = {
+    name:                  data.name                  ?? project.name,
+    tagline:               data.tagline               ?? project.tagline,
+    description:           data.description           ?? project.description,
+    status:                data.status                ?? project.status,
+    totalUnits:            data.totalUnits            ?? project.totalUnits,
+    constructionStartDate: data.constructionStartDate ?? project.constructionStartDate,
+    constructionEndDate:   data.constructionEndDate   ?? project.constructionEndDate,
+    mapEmbedUrl:           data.mapEmbedUrl           ?? project.mapEmbedUrl,
+    tags:                  data.tags                  ?? project.tags,
+    location: data.location
+      ? {
+          ...project.location,
+          ...data.location,
+          lat: typeof data.location.lat === "number" ? data.location.lat : project.location.lat,
+          lng: typeof data.location.lng === "number" ? data.location.lng : project.location.lng,
+        }
+      : project.location,
   }
-  updateProject(slug, merged)
+
+  const result = await updateProject(slug, merged)
+  if (!result) return { success: false }
   return { success: true }
 }
 
@@ -168,9 +185,9 @@ export async function updateGallery(
   construction?: { src: string; alt: string }[],
   videos?: { src: string; alt: string; url?: string }[],
   tour360?: { url: string; thumb?: string }[],
-  parcela?: { src: string; alt: string }[],
+  parcela?: { src: string; alt: string; url?: string }[],
 ): Promise<{ success: boolean }> {
-  const ok = updateProjectGallery(slug, photos, construction, videos, tour360, parcela)
+  const ok = await updateProjectGallery(slug, photos, construction, videos, tour360, parcela)
   return { success: ok }
 }
 
@@ -178,12 +195,12 @@ export async function updateHeroImage(
   slug: string,
   heroImage: string,
 ): Promise<{ success: boolean }> {
-  const ok = updateProjectHeroImage(slug, heroImage)
+  const ok = await updateProjectHeroImage(slug, heroImage)
   return { success: ok }
 }
 
 export async function deleteProject(slug: string): Promise<{ success: boolean }> {
-  const ok = storeDeleteProject(slug)
+  const ok = await storeDeleteProject(slug)
   return { success: ok }
 }
 
@@ -195,12 +212,12 @@ export async function addProject(data: {
   heroImage: string
   totalUnits: number
   pricing?: PricingItem[]
-  location?: { address?: string; city?: string; lat?: number; lng?: number }
+  location?: { address?: string; city?: string; province?: string; postalCode?: string; lat?: number; lng?: number }
   galleryPhotos?: { src: string; alt: string }[]
-  /** 360° tour embed URLs – Matterport, Wizio, etc. (optional, add more in project editor) */
   galleryTour360?: { url: string; thumb?: string }[]
+  galleryVideos?: { src: string; alt: string; url?: string }[]
 }): Promise<{ success: boolean; slug?: string }> {
-  const existing = getProject(data.slug)
+  const existing = await getProject(data.slug)
   if (existing) return { success: false }
 
   const pricing = data.pricing ?? []
@@ -218,22 +235,18 @@ export async function addProject(data: {
     heroImage: data.heroImage || "/images/exterior.jpg",
     tags: ["Proximamente"],
     location: {
-      address: data.location?.address ?? "",
-      city: data.location?.city ?? "El Viso de San Juan",
-      province: "La Sagra, Toledo",
-      postalCode: "45215",
-      lat: data.location?.lat ?? 40.14199365784348,
-      lng: data.location?.lng ?? -3.924643621440974,
-      distances: ["35 km a Madrid centro", "33 km a Toledo"],
+      address:    data.location?.address    ?? "",
+      city:       data.location?.city       ?? "",
+      province:   data.location?.province   ?? "",
+      postalCode: data.location?.postalCode ?? "",
+      lat:        data.location?.lat        ?? 40.14199365784348,
+      lng:        data.location?.lng        ?? -3.924643621440974,
+      distances: [],
       amenities: [],
     },
     features: [
       { title: "Luminosas", description: "Amplios ventanales con luz natural.", icon: "Sun" },
-      {
-        title: "Calidad Premium",
-        description: "Materiales de primera calidad.",
-        icon: "Shield",
-      },
+      { title: "Calidad Premium", description: "Materiales de primera calidad.", icon: "Shield" },
     ],
     phases: [],
     propertyTypes: [],
@@ -241,18 +254,18 @@ export async function addProject(data: {
     gallery: {
       photos: data.galleryPhotos ?? [],
       construction: [],
-      videos: [],
+      videos: data.galleryVideos ?? [],
       tour360: data.galleryTour360 ?? [],
       parcela: [],
     },
     qualities: [],
     status: "coming-soon",
     totalUnits: totalUnits || 1,
-    availableUnits: availableUnits,
+    availableUnits,
     customFields: {},
   }
 
-  createProject(project)
+  await createProject(project)
   return { success: true, slug: data.slug }
 }
 
@@ -271,7 +284,7 @@ export async function addPost(data: {
   content: string
   image: string
 }): Promise<{ success: boolean }> {
-  createPost({
+  await createPost({
     ...data,
     date: new Date().toLocaleDateString("es-ES", {
       day: "numeric",
@@ -288,12 +301,12 @@ export async function editPost(
   id: string,
   data: Partial<BlogPost>,
 ): Promise<{ success: boolean }> {
-  const result = updatePost(id, data)
+  const result = await updatePost(id, data)
   return { success: !!result }
 }
 
 export async function removePost(id: string): Promise<{ success: boolean }> {
-  const ok = deletePost(id)
+  const ok = await deletePost(id)
   return { success: ok }
 }
 
@@ -305,6 +318,6 @@ export async function fetchSettings(): Promise<SiteSettings> {
 export async function saveSettings(
   data: Partial<SiteSettings>,
 ): Promise<{ success: boolean }> {
-  updateSettings(data)
+  await updateSettings(data)
   return { success: true }
 }

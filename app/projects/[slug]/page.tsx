@@ -18,7 +18,8 @@ import { ManagementOverlay } from "@/components/admin/management-overlay"
 export const dynamic = "force-dynamic"
 
 export async function generateStaticParams() {
-  return getAllProjects().map((p) => ({ slug: p.slug }))
+  const projects = await getAllProjects()
+  return projects.map((p) => ({ slug: p.slug }))
 }
 
 export async function generateMetadata({
@@ -27,7 +28,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const project = getProject(slug)
+  const project = await getProject(slug)
   if (!project) return { title: "Proyecto no encontrado" }
   return {
     title: `${project.name} | Chivana Real Estate`,
@@ -41,7 +42,7 @@ export default async function ProjectDetailPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const project = getProject(slug)
+  const project = await getProject(slug)
   if (!project) notFound()
 
   const isComingSoon = project.status === "coming-soon"

@@ -12,6 +12,7 @@ import { Plus, Pencil, Trash2, X, Eye, EyeOff, FileText } from "lucide-react"
 import { fetchPosts, addPost, editPost, removePost } from "@/app/admin/actions"
 import type { BlogPost } from "@/lib/types"
 import { PostsSkeleton } from "./admin-skeleton"
+import { ImageUploader } from "./image-uploader"
 
 export function BlogManager() {
   const [posts, setPosts] = useState<BlogPost[]>([])
@@ -121,26 +122,27 @@ export function BlogManager() {
           </div>
 
           <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-4 sm:flex-row">
-              <div className="flex-1">
-                <Label htmlFor="post-title">Titulo</Label>
-                <Input
-                  id="post-title"
-                  value={formData.title}
-                  onChange={(e) => setFormData((f) => ({ ...f, title: e.target.value }))}
-                  placeholder="Titulo del articulo"
-                  required
-                  className="mt-1.5"
-                />
-              </div>
-              <div className="sm:w-64">
-                <Label htmlFor="post-image">Imagen (ruta)</Label>
-                <Input
-                  id="post-image"
+            <div>
+              <Label htmlFor="post-title">Titulo</Label>
+              <Input
+                id="post-title"
+                value={formData.title}
+                onChange={(e) => setFormData((f) => ({ ...f, title: e.target.value }))}
+                placeholder="Titulo del articulo"
+                required
+                className="mt-1.5"
+              />
+            </div>
+
+            <div>
+              <Label>Imagen de portada</Label>
+              <div className="mt-1.5">
+                <ImageUploader
                   value={formData.image}
-                  onChange={(e) => setFormData((f) => ({ ...f, image: e.target.value }))}
-                  placeholder="/images/photo.jpg"
-                  className="mt-1.5"
+                  onChange={(url) => setFormData((f) => ({ ...f, image: url }))}
+                  context="blog"
+                  postId={editingId ?? "new"}
+                  label="Subir imagen de portada"
                 />
               </div>
             </div>

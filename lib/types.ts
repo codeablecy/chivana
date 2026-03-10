@@ -31,6 +31,8 @@ export interface PricingItem {
   garden?: string
   /** Optional longer description for Las Viviendas. Falls back to details if empty. */
   description?: string
+  /** Public URL to the floor-plan PDF. Only shown on the project page when present. */
+  planPdf?: string
 }
 
 export interface BlogPost {
@@ -78,12 +80,18 @@ export interface Project {
   gallery: {
     photos: { src: string; alt: string }[]
     construction: { src: string; alt: string }[]
-    /** Video embed URLs or thumbnails */
+    /**
+     * Video items. Media files have `src` set; embed items (YouTube/Vimeo)
+     * have `src=""` and `url` set to the iframe src.
+     */
     videos?: { src: string; alt: string; url?: string }[]
-    /** 360° tour embed URL */
+    /** 360° tour embed URLs (Matterport, Wizio, etc.) */
     tour360?: { url: string; thumb?: string }[]
-    /** Parcel/plot images */
-    parcela?: { src: string; alt: string }[]
+    /**
+     * Parcel/plot items. Image files have `src` set; embed items (3D tours)
+     * have `src=""` and `url` set to the iframe src.
+     */
+    parcela?: { src: string; alt: string; url?: string }[]
   }
   qualities: {
     title: string

@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge"
+import { FileText } from "lucide-react"
 import type { PricingItem } from "@/lib/types"
 
 export function ProjectPricing({ pricing }: { pricing: PricingItem[] }) {
@@ -53,6 +54,17 @@ export function ProjectPricing({ pricing }: { pricing: PricingItem[] }) {
                   <span className="text-foreground font-medium">Vendidas:</span> {item.sold}
                 </p>
               </div>
+              {item.planPdf && (
+                <a
+                  href={item.planPdf}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-3 inline-flex items-center gap-2 text-xs font-medium text-accent hover:text-primary transition-colors"
+                >
+                  <FileText className="h-4 w-4 shrink-0" />
+                  Descargar plano PDF
+                </a>
+              )}
             </div>
           ))}
         </div>
@@ -79,6 +91,9 @@ export function ProjectPricing({ pricing }: { pricing: PricingItem[] }) {
                 </th>
                 <th className="text-center px-6 py-4 text-sm font-semibold text-foreground">
                   Vendidas
+                </th>
+                <th className="text-center px-6 py-4 text-sm font-semibold text-foreground">
+                  Plano
                 </th>
               </tr>
             </thead>
@@ -112,6 +127,20 @@ export function ProjectPricing({ pricing }: { pricing: PricingItem[] }) {
                   </td>
                   <td className="px-6 py-4 text-center text-sm text-muted-foreground">
                     {item.sold}
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    {item.planPdf ? (
+                      <a
+                        href={item.planPdf}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="Descargar plano PDF"
+                        className="inline-flex items-center gap-1.5 text-xs font-medium text-accent hover:text-primary transition-colors"
+                      >
+                        <FileText className="h-4 w-4 shrink-0" />
+                        <span className="hidden lg:inline">Plano</span>
+                      </a>
+                    ) : null}
                   </td>
                 </tr>
               ))}

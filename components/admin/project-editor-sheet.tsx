@@ -191,7 +191,7 @@ export function ProjectEditorSheet({
   const handleSave = async () => {
     setSaving(true)
     try {
-      await updateProjectFull(project.slug, {
+      const updateResult = await updateProjectFull(project.slug, {
         name: form.name,
         tagline: form.tagline,
         description: form.description,
@@ -210,6 +210,12 @@ export function ProjectEditorSheet({
         },
         tags: form.tags,
       })
+      if (!updateResult.success) {
+        toast.error("Error al guardar", {
+          description: "No se pudieron guardar los datos del proyecto.",
+        })
+        return
+      }
       const galleryChanged =
         JSON.stringify(form.galleryPhotos) !==
           JSON.stringify(project.gallery.photos) ||
@@ -358,6 +364,9 @@ export function ProjectEditorSheet({
               </TabsContent>
 
               <TabsContent value="location" className="space-y-4 mt-4">
+                <p className="text-xs text-muted-foreground">
+                  Dirección, ciudad y provincia se muestran en la barra inferior de la ficha del proyecto (sección Ubicación).
+                </p>
                 <div>
                   <Label htmlFor="address">Dirección</Label>
                   <Input
@@ -473,9 +482,6 @@ export function ProjectEditorSheet({
               </TabsContent>
 
               <TabsContent value="media" className="space-y-4 mt-4">
-                <p className="text-xs text-muted-foreground">
-                  Arrastra para reordenar. Haz clic en la estrella para marcar como imagen hero.
-                </p>
                 <Tabs defaultValue="fotos" className="w-full">
                   <TabsList className="flex flex-wrap gap-2 p-2 rounded-full bg-muted/80 w-full h-auto">
                     <TabsTrigger
@@ -509,47 +515,48 @@ export function ProjectEditorSheet({
                       Construccion
                     </TabsTrigger>
                   </TabsList>
-                  <TabsContent value="fotos" className="mt-0">
+                  <TabsContent value="fotos" className="mt-4">
                     <GalleryEditor
                       photos={form.galleryPhotos}
                       heroImage={form.heroImage}
                       onReorder={(photos) => update({ galleryPhotos: photos })}
                       onHeroChange={(src) => update({ heroImage: src })}
+                      projectSlug={project.slug}
                     />
                   </TabsContent>
-                  <TabsContent value="videos" className="mt-0">
+                  <TabsContent value="videos" className="mt-4">
                     <MediaSectionEditor
                       items={form.galleryVideos}
                       onChange={(items) => update({ galleryVideos: items })}
                       type="videos"
                       addPlaceholder="URL de video o thumbnail"
+                      projectSlug={project.slug}
                     />
                   </TabsContent>
-                  <TabsContent value="tour360" className="mt-0">
-                    <p className="text-xs text-muted-foreground mb-3">
-                      URLs de embed de tours 360° (Matterport, Wizio u otra plataforma).
-                      Se muestran en la pestaña &quot;Tour 360°&quot; de la galería del proyecto.
-                    </p>
+                  <TabsContent value="tour360" className="mt-4">
                     <MediaSectionEditor
                       items={form.galleryTour360}
                       onChange={(items) => update({ galleryTour360: items })}
                       type="tour360"
+                      projectSlug={project.slug}
                     />
                   </TabsContent>
-                  <TabsContent value="parcela" className="mt-0">
+                  <TabsContent value="parcela" className="mt-4">
                     <MediaSectionEditor
                       items={form.galleryParcela}
                       onChange={(items) => update({ galleryParcela: items })}
                       type="parcela"
                       addPlaceholder="URL de imagen de parcela"
+                      projectSlug={project.slug}
                     />
                   </TabsContent>
-                  <TabsContent value="construccion" className="mt-0">
+                  <TabsContent value="construccion" className="mt-4">
                     <MediaSectionEditor
                       items={form.galleryConstruction}
                       onChange={(items) => update({ galleryConstruction: items })}
-                      type="photos"
+                      type="construction"
                       addPlaceholder="URL de imagen de obra"
+                      projectSlug={project.slug}
                     />
                   </TabsContent>
                 </Tabs>
