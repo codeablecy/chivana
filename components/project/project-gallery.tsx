@@ -187,19 +187,19 @@ export function ProjectGallery({ gallery }: GalleryProps) {
         {/* Tab bar */}
         <div className="flex flex-wrap justify-center gap-2 mb-8">
           {TABS.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-5 py-2.5 rounded-full text-sm font-medium transition-colors ${
-                activeTab === tab
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-5 py-2.5 rounded-full text-sm font-medium transition-colors ${
+                  activeTab === tab
                   ? "bg-accent text-accent-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
+                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
 
         {/* Main viewer */}
         {hasItems && current ? (
@@ -210,12 +210,12 @@ export function ProjectGallery({ gallery }: GalleryProps) {
 
               {current.kind === "image" ? (
                 /* ── Image viewer ── */
-                <button
+            <button
                   onClick={() => setLightboxOpen(true)}
                   className="absolute inset-0 w-full h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset"
                   aria-label="Ver imagen en pantalla completa"
-                >
-                  <Image
+            >
+              <Image
                     src={current.src}
                     alt={current.alt}
                     fill
@@ -338,7 +338,7 @@ export function ProjectGallery({ gallery }: GalleryProps) {
                           {item.title}
                         </div>
                       )}
-                    </button>
+            </button>
                   )
                 })}
               </div>
@@ -347,7 +347,7 @@ export function ProjectGallery({ gallery }: GalleryProps) {
         ) : (
           <div className="aspect-[16/10] rounded-xl bg-muted flex items-center justify-center">
             <p className="text-muted-foreground text-sm">Sin contenido</p>
-          </div>
+        </div>
         )}
       </div>
 

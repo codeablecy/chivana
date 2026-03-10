@@ -1,9 +1,8 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { ProjectCard } from "@/components/project-card"
+import { FeaturedProjectsDisplay } from "@/components/featured-projects-display"
 import { Navbar } from "@/components/navbar"
-import { Footer } from "@/components/footer"
 import { Contact } from "@/components/contact"
 import { getActiveProjects, getPublishedPosts } from "@/lib/store"
 import {
@@ -142,38 +141,7 @@ function WhyChivana() {
 
 async function FeaturedProjects() {
   const projects = await getActiveProjects()
-
-  return (
-    <section className="py-16 px-4 lg:py-24 lg:px-8 bg-background">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col gap-4 mb-12 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-accent font-semibold text-sm tracking-widest uppercase mb-2">
-              Proyectos
-            </p>
-            <h2 className="font-serif text-2xl font-bold text-foreground lg:text-4xl text-balance">
-              Nuestros Proyectos
-            </h2>
-            <p className="text-muted-foreground mt-3 max-w-xl leading-relaxed">
-              Descubre nuestras promociones de viviendas unifamiliares exclusivas.
-            </p>
-          </div>
-          <Button variant="outline" className="self-start sm:self-auto bg-transparent" asChild>
-            <Link href="/projects">
-              Ver todos
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Link>
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {projects.map((project) => (
-            <ProjectCard key={project.slug} project={project} />
-          ))}
-        </div>
-      </div>
-    </section>
-  )
+  return <FeaturedProjectsDisplay projects={projects} />
 }
 
 async function BlogPreview() {
@@ -193,9 +161,10 @@ async function BlogPreview() {
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {posts.map((post) => (
-            <article
+            <Link
               key={post.id}
-              className="group rounded-xl border border-border overflow-hidden bg-background hover:shadow-lg transition-shadow"
+              href={`/blog/${post.id}`}
+              className="group rounded-xl border border-border overflow-hidden bg-background hover:shadow-lg hover:border-accent/30 transition-all"
             >
               <div className="relative aspect-[16/10] overflow-hidden">
                 <Image
@@ -218,11 +187,11 @@ async function BlogPreview() {
                   {post.excerpt}
                 </p>
                 <div className="mt-4 flex items-center gap-1 text-sm font-medium text-accent">
-                  Leer mas
+                  Leer más
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </div>
               </div>
-            </article>
+            </Link>
           ))}
         </div>
       </div>
@@ -293,7 +262,6 @@ export default function Page() {
         <QuickContact />
         <Contact />
       </main>
-      <Footer />
     </>
   )
 }

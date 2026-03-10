@@ -3,7 +3,6 @@
 import { useState } from "react"
 import Image from "next/image"
 import { Navbar } from "@/components/navbar"
-import { Footer } from "@/components/footer"
 import { BookingRequestDialog } from "@/components/booking-request-dialog"
 import type { BookingType } from "@/components/booking-request-dialog"
 import { Video, MapPin } from "lucide-react"
@@ -105,8 +104,6 @@ export default function CitasVisitasPage() {
             </article>
           </div>
         </section>
-
-        <Footer />
       </main>
 
       <BookingRequestDialog

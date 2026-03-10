@@ -51,6 +51,24 @@ function tipologiaBarLabel(stats: Stats | null): string {
   return prefix
 }
 
+// ─── Hero video helper ─────────────────────────────────────────────────────────
+
+/**
+ * Converts any YouTube URL (watch, youtu.be, embed) to a full-bleed autoplay
+ * embed URL — same behaviour as the homepage hero.
+ * Non-YouTube URLs are returned as-is so Vimeo / other embeds still work.
+ */
+function buildHeroVideoSrc(src: string): string {
+  const match = src.match(
+    /(?:youtube\.com\/embed\/|youtube\.com\/watch\?v=|youtu\.be\/)([^?&/]+)/,
+  )
+  if (match?.[1]) {
+    const id = match[1]
+    return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&controls=0&rel=0&showinfo=0&modestbranding=1`
+  }
+  return src
+}
+
 // ─── Status map ────────────────────────────────────────────────────────────────
 
 const STATUS_STYLE: Record<Project["status"], string> = {
@@ -107,14 +125,24 @@ export function ProjectHero({ project }: { project: Project }) {
 
   return (
     <section className="relative min-h-screen overflow-hidden">
-      {/* ── Background image ── */}
-      <Image
-        src={project.heroImage || "/placeholder.svg"}
-        alt={project.name}
-        fill
-        className="object-cover"
-        priority
-      />
+      {/* ── Background: video iframe or static image ── */}
+      {project.heroVideoUrl ? (
+        <iframe
+          src={buildHeroVideoSrc(project.heroVideoUrl)}
+          title={project.name}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          className="absolute top-1/2 left-1/2 w-[100vw] h-[100vh] min-w-[177.78vh] min-h-[56.25vw] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+        />
+      ) : (
+        <Image
+          src={project.heroImage || "/placeholder.svg"}
+          alt={project.name}
+          fill
+          className="object-cover"
+          priority
+        />
+      )}
 
       {/* ── Gradient overlay — stronger on mobile for readability ── */}
       <div className="absolute inset-0 bg-gradient-to-b from-foreground/60 via-foreground/65 to-foreground/95 lg:bg-gradient-to-r lg:from-foreground/90 lg:via-foreground/55 lg:to-foreground/10" />
@@ -182,26 +210,24 @@ export function ProjectHero({ project }: { project: Project }) {
               </div>
             )}
 
-            {/* CTAs */}
-            {!isComingSoon && (
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                <Button
-                  size="lg"
-                  className="w-full sm:w-auto text-sm sm:text-base px-6 sm:px-8 h-12"
-                  asChild
-                >
-                  <Link href="#viviendas">Descubrir Tipologías</Link>
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="w-full sm:w-auto border-card/40 text-card hover:bg-card/15 text-sm sm:text-base px-6 sm:px-8 h-12 bg-card/10 backdrop-blur-sm"
-                  asChild
-                >
-                  <Link href="#precios">Ver Precios</Link>
-                </Button>
-              </div>
-            )}
+            {/* CTAs — mobile-first: stacked full-width, then side-by-side; always visible */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+              <Button
+                size="lg"
+                className="w-full sm:w-auto text-sm sm:text-base px-6 sm:px-8 h-12 rounded-xl bg-accent text-accent-foreground hover:bg-accent/90 font-semibold shadow-lg shadow-accent/20"
+                asChild
+              >
+                <Link href="#viviendas">Descubrir Tipologías</Link>
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="w-full sm:w-auto rounded-xl border-2 border-card/50 text-card hover:bg-card/15 hover:border-card/70 text-sm sm:text-base px-6 sm:px-8 h-12 bg-transparent backdrop-blur-sm font-medium"
+                asChild
+              >
+                <Link href="#precios">Ver Precios</Link>
+              </Button>
+            </div>
 
             {/* ── Mobile summary card (below CTAs, above fold) ── */}
             {!isComingSoon && (

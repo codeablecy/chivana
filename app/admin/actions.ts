@@ -1,6 +1,8 @@
 "use server"
 
-import { cookies } from "next/headers"
+import { redirect } from "next/navigation"
+import { revalidatePath } from "next/cache"
+import { createSupabaseServerClient } from "@/lib/supabase/server"
 import {
   getAllProjects,
   getProject,
@@ -15,6 +17,11 @@ import {
   updateProjectPhases,
   updateProjectGallery,
   updateProjectHeroImage,
+  updateProjectHeroVideo,
+  updateProjectAmenities,
+  updateProjectDistances,
+  updateProjectFeatures,
+  updateProjectQualities,
   deleteProject as storeDeleteProject,
   createProject,
   getAllPosts,
@@ -31,34 +38,20 @@ import type {
   SiteSettings,
   Phase,
   PricingItem,
+  Amenity,
 } from "@/lib/types"
 
-const ADMIN_PASSWORD = "chivana2025"
-const SESSION_COOKIE = "admin_session"
-
-export async function login(password: string): Promise<{ success: boolean }> {
-  if (password === ADMIN_PASSWORD) {
-    const jar = await cookies()
-    jar.set(SESSION_COOKIE, "authenticated", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 4,
-      path: "/",
-    })
-    return { success: true }
-  }
-  return { success: false }
-}
-
-export async function logout(): Promise<void> {
-  const jar = await cookies()
-  jar.delete(SESSION_COOKIE)
+export async function logout(): Promise<never> {
+  const supabase = await createSupabaseServerClient()
+  await supabase.auth.signOut()
+  revalidatePath("/", "layout")
+  redirect("/auth/sign-in")
 }
 
 export async function isAuthenticated(): Promise<boolean> {
-  const jar = await cookies()
-  return jar.get(SESSION_COOKIE)?.value === "authenticated"
+  const supabase = await createSupabaseServerClient()
+  const { data } = await supabase.auth.getClaims()
+  return !!data?.claims
 }
 
 // ---------- Projects ----------
@@ -199,8 +192,48 @@ export async function updateHeroImage(
   return { success: ok }
 }
 
+export async function updateHeroVideo(
+  slug: string,
+  heroVideoUrl: string,
+): Promise<{ success: boolean }> {
+  const ok = await updateProjectHeroVideo(slug, heroVideoUrl)
+  return { success: ok }
+}
+
 export async function deleteProject(slug: string): Promise<{ success: boolean }> {
   const ok = await storeDeleteProject(slug)
+  return { success: ok }
+}
+
+export async function saveProjectAmenities(
+  slug: string,
+  amenities: Amenity[],
+): Promise<{ success: boolean }> {
+  const ok = await updateProjectAmenities(slug, amenities)
+  return { success: ok }
+}
+
+export async function saveProjectDistances(
+  slug: string,
+  distances: string[],
+): Promise<{ success: boolean }> {
+  const ok = await updateProjectDistances(slug, distances)
+  return { success: ok }
+}
+
+export async function saveProjectFeatures(
+  slug: string,
+  features: { title: string; description: string; icon: string }[],
+): Promise<{ success: boolean }> {
+  const ok = await updateProjectFeatures(slug, features)
+  return { success: ok }
+}
+
+export async function saveProjectQualities(
+  slug: string,
+  qualities: { title: string; description: string; icon: string }[],
+): Promise<{ success: boolean }> {
+  const ok = await updateProjectQualities(slug, qualities)
   return { success: ok }
 }
 
@@ -216,6 +249,10 @@ export async function addProject(data: {
   galleryPhotos?: { src: string; alt: string }[]
   galleryTour360?: { url: string; thumb?: string }[]
   galleryVideos?: { src: string; alt: string; url?: string }[]
+  amenities?: Amenity[]
+  distances?: string[]
+  features?: { title: string; description: string; icon: string }[]
+  qualities?: { title: string; description: string; icon: string }[]
 }): Promise<{ success: boolean; slug?: string }> {
   const existing = await getProject(data.slug)
   if (existing) return { success: false }
@@ -241,10 +278,10 @@ export async function addProject(data: {
       postalCode: data.location?.postalCode ?? "",
       lat:        data.location?.lat        ?? 40.14199365784348,
       lng:        data.location?.lng        ?? -3.924643621440974,
-      distances: [],
-      amenities: [],
+      distances:  data.distances ?? [],
+      amenities:  data.amenities ?? [],
     },
-    features: [
+    features: data.features ?? [
       { title: "Luminosas", description: "Amplios ventanales con luz natural.", icon: "Sun" },
       { title: "Calidad Premium", description: "Materiales de primera calidad.", icon: "Shield" },
     ],
@@ -258,7 +295,7 @@ export async function addProject(data: {
       tour360: data.galleryTour360 ?? [],
       parcela: [],
     },
-    qualities: [],
+    qualities: data.qualities ?? [],
     status: "coming-soon",
     totalUnits: totalUnits || 1,
     availableUnits,

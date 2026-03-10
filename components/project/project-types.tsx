@@ -37,14 +37,15 @@ export function ProjectTypes({ pricing }: { pricing: PricingItem[] }) {
   return (
     <section
       id="viviendas"
-      className="py-12 px-4 lg:py-20 lg:px-8 bg-background"
+      className="scroll-mt-20 py-12 px-4 lg:py-20 lg:px-8 bg-background"
+      aria-labelledby="viviendas-heading"
     >
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-10 lg:mb-12">
           <p className="text-accent font-semibold text-sm tracking-widest uppercase mb-2">
             Tipologías
           </p>
-          <h2 className="font-serif text-2xl font-bold text-foreground lg:text-4xl text-balance">
+          <h2 id="viviendas-heading" className="font-serif text-2xl font-bold text-foreground lg:text-4xl text-balance">
             Las Viviendas
           </h2>
           <p className="text-muted-foreground mt-3 max-w-xl mx-auto leading-relaxed text-sm lg:text-base">

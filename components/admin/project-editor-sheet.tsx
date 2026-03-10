@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,10 +41,26 @@ import {
   updateProjectFull,
   updateGallery,
   updateHeroImage,
+  updateHeroVideo,
   deleteProject,
+  saveProjectAmenities,
+  saveProjectDistances,
+  saveProjectFeatures,
+  saveProjectQualities,
 } from "@/app/admin/actions"
 import { toast } from "sonner"
-import type { Project } from "@/lib/types"
+import type { Project, Amenity } from "@/lib/types"
+import { Plus, Trash2 } from "lucide-react"
+
+const AMENITY_TYPES: { value: Amenity["type"]; label: string }[] = [
+  { value: "education", label: "Educación" },
+  { value: "health", label: "Salud" },
+  { value: "transport", label: "Transporte" },
+  { value: "shopping", label: "Compras" },
+  { value: "leisure", label: "Ocio" },
+]
+
+import { PROJECT_ICON_OPTIONS } from "@/lib/project-icons"
 
 const SUGGESTED_TAGS = [
   "En Construcción",
@@ -74,6 +91,7 @@ export function ProjectEditorSheet({
   onOpenChange,
 }: ProjectEditorSheetProps) {
   const router = useRouter()
+  const tabsAnchorRef = React.useRef<HTMLDivElement | null>(null)
   const [saving, setSaving] = React.useState(false)
   const [deleteConfirm, setDeleteConfirm] = React.useState("")
   const [form, setForm] = React.useState({
@@ -98,6 +116,11 @@ export function ProjectEditorSheet({
     galleryTour360: [...(project.gallery.tour360 ?? [])],
     galleryParcela: [...(project.gallery.parcela ?? [])],
     heroImage: project.heroImage,
+    heroVideoUrl: project.heroVideoUrl ?? "",
+    amenities: [...project.location.amenities],
+    distances: [...project.location.distances],
+    features: [...project.features],
+    qualities: [...project.qualities],
   })
 
   React.useEffect(() => {
@@ -124,6 +147,11 @@ export function ProjectEditorSheet({
         galleryTour360: [...(project.gallery.tour360 ?? [])],
         galleryParcela: [...(project.gallery.parcela ?? [])],
         heroImage: project.heroImage,
+        heroVideoUrl: project.heroVideoUrl ?? "",
+        amenities: [...project.location.amenities],
+        distances: [...project.location.distances],
+        features: [...project.features],
+        qualities: [...project.qualities],
       })
     }
   }, [open, project])
@@ -155,7 +183,12 @@ export function ProjectEditorSheet({
         JSON.stringify(project.gallery.tour360 ?? []) ||
       JSON.stringify(form.galleryParcela) !==
         JSON.stringify(project.gallery.parcela ?? []) ||
-      form.heroImage !== project.heroImage
+      form.heroImage !== project.heroImage ||
+      form.heroVideoUrl !== (project.heroVideoUrl ?? "") ||
+      JSON.stringify(form.amenities) !== JSON.stringify(project.location.amenities) ||
+      JSON.stringify(form.distances) !== JSON.stringify(project.location.distances) ||
+      JSON.stringify(form.features) !== JSON.stringify(project.features) ||
+      JSON.stringify(form.qualities) !== JSON.stringify(project.qualities)
     )
   }, [form, project])
 
@@ -185,6 +218,11 @@ export function ProjectEditorSheet({
       galleryTour360: [...(project.gallery.tour360 ?? [])],
       galleryParcela: [...(project.gallery.parcela ?? [])],
       heroImage: project.heroImage,
+      heroVideoUrl: project.heroVideoUrl ?? "",
+      amenities: [...project.location.amenities],
+      distances: [...project.location.distances],
+      features: [...project.features],
+      qualities: [...project.qualities],
     })
   }
 
@@ -232,6 +270,21 @@ export function ProjectEditorSheet({
       }
       if (form.heroImage !== project.heroImage) {
         await updateHeroImage(project.slug, form.heroImage)
+      }
+      if (form.heroVideoUrl !== (project.heroVideoUrl ?? "")) {
+        await updateHeroVideo(project.slug, form.heroVideoUrl)
+      }
+      if (JSON.stringify(form.amenities) !== JSON.stringify(project.location.amenities)) {
+        await saveProjectAmenities(project.slug, form.amenities)
+      }
+      if (JSON.stringify(form.distances) !== JSON.stringify(project.location.distances)) {
+        await saveProjectDistances(project.slug, form.distances)
+      }
+      if (JSON.stringify(form.features) !== JSON.stringify(project.features)) {
+        await saveProjectFeatures(project.slug, form.features)
+      }
+      if (JSON.stringify(form.qualities) !== JSON.stringify(project.qualities)) {
+        await saveProjectQualities(project.slug, form.qualities)
       }
       toast.success("Proyecto actualizado", {
         description: "Los cambios se han guardado correctamente.",
@@ -311,8 +364,14 @@ export function ProjectEditorSheet({
               </div>
             </div>
 
-            <Tabs defaultValue="core" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+            <Tabs
+              defaultValue="core"
+              className="w-full"
+              onValueChange={() => {
+                tabsAnchorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+              }}
+            >
+              <TabsList ref={tabsAnchorRef} className="grid w-full grid-cols-4 scroll-mt-2">
                 <TabsTrigger value="core">Core</TabsTrigger>
                 <TabsTrigger value="location">Ubicación</TabsTrigger>
                 <TabsTrigger value="specs">Especificaciones</TabsTrigger>
@@ -421,9 +480,84 @@ export function ProjectEditorSheet({
                     className="mt-1"
                   />
                 </div>
+
+                <Separator />
+
+                {/* Distances */}
+                <div>
+                  <Label className="mb-2 block">Distancias clave</Label>
+                  <div className="space-y-2">
+                    {form.distances.map((d, i) => (
+                      <div key={i} className="flex gap-2">
+                        <Input value={d}
+                          onChange={(e) => {
+                            const next = [...form.distances]; next[i] = e.target.value; update({ distances: next })
+                          }}
+                          placeholder="35 km a Madrid centro"
+                          className="flex-1"
+                        />
+                        <Button type="button" size="icon" variant="ghost" className="text-destructive shrink-0"
+                          onClick={() => update({ distances: form.distances.filter((_, j) => j !== i) })}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    <Button type="button" variant="outline" size="sm"
+                      onClick={() => update({ distances: [...form.distances, ""] })}>
+                      <Plus className="h-4 w-4 mr-1.5" /> Añadir distancia
+                    </Button>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Amenities */}
+                <div>
+                  <Label className="mb-2 block">Servicios Cercanos</Label>
+                  <div className="space-y-2">
+                    {form.amenities.map((a, i) => (
+                      <div key={i} className="grid grid-cols-[1fr_18ch_auto_auto] gap-2 items-center">
+                        <Input value={a.name}
+                          onChange={(e) => {
+                            const next = [...form.amenities]; next[i] = { ...next[i], name: e.target.value }; update({ amenities: next })
+                          }}
+                          placeholder="Centro de Salud"
+                        />
+                        <Input value={a.distance}
+                          onChange={(e) => {
+                            const next = [...form.amenities]; next[i] = { ...next[i], distance: e.target.value }; update({ amenities: next })
+                          }}
+                          placeholder="800 m"
+                        />
+                        <Select value={a.type}
+                          onValueChange={(v) => {
+                            const next = [...form.amenities]; next[i] = { ...next[i], type: v as Amenity["type"] }; update({ amenities: next })
+                          }}
+                        >
+                          <SelectTrigger className="w-28 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {AMENITY_TYPES.map((t) => (
+                              <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Button type="button" size="icon" variant="ghost" className="text-destructive"
+                          onClick={() => update({ amenities: form.amenities.filter((_, j) => j !== i) })}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    <Button type="button" variant="outline" size="sm"
+                      onClick={() => update({ amenities: [...form.amenities, { name: "", distance: "", type: "education" as Amenity["type"] }] })}>
+                      <Plus className="h-4 w-4 mr-1.5" /> Añadir servicio
+                    </Button>
+                  </div>
+                </div>
               </TabsContent>
 
-              <TabsContent value="specs" className="space-y-4 mt-4">
+              <TabsContent value="specs" className="space-y-4 mt-4 min-w-0 overflow-hidden">
                 <div>
                   <Label htmlFor="status">Estado</Label>
                   <Select
@@ -479,6 +613,118 @@ export function ProjectEditorSheet({
                     className="mt-1"
                   />
                 </div>
+
+                <Separator />
+
+                {/* Features (USPs) */}
+                <div className="min-w-0">
+                  <Label className="mb-2 block">Puntos fuertes</Label>
+                  <div className="space-y-2">
+                    {form.features.map((f, i) => (
+                      <div key={i} className="grid grid-cols-[9rem_minmax(0,1fr)_auto] gap-2 items-start">
+                        <Select value={f.icon}
+                          onValueChange={(v) => {
+                            const next = [...form.features]; next[i] = { ...next[i], icon: v }; update({ features: next })
+                          }}
+                        >
+                          <SelectTrigger className="text-xs w-full max-w-[9rem]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {PROJECT_ICON_OPTIONS.map((opt) => (
+                              <SelectItem key={opt.id} value={opt.id}>
+                                <div className="flex items-center gap-2">
+                                  <opt.Icon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                                  <span>{opt.label}</span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <div className="min-w-0 grid grid-cols-2 gap-2">
+                          <Input value={f.title}
+                            onChange={(e) => {
+                              const next = [...form.features]; next[i] = { ...next[i], title: e.target.value }; update({ features: next })
+                            }}
+                            placeholder="Luminosas"
+                            className="min-w-0"
+                          />
+                          <Input value={f.description}
+                            onChange={(e) => {
+                              const next = [...form.features]; next[i] = { ...next[i], description: e.target.value }; update({ features: next })
+                            }}
+                            placeholder="Descripción breve"
+                            className="min-w-0"
+                          />
+                        </div>
+                        <Button type="button" size="icon" variant="ghost" className="text-destructive shrink-0"
+                          onClick={() => update({ features: form.features.filter((_, j) => j !== i) })}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    <Button type="button" variant="outline" size="sm"
+                      onClick={() => update({ features: [...form.features, { title: "", description: "", icon: "Sun" }] })}>
+                      <Plus className="h-4 w-4 mr-1.5" /> Añadir punto fuerte
+                    </Button>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Qualities */}
+                <div className="min-w-0">
+                  <Label className="mb-2 block">Memoria de Calidades</Label>
+                  <div className="space-y-2">
+                    {form.qualities.map((q, i) => (
+                      <div key={i} className="grid grid-cols-[9rem_minmax(0,1fr)_auto] gap-2 items-start">
+                        <Select value={q.icon}
+                          onValueChange={(v) => {
+                            const next = [...form.qualities]; next[i] = { ...next[i], icon: v }; update({ qualities: next })
+                          }}
+                        >
+                          <SelectTrigger className="text-xs w-full max-w-[9rem]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {PROJECT_ICON_OPTIONS.map((opt) => (
+                              <SelectItem key={opt.id} value={opt.id}>
+                                <div className="flex items-center gap-2">
+                                  <opt.Icon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                                  <span>{opt.label}</span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <div className="min-w-0 grid grid-cols-2 gap-2">
+                          <Input value={q.title}
+                            onChange={(e) => {
+                              const next = [...form.qualities]; next[i] = { ...next[i], title: e.target.value }; update({ qualities: next })
+                            }}
+                            placeholder="Cubiertas"
+                            className="min-w-0"
+                          />
+                          <Input value={q.description}
+                            onChange={(e) => {
+                              const next = [...form.qualities]; next[i] = { ...next[i], description: e.target.value }; update({ qualities: next })
+                            }}
+                            placeholder="Descripción breve"
+                            className="min-w-0"
+                          />
+                        </div>
+                        <Button type="button" size="icon" variant="ghost" className="text-destructive shrink-0"
+                          onClick={() => update({ qualities: form.qualities.filter((_, j) => j !== i) })}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    <Button type="button" variant="outline" size="sm"
+                      onClick={() => update({ qualities: [...form.qualities, { title: "", description: "", icon: "Layers" }] })}>
+                      <Plus className="h-4 w-4 mr-1.5" /> Añadir calidad
+                    </Button>
+                  </div>
+                </div>
               </TabsContent>
 
               <TabsContent value="media" className="space-y-4 mt-4">
@@ -531,6 +777,8 @@ export function ProjectEditorSheet({
                       type="videos"
                       addPlaceholder="URL de video o thumbnail"
                       projectSlug={project.slug}
+                      heroVideoUrl={form.heroVideoUrl}
+                      onHeroVideoChange={(url) => update({ heroVideoUrl: url })}
                     />
                   </TabsContent>
                   <TabsContent value="tour360" className="mt-4">

@@ -118,12 +118,15 @@ export function ProjectLocation({ project }: { project: Project }) {
           </div>
         </div>
 
-        {/* Amenities Section */}
+        {/* Servicios Cercanos */}
         {project.location.amenities.length > 0 && (
           <div>
-            <h3 className="font-serif text-xl font-bold text-foreground mb-6 text-center lg:text-2xl">
-              Servicios Cercanos
-            </h3>
+            <div className="text-center mb-8">
+              <h3 className="font-serif text-2xl font-bold text-foreground lg:text-3xl">
+                Servicios Cercanos
+              </h3>
+            </div>
+
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {Object.entries(amenitiesByType).map(([type, amenities]) => {
                 const Icon = amenityIcons[type as Amenity["type"]]
@@ -131,22 +134,33 @@ export function ProjectLocation({ project }: { project: Project }) {
                 return (
                   <div
                     key={type}
-                    className="bg-background rounded-xl border border-border p-5"
+                    className="bg-background rounded-2xl border border-border/70 p-5 shadow-sm hover:shadow-md transition-shadow duration-200"
                   >
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="flex items-center justify-center h-9 w-9 rounded-lg bg-accent/10">
-                        <Icon className="h-5 w-5 text-accent" />
+                    {/* Card header */}
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="flex items-center justify-center h-9 w-9 rounded-xl bg-accent/10 flex-shrink-0">
+                        <Icon className="h-4 w-4 text-accent" strokeWidth={1.75} />
                       </div>
-                      <h4 className="font-semibold text-foreground text-sm">{label}</h4>
+                      <h4 className="font-semibold text-foreground text-sm tracking-wide">
+                        {label}
+                      </h4>
                     </div>
-                    <div className="flex flex-col gap-2">
-                      {amenities.map((a) => (
+
+                    {/* Amenity rows with separators */}
+                    <div className="flex flex-col">
+                      {amenities.map((a, idx) => (
                         <div
                           key={a.name}
-                          className="flex items-center justify-between text-sm"
+                          className={`flex items-center justify-between py-2 text-sm ${
+                            idx < amenities.length - 1
+                              ? "border-b border-border/50"
+                              : ""
+                          }`}
                         >
-                          <span className="text-muted-foreground">{a.name}</span>
-                          <span className="text-foreground font-medium flex-shrink-0 ml-3">
+                          <span className="text-muted-foreground leading-snug pr-4">
+                            {a.name}
+                          </span>
+                          <span className="text-foreground font-semibold flex-shrink-0 tabular-nums">
                             {a.distance}
                           </span>
                         </div>

@@ -1,5 +1,4 @@
 import { Navbar } from "@/components/navbar"
-import { Footer } from "@/components/footer"
 import { ProjectsGrid } from "@/components/projects-grid"
 import { getAllProjects } from "@/lib/store"
 import type { Metadata } from "next"
@@ -38,7 +37,6 @@ export default async function ProjectsPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   )
 }

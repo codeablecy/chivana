@@ -4,13 +4,13 @@ import type { PricingItem } from "@/lib/types"
 
 export function ProjectPricing({ pricing }: { pricing: PricingItem[] }) {
   return (
-    <section id="precios" className="py-16 px-4 lg:py-24 lg:px-8 bg-card">
+    <section id="precios" className="scroll-mt-20 py-16 px-4 lg:py-24 lg:px-8 bg-card" aria-labelledby="precios-heading">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <p className="text-accent font-semibold text-sm tracking-widest uppercase mb-2">
             Precios
           </p>
-          <h2 className="font-serif text-2xl font-bold text-foreground lg:text-4xl text-balance">
+          <h2 id="precios-heading" className="font-serif text-2xl font-bold text-foreground lg:text-4xl text-balance">
             Los Precios
           </h2>
         </div>

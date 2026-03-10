@@ -1,8 +1,6 @@
 import Image from "next/image"
-import { Sun, Shield, Leaf, Home } from "lucide-react"
+import { getProjectIcon } from "@/lib/project-icons"
 import type { Project } from "@/lib/types"
-
-const iconMap: Record<string, typeof Sun> = { Sun, Shield, Leaf, Home }
 
 export function ProjectAbout({ project }: { project: Project }) {
   return (
@@ -31,7 +29,7 @@ export function ProjectAbout({ project }: { project: Project }) {
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {project.features.map((feature) => {
-                const Icon = iconMap[feature.icon] || Sun
+                const Icon = getProjectIcon(feature.icon)
                 return (
                   <div key={feature.title} className="flex items-start gap-3">
                     <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-accent/10 flex-shrink-0">

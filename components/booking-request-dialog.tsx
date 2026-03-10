@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { useScrollToTopOnChange } from "@/hooks/use-scroll-to-top-on-change"
 import { format, addDays, isBefore, isAfter, setHours, setMinutes } from "date-fns"
 import { es } from "date-fns/locale"
 import {
@@ -69,6 +70,8 @@ export function BookingRequestDialog({
   const [step, setStep] = React.useState<"datetime" | "form" | "success">(
     "datetime"
   )
+  const stepContentRef = React.useRef<HTMLDivElement>(null)
+  useScrollToTopOnChange(stepContentRef, [step])
   const [date, setDate] = React.useState<Date | undefined>()
   const [time, setTime] = React.useState<string>("")
   const [form, setForm] = React.useState({
@@ -157,7 +160,7 @@ export function BookingRequestDialog({
             </Link>
           </div>
         ) : (
-          <>
+          <div ref={stepContentRef} className="scroll-mt-2">
             {step === "datetime" && (
           <div className="space-y-6">
             <div>
@@ -325,7 +328,7 @@ export function BookingRequestDialog({
             )}
           </div>
         )}
-          </>
+          </div>
         )}
       </DialogContent>
     </Dialog>

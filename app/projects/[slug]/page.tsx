@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { Navbar } from "@/components/navbar"
-import { Footer } from "@/components/footer"
 import { Contact } from "@/components/contact"
 import { getAllProjects, getProject } from "@/lib/store"
 import { ProjectHero } from "@/components/project/project-hero"
@@ -71,7 +70,6 @@ export default async function ProjectDetailPage({
         <ProjectLocation project={project} />
         {!isComingSoon && <Contact />}
       </main>
-      <Footer />
     </>
   )
 }

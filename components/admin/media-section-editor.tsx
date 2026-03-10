@@ -29,6 +29,13 @@ interface MediaSectionEditorProps<T extends AnyItem> {
   hasHero?: boolean
   heroImage?: string
   onHeroChange?: (src: string) => void
+  /**
+   * The embed URL of the video currently marked as hero background.
+   * Only relevant when `type === "videos"`.
+   */
+  heroVideoUrl?: string
+  /** Called when an embed card's star is clicked. Pass "" to clear. */
+  onHeroVideoChange?: (url: string) => void
   addPlaceholder?: string
   /** Supabase Storage folder for this project */
   projectSlug?: string
@@ -141,6 +148,8 @@ export function MediaSectionEditor<T extends AnyItem>({
   hasHero = false,
   heroImage,
   onHeroChange,
+  heroVideoUrl,
+  onHeroVideoChange,
   addPlaceholder = "URL de imagen",
   projectSlug = "",
   className,
@@ -297,9 +306,14 @@ export function MediaSectionEditor<T extends AnyItem>({
         const embedItem = item as MediaEmbedItem
         const thumb = embedThumb(embedItem.url)
         const label = embedLabel(embedItem.url)
+        const isHeroEmbed = type === "videos" && !!heroVideoUrl && heroVideoUrl === embedItem.url
         return (
-          <div key={`embed-${globalIdx}`}
-            className="flex items-center gap-3 rounded-xl border border-border bg-card p-3"
+          <div
+            key={`embed-${globalIdx}`}
+            className={cn(
+              "flex items-center gap-3 rounded-xl border bg-card p-3 transition-colors",
+              isHeroEmbed ? "border-accent ring-1 ring-accent/30" : "border-border",
+            )}
           >
             {/* Thumbnail */}
             <div className="relative h-14 w-20 shrink-0 rounded-lg overflow-hidden bg-muted flex items-center justify-center">
@@ -311,14 +325,40 @@ export function MediaSectionEditor<T extends AnyItem>({
               <div className="absolute bottom-0 left-0 right-0 bg-foreground/70 text-[9px] text-white text-center py-0.5 font-medium truncate px-1">
                 {label}
               </div>
+              {isHeroEmbed && (
+                <div className="absolute top-1 right-1">
+                  <span className="text-[9px] font-bold bg-accent text-accent-foreground px-1 py-0.5 rounded">Hero</span>
+                </div>
+              )}
             </div>
             {/* Info */}
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">{embedItem.alt || "Sin título"}</p>
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <p className="text-sm font-medium text-foreground truncate">{embedItem.alt || "Sin título"}</p>
+                {isHeroEmbed && (
+                  <span className="shrink-0 text-[10px] font-semibold text-accent">· Hero activo</span>
+                )}
+              </div>
               <p className="text-xs text-muted-foreground truncate">{embedItem.url}</p>
             </div>
             {/* Actions */}
             <div className="flex items-center gap-1.5 shrink-0">
+              {type === "videos" && onHeroVideoChange && (
+                <Button
+                  type="button"
+                  size="icon"
+                  variant={isHeroEmbed ? "default" : "secondary"}
+                  className={cn(
+                    "h-8 w-8 shadow-sm text-base leading-none",
+                    isHeroEmbed && "bg-accent hover:bg-accent/90 text-accent-foreground",
+                  )}
+                  onClick={() => onHeroVideoChange(isHeroEmbed ? "" : embedItem.url)}
+                  title={isHeroEmbed ? "Quitar video hero" : "Marcar como hero"}
+                  aria-label={isHeroEmbed ? "Quitar video hero" : "Marcar como hero"}
+                >
+                  ★
+                </Button>
+              )}
               <a href={embedItem.url} target="_blank" rel="noopener noreferrer"
                 className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
                 title="Abrir en nueva pestaña">

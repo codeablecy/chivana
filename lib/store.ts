@@ -1,11 +1,10 @@
 /**
- * Supabase-backed data store.
- * Replaces the previous in-memory store with the same function signatures,
- * now all async. Reads use the anon client; writes use the service-role
- * admin client (server-side only).
+ * Supabase-backed data store — server-side only.
+ * All reads and writes use the service-role admin client, which bypasses
+ * RLS entirely. This is safe because store.ts is never imported by client
+ * components; it is only used in Server Components and Server Actions.
  */
 import type { Project, BlogPost, SiteSettings, Phase, PricingItem, Amenity } from "./types"
-import { supabase } from "./supabase/client"
 import { createAdminClient } from "./supabase/admin"
 
 // ---------------------------------------------------------------------------
@@ -26,7 +25,12 @@ const PROJECT_SELECT = `
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapRow(row: Record<string, any>): Project {
-  const loc = row.project_locations?.[0] ?? {}
+  // PostgREST returns one-to-one relationships (UNIQUE FK) as a plain object,
+  // and one-to-many as an array. Handle both to be safe.
+  const locRaw = row.project_locations
+  const loc: Record<string, unknown> = Array.isArray(locRaw)
+    ? (locRaw[0] ?? {})
+    : (locRaw ?? {})
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sortBy = (arr: any[]): any[] =>
@@ -42,6 +46,7 @@ function mapRow(row: Record<string, any>): Project {
     tagline: row.tagline,
     description: row.description,
     heroImage: row.hero_image,
+    heroVideoUrl: row.hero_video_url ?? undefined,
     tags: row.tags ?? [],
     status: row.status as Project["status"],
     totalUnits: row.total_units,
@@ -153,7 +158,8 @@ function mapRow(row: Record<string, any>): Project {
 // ---------------------------------------------------------------------------
 
 export async function getSettings(): Promise<SiteSettings> {
-  const { data, error } = await supabase
+  const db = createAdminClient()
+  const { data, error } = await db
     .from("site_settings")
     .select("*")
     .eq("id", 1)
@@ -215,7 +221,8 @@ export async function updateSettings(data: Partial<SiteSettings>): Promise<SiteS
 // ---------------------------------------------------------------------------
 
 export async function getAllProjects(): Promise<Project[]> {
-  const { data, error } = await supabase
+  const db = createAdminClient()
+  const { data, error } = await db
     .from("projects")
     .select(PROJECT_SELECT)
     .order("created_at", { ascending: true })
@@ -225,7 +232,8 @@ export async function getAllProjects(): Promise<Project[]> {
 }
 
 export async function getActiveProjects(): Promise<Project[]> {
-  const { data, error } = await supabase
+  const db = createAdminClient()
+  const { data, error } = await db
     .from("projects")
     .select(PROJECT_SELECT)
     .neq("status", "sold-out")
@@ -235,8 +243,29 @@ export async function getActiveProjects(): Promise<Project[]> {
   return (data ?? []).map(mapRow)
 }
 
+/** Lightweight query for footer / nav — only fetches slug, name, status, tags. */
+export async function getFooterProjects(): Promise<
+  Pick<Project, "slug" | "name" | "status" | "tags">[]
+> {
+  const db = createAdminClient()
+  const { data, error } = await db
+    .from("projects")
+    .select("slug, name, status, tags")
+    .neq("status", "sold-out")
+    .order("created_at", { ascending: true })
+
+  if (error) { console.error("[store] getFooterProjects error:", error); return [] }
+  return (data ?? []).map((r) => ({
+    slug:   r.slug   ?? "",
+    name:   r.name   ?? "",
+    status: (r.status ?? "coming-soon") as Project["status"],
+    tags:   (r.tags  ?? []) as string[],
+  }))
+}
+
 export async function getProject(slug: string): Promise<Project | undefined> {
-  const { data, error } = await supabase
+  const db = createAdminClient()
+  const { data, error } = await db
     .from("projects")
     .select(PROJECT_SELECT)
     .eq("slug", slug)
@@ -388,6 +417,27 @@ export async function createProject(project: Project): Promise<Project> {
         sort_order: i,
       })),
     )
+  }
+
+  // Qualities
+  if (project.qualities.length > 0) {
+    const { error: qErr } = await db.from("project_qualities").insert(
+      project.qualities.map((q, i) => ({
+        project_id: projectId, title: q.title, description: q.description, icon: q.icon, sort_order: i,
+      })),
+    )
+    if (qErr) console.error("[store] createProject qualities error:", qErr.message)
+  }
+
+  // Amenities
+  const amenities = project.location.amenities ?? []
+  if (amenities.length > 0) {
+    const { error: aErr } = await db.from("project_amenities").insert(
+      amenities.map((a, i) => ({
+        project_id: projectId, name: a.name, distance: a.distance, type: a.type, sort_order: i,
+      })),
+    )
+    if (aErr) console.error("[store] createProject amenities error:", aErr.message)
   }
 
   // Gallery
@@ -590,9 +640,104 @@ export async function updateProjectGallery(
   return !error
 }
 
+// ---------------------------------------------------------------------------
+// Amenities, Features, Qualities, Distances — replace-all writes
+// ---------------------------------------------------------------------------
+
+export async function updateProjectAmenities(
+  slug: string,
+  amenities: import("./types").Amenity[],
+): Promise<boolean> {
+  const db = createAdminClient()
+  const { data: proj } = await db.from("projects").select("id").eq("slug", slug).single()
+  if (!proj) return false
+  await db.from("project_amenities").delete().eq("project_id", proj.id)
+  if (amenities.length === 0) return true
+  const { error } = await db.from("project_amenities").insert(
+    amenities.map((a, i) => ({
+      project_id: proj.id,
+      name: a.name,
+      distance: a.distance,
+      type: a.type,
+      sort_order: i,
+    })),
+  )
+  return !error
+}
+
+export async function updateProjectDistances(
+  slug: string,
+  distances: string[],
+): Promise<boolean> {
+  const db = createAdminClient()
+  const { data: proj } = await db.from("projects").select("id").eq("slug", slug).single()
+  if (!proj) return false
+  const { error } = await db
+    .from("project_locations")
+    .update({ distances })
+    .eq("project_id", proj.id)
+  return !error
+}
+
+export async function updateProjectFeatures(
+  slug: string,
+  features: { title: string; description: string; icon: string }[],
+): Promise<boolean> {
+  const db = createAdminClient()
+  const { data: proj } = await db.from("projects").select("id").eq("slug", slug).single()
+  if (!proj) return false
+  await db.from("project_features").delete().eq("project_id", proj.id)
+  if (features.length === 0) return true
+  const { error } = await db.from("project_features").insert(
+    features.map((f, i) => ({
+      project_id: proj.id,
+      title: f.title,
+      description: f.description,
+      icon: f.icon,
+      sort_order: i,
+    })),
+  )
+  return !error
+}
+
+export async function updateProjectQualities(
+  slug: string,
+  qualities: { title: string; description: string; icon: string }[],
+): Promise<boolean> {
+  const db = createAdminClient()
+  const { data: proj } = await db.from("projects").select("id").eq("slug", slug).single()
+  if (!proj) return false
+  await db.from("project_qualities").delete().eq("project_id", proj.id)
+  if (qualities.length === 0) return true
+  const { error } = await db.from("project_qualities").insert(
+    qualities.map((q, i) => ({
+      project_id: proj.id,
+      title: q.title,
+      description: q.description,
+      icon: q.icon,
+      sort_order: i,
+    })),
+  )
+  return !error
+}
+
 export async function updateProjectHeroImage(slug: string, heroImage: string): Promise<boolean> {
   const db = createAdminClient()
   const { error } = await db.from("projects").update({ hero_image: heroImage }).eq("slug", slug)
+  return !error
+}
+
+/**
+ * Set or clear the hero video URL for a project.
+ * Pass an empty string to clear (renders static heroImage instead).
+ */
+export async function updateProjectHeroVideo(slug: string, heroVideoUrl: string): Promise<boolean> {
+  const db = createAdminClient()
+  const { error } = await db
+    .from("projects")
+    .update({ hero_video_url: heroVideoUrl || null })
+    .eq("slug", slug)
+  if (error) console.error("[store] updateProjectHeroVideo error:", error)
   return !error
 }
 
@@ -601,7 +746,8 @@ export async function updateProjectHeroImage(slug: string, heroImage: string): P
 // ---------------------------------------------------------------------------
 
 export async function getAllPosts(): Promise<BlogPost[]> {
-  const { data, error } = await supabase
+  const db = createAdminClient()
+  const { data, error } = await db
     .from("blog_posts")
     .select("*")
     .order("created_at", { ascending: false })
@@ -611,7 +757,8 @@ export async function getAllPosts(): Promise<BlogPost[]> {
 }
 
 export async function getPublishedPosts(): Promise<BlogPost[]> {
-  const { data, error } = await supabase
+  const db = createAdminClient()
+  const { data, error } = await db
     .from("blog_posts")
     .select("*")
     .eq("published", true)
@@ -622,7 +769,8 @@ export async function getPublishedPosts(): Promise<BlogPost[]> {
 }
 
 export async function getPost(id: string): Promise<BlogPost | undefined> {
-  const { data, error } = await supabase
+  const db = createAdminClient()
+  const { data, error } = await db
     .from("blog_posts")
     .select("*")
     .eq("id", id)

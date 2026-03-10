@@ -222,8 +222,16 @@ export function ProjectsGrid({ projects }: { projects: Project[] }) {
           : `${filtered.length} proyecto${filtered.length !== 1 ? "s" : ""}${activeCity !== "all" ? ` en ${activeCity}` : ""}`}
       </p>
 
-      {/* ── Grid ── */}
-      <div className="grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2 xl:grid-cols-3">
+      {/* ── Grid: count-aware layout — centered when 1–2 items for balanced UI ── */}
+      <div
+        className={cn(
+          "project-grid-stagger grid gap-6 sm:gap-8",
+          filtered.length === 0 && "grid-cols-1",
+          filtered.length === 1 && "grid-cols-1 max-w-lg mx-auto",
+          filtered.length === 2 && "grid-cols-2 max-w-4xl mx-auto",
+          filtered.length >= 3 && "grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
+        )}
+      >
         {filtered.length === 0 ? (
           <EmptyState onReset={resetFilters} />
         ) : (

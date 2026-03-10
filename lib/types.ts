@@ -58,6 +58,12 @@ export interface Project {
   tagline: string
   description: string
   heroImage: string
+  /**
+   * YouTube (or Vimeo) embed URL used as the project hero background video.
+   * When set, the project hero renders a full-bleed autoplay iframe instead of
+   * the static heroImage — exactly like the homepage hero.
+   */
+  heroVideoUrl?: string
   tags: string[]
   location: {
     address: string

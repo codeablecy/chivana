@@ -168,7 +168,15 @@ function Tour360Dialog({
 
 // ─── Card ──────────────────────────────────────────────────────────────────────
 
-export function ProjectCard({ project }: { project: Project }) {
+type CardVariant = "compact" | "full"
+
+interface ProjectCardProps {
+  project: Project
+  /** `compact` for home/carousel: fewer specs, tighter layout. `full` for /projects grid. */
+  variant?: CardVariant
+}
+
+export function ProjectCard({ project, variant = "full" }: ProjectCardProps) {
   const [tourOpen, setTourOpen] = useState(false)
 
   const stats    = buildCardStats(project.pricing)
@@ -185,27 +193,37 @@ export function ProjectCard({ project }: { project: Project }) {
     : fallback?.baths != null ? String(fallback.baths) : null
 
   const areaVal = stats.areaM2
-    ? rangeStr(Math.round(stats.areaM2.min), Math.round(stats.areaM2.max), " m²")
-    : fallback?.area ?? null
+    ? rangeStr(Math.round(stats.areaM2.min), Math.round(stats.areaM2.max))
+    : fallback?.area
+      ? String(fallback.area).replace(/\s*m²/gi, "").trim()
+      : null
 
-  const showSpecs = roomsVal || bathsVal || areaVal
+  const showSpecs = variant === "full" && (roomsVal || bathsVal || areaVal)
+  const isCompact = variant === "compact"
 
   return (
     <>
-      <article className={`group rounded-2xl border border-border overflow-hidden bg-card hover:shadow-xl transition-all duration-300 ${STATUS_CARD_CLASS[project.status]}`}>
-
+      <article
+        className={`group rounded-2xl border border-border overflow-hidden bg-card transition-all duration-300 ease-out
+          ${!isCompact ? "hover:shadow-2xl hover:shadow-foreground/8 hover:-translate-y-1" : "hover:shadow-xl"}
+          ${STATUS_CARD_CLASS[project.status]} ${isCompact ? "flex flex-col" : ""}`}
+      >
         {/* ── Image block ── */}
-        <div className="relative aspect-[16/10] overflow-hidden">
+        <div className={`relative overflow-hidden ${isCompact ? "aspect-[4/3]" : "aspect-[16/10]"}`}>
           <Image
             src={project.heroImage || "/placeholder.svg"}
             alt={project.name}
             fill
-            className={`object-cover transition-transform duration-500 group-hover:scale-105 ${project.status === "sold-out" ? "grayscale-[30%]" : ""}`}
+            className={`object-cover transition-transform duration-500 ease-out will-change-transform
+              ${!isCompact ? "group-hover:scale-110" : "group-hover:scale-105"}
+              ${project.status === "sold-out" ? "grayscale-[30%]" : ""}`}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
 
-          {/* Gradient */}
-          <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-foreground/10 to-transparent" />
+          {/* Gradient — intensifies on hover (full variant) */}
+          <div
+            className={`absolute inset-0 bg-gradient-to-t from-foreground/60 via-foreground/10 to-transparent transition-opacity duration-300 ${!isCompact ? "group-hover:from-foreground/70 group-hover:via-foreground/20" : ""}`}
+          />
 
           {/* Sold-out diagonal ribbon */}
           {project.status === "sold-out" && (
@@ -252,7 +270,7 @@ export function ProjectCard({ project }: { project: Project }) {
 
           {/* Title + location — bottom */}
           <div className="absolute bottom-3 left-3 right-3">
-            <h3 className="font-serif text-lg font-bold text-card leading-tight lg:text-xl">
+            <h3 className={`font-serif font-bold text-card leading-tight ${isCompact ? "text-lg lg:text-xl" : "text-lg lg:text-xl xl:text-2xl"}`}>
               {project.name}
             </h3>
             {(project.location.city || project.location.province) && (
@@ -269,19 +287,30 @@ export function ProjectCard({ project }: { project: Project }) {
         </div>
 
         {/* ── Body ── */}
-        <div className="px-4 pt-4 pb-5 lg:px-5 flex flex-col gap-3">
+        <div className={`px-4 pt-4 pb-5 lg:px-5 flex flex-col gap-3 ${isCompact ? "flex-1 flex justify-between" : ""}`}>
 
-          {/* Tagline */}
-          <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2">
-            {project.tagline}
-          </p>
+          {/* Tagline — hidden in compact */}
+          {!isCompact && (
+            <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2">
+              {project.tagline}
+            </p>
+          )}
 
-          {/* Spec row */}
+          {/* Spec row — hidden in compact */}
           {showSpecs && (
             <div className="flex items-center gap-3 flex-wrap py-2.5 px-3 rounded-xl bg-muted/50 border border-border/60">
               {areaVal  && <SpecChip icon={Ruler}    value={areaVal}  label="m²"    />}
               {roomsVal && <SpecChip icon={BedDouble} value={roomsVal} label="dorm." />}
               {bathsVal && <SpecChip icon={Bath}      value={bathsVal} label="baños" />}
+            </div>
+          )}
+
+          {/* Compact: inline mini-specs */}
+          {isCompact && (roomsVal || areaVal) && (
+            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+              {areaVal && <span className="flex items-center gap-1"><Ruler className="h-3 w-3 text-accent" />{areaVal} m²</span>}
+              {roomsVal && <span className="flex items-center gap-1"><BedDouble className="h-3 w-3 text-accent" />{roomsVal} dorm.</span>}
+              {bathsVal && <span className="flex items-center gap-1"><Bath className="h-3 w-3 text-accent" />{bathsVal} baños</span>}
             </div>
           )}
 
@@ -314,8 +343,13 @@ export function ProjectCard({ project }: { project: Project }) {
             </div>
           </div>
 
-          {/* CTA */}
-          <Button className="w-full mt-1" asChild>
+          {/* CTA — min 44px touch target on mobile, hover lift on desktop */}
+          <Button
+            className={`w-full mt-1 min-h-[44px] sm:min-h-0 transition-transform duration-200
+              ${!isCompact ? "hover:scale-[1.02] hover:shadow-md" : ""}
+              ${isCompact ? "text-sm" : ""}`}
+            asChild
+          >
             <Link href={`/projects/${project.slug}`}>
               {project.status === "coming-soon" ? "Más información" : "Ver proyecto"}
               <ArrowRight className="h-4 w-4 ml-2" />

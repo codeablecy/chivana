@@ -1,10 +1,12 @@
 import React from "react"
-import type { Metadata, Viewport } from 'next'
-import { Barlow, Belleza } from 'next/font/google'
+import type { Metadata, Viewport } from "next"
+import { Barlow, Belleza } from "next/font/google"
 
-import './globals.css'
+import "./globals.css"
 import { Toaster } from "sonner"
-import { CtaBar } from "@/components/cta-bar"
+import { ConditionalLayoutShell } from "@/components/conditional-layout-shell"
+import { ScrollToTopOnNavigateClient } from "@/components/scroll-to-top-on-navigate-client"
+import { getFooterProjects } from "@/lib/store"
 
 const barlow = Barlow({
   subsets: ['latin'],
@@ -28,18 +30,22 @@ export const viewport: Viewport = {
   themeColor: '#234457',
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const footerProjects = await getFooterProjects().catch(() => [])
+
   return (
-    <html lang="es">
+    <html lang="es" className="scroll-smooth">
       <body
         className={`${barlow.variable} ${belleza.variable} font-sans antialiased`}
       >
-        {children}
-        <CtaBar />
+        <ScrollToTopOnNavigateClient />
+        <ConditionalLayoutShell projects={footerProjects}>
+          {children}
+        </ConditionalLayoutShell>
         <Toaster richColors position="top-center" />
       </body>
     </html>

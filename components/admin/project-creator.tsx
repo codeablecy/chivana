@@ -1,30 +1,45 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useRef, useEffect } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select"
+import {
   CheckCircle2, FolderPlus, ChevronRight, ChevronLeft,
   Check, Globe, Link2, Building2, MapPin, Layers, Image as ImageIcon,
+  Plus, Trash2, MapIcon, Star,
 } from "lucide-react"
 import { addProject } from "@/app/admin/actions"
+import { PROJECT_ICON_OPTIONS } from "@/lib/project-icons"
 import { PricingInventoryTable } from "./pricing-inventory-table"
 import { ImageUploader } from "./image-uploader"
 import { GalleryEditor } from "./gallery-editor"
-import type { PricingItem } from "@/lib/types"
+import type { PricingItem, Amenity } from "@/lib/types"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 
 // ─── Steps config ─────────────────────────────────────────────────────────────
 
 const STEPS = [
-  { id: 1, label: "Identidad", icon: Building2, description: "Nombre, descripción, ubicación" },
-  { id: 2, label: "Inventario", icon: Layers, description: "Tipologías, precios y disponibilidad" },
-  { id: 3, label: "Medios", icon: ImageIcon, description: "Hero, galería y tours" },
+  { id: 1, label: "Identidad",  icon: Building2,  description: "Nombre, descripción, ubicación" },
+  { id: 2, label: "Inventario", icon: Layers,      description: "Tipologías, precios y disponibilidad" },
+  { id: 3, label: "Medios",     icon: ImageIcon,   description: "Hero, galería y tours" },
+  { id: 4, label: "Entorno",    icon: MapIcon,     description: "Servicios cercanos y calidades" },
 ] as const
+
+const AMENITY_TYPES: { value: Amenity["type"]; label: string }[] = [
+  { value: "education",  label: "Educación" },
+  { value: "health",     label: "Salud" },
+  { value: "transport",  label: "Transporte" },
+  { value: "shopping",   label: "Compras" },
+  { value: "leisure",    label: "Ocio" },
+]
+
 
 // ─── Stepper ──────────────────────────────────────────────────────────────────
 
@@ -99,13 +114,29 @@ export function ProjectCreator() {
   const [tour360Url, setTour360Url] = useState("")
   const [videoEmbedUrl, setVideoEmbedUrl] = useState("")
   const [pricing, setPricing] = useState<PricingItem[]>([])
+  const [amenities, setAmenities] = useState<Amenity[]>([])
+  const [distances, setDistances] = useState<string[]>([])
+  const [features, setFeatures] = useState<{ title: string; description: string; icon: string }[]>([])
+  const [qualities, setQualities] = useState<{ title: string; description: string; icon: string }[]>([])
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
+
+  const stepContentRef = useRef<HTMLDivElement>(null)
+  const isInitialMount = useRef(true)
 
   const goTo = useCallback((n: number) => {
     setStep(n)
     setMaxReached((m) => Math.max(m, n))
   }, [])
+
+  // Scroll step content into view on step change to prevent jarring jump (content height differs per step)
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false
+      return
+    }
+    stepContentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }, [step])
 
   function updateField(field: string, value: string) {
     setFormData((prev) => {
@@ -157,6 +188,10 @@ export function ProjectCreator() {
       galleryPhotos: galleryPhotos.length > 0 ? galleryPhotos : undefined,
       galleryTour360: tour360Url.trim() ? [{ url: tour360Url.trim() }] : undefined,
       galleryVideos: videoUrl ? [{ src: "", alt: "Vídeo del proyecto", url: videoUrl }] : undefined,
+      amenities: amenities.length > 0 ? amenities : undefined,
+      distances: distances.filter(Boolean).length > 0 ? distances.filter(Boolean) : undefined,
+      features: features.length > 0 ? features : undefined,
+      qualities: qualities.length > 0 ? qualities : undefined,
     })
 
     if (result.success) {
@@ -171,7 +206,8 @@ export function ProjectCreator() {
   function reset() {
     setSubmitted(false); setStep(1); setMaxReached(1)
     setFormData({ name: "", slug: "", tagline: "", description: "", address: "", city: "", province: "", postalCode: "", lat: "40.14199365784348", lng: "-3.924643621440974", totalUnits: "" })
-    setHeroImage(""); setGalleryPhotos([]); setTour360Url(""); setVideoEmbedUrl(""); setPricing([])
+    setHeroImage(""); setGalleryPhotos([]); setTour360Url(""); setVideoEmbedUrl("")
+    setPricing([]); setAmenities([]); setDistances([]); setFeatures([]); setQualities([])
   }
 
   // ── Success ──────────────────────────────────────────────────────────────────
@@ -207,7 +243,9 @@ export function ProjectCreator() {
         <p className="text-sm text-muted-foreground mt-1">Configura el proyecto en 3 pasos y publícalo desde el panel.</p>
       </div>
 
-      <Stepper step={step} maxReached={maxReached} />
+      <div ref={stepContentRef} className="scroll-mt-20">
+        <Stepper step={step} maxReached={maxReached} />
+      </div>
 
       <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
 
@@ -431,6 +469,203 @@ export function ProjectCreator() {
 
             <div className="flex items-center justify-between pt-1">
               <Button type="button" variant="outline" onClick={() => goTo(2)}>
+                <ChevronLeft className="h-4 w-4 mr-2" /> Atrás
+              </Button>
+              <Button type="button" onClick={() => goTo(4)}
+                className="bg-primary text-primary-foreground hover:bg-primary/90 min-w-[160px]">
+                Siguiente: Entorno
+                <ChevronRight className="h-4 w-4 ml-2" />
+              </Button>
+            </div>
+          </>
+        )}
+
+        {/* ══ STEP 4 ══ */}
+        {step === 4 && (
+          <>
+            {/* Distances */}
+            <StepCard title="Distancias clave" subtitle="Ej: '35 km a Madrid centro'. Se muestran en el hero del proyecto.">
+              <div className="space-y-2">
+                {distances.map((d, i) => (
+                  <div key={i} className="flex gap-2 items-center">
+                    <Input
+                      value={d}
+                      onChange={(e) => {
+                        const next = [...distances]; next[i] = e.target.value; setDistances(next)
+                      }}
+                      placeholder="35 km a Madrid centro"
+                      className="flex-1"
+                    />
+                    <Button type="button" size="icon" variant="ghost" className="text-destructive shrink-0"
+                      onClick={() => setDistances(distances.filter((_, j) => j !== i))}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                <Button type="button" variant="outline" size="sm"
+                  onClick={() => setDistances([...distances, ""])}>
+                  <Plus className="h-4 w-4 mr-1.5" /> Añadir distancia
+                </Button>
+              </div>
+            </StepCard>
+
+            {/* Amenities */}
+            <StepCard title="Servicios Cercanos" subtitle="Se muestran agrupados por categoría en la sección Ubicación.">
+              <div className="space-y-3">
+                {amenities.map((a, i) => (
+                  <div key={i} className="grid grid-cols-[1fr_1fr_auto_auto] gap-2 items-center">
+                    <Input
+                      value={a.name}
+                      onChange={(e) => {
+                        const next = [...amenities]; next[i] = { ...next[i], name: e.target.value }; setAmenities(next)
+                      }}
+                      placeholder="Colegio Público El Viso"
+                    />
+                    <Input
+                      value={a.distance}
+                      onChange={(e) => {
+                        const next = [...amenities]; next[i] = { ...next[i], distance: e.target.value }; setAmenities(next)
+                      }}
+                      placeholder="500 m"
+                    />
+                    <Select
+                      value={a.type}
+                      onValueChange={(v) => {
+                        const next = [...amenities]; next[i] = { ...next[i], type: v as Amenity["type"] }; setAmenities(next)
+                      }}
+                    >
+                      <SelectTrigger className="w-32">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {AMENITY_TYPES.map((t) => (
+                          <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button type="button" size="icon" variant="ghost" className="text-destructive"
+                      onClick={() => setAmenities(amenities.filter((_, j) => j !== i))}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                <Button type="button" variant="outline" size="sm"
+                  onClick={() => setAmenities([...amenities, { name: "", distance: "", type: "education" }])}>
+                  <Plus className="h-4 w-4 mr-1.5" /> Añadir servicio
+                </Button>
+              </div>
+            </StepCard>
+
+            {/* Features (USPs) */}
+            <StepCard title="Puntos fuertes del proyecto" subtitle="Aparecen como tarjetas destacadas en la sección Sobre el Proyecto.">
+              <div className="space-y-3 min-w-0">
+                {features.map((f, i) => (
+                  <div key={i} className="grid grid-cols-[9rem_minmax(0,1fr)_minmax(0,1fr)_auto] gap-2 items-start">
+                    <Select
+                      value={f.icon}
+                      onValueChange={(v) => {
+                        const next = [...features]; next[i] = { ...next[i], icon: v }; setFeatures(next)
+                      }}
+                    >
+                      <SelectTrigger className="w-full max-w-[9rem]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PROJECT_ICON_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.id} value={opt.id}>
+                            <div className="flex items-center gap-2">
+                              <opt.Icon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                              <span>{opt.label}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      value={f.title}
+                      onChange={(e) => {
+                        const next = [...features]; next[i] = { ...next[i], title: e.target.value }; setFeatures(next)
+                      }}
+                      placeholder="Luminosas"
+                      className="min-w-0"
+                    />
+                    <Input
+                      value={f.description}
+                      onChange={(e) => {
+                        const next = [...features]; next[i] = { ...next[i], description: e.target.value }; setFeatures(next)
+                      }}
+                      placeholder="Amplios ventanales con luz natural."
+                      className="min-w-0"
+                    />
+                    <Button type="button" size="icon" variant="ghost" className="text-destructive shrink-0"
+                      onClick={() => setFeatures(features.filter((_, j) => j !== i))}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                <Button type="button" variant="outline" size="sm"
+                  onClick={() => setFeatures([...features, { title: "", description: "", icon: "Sun" }])}>
+                  <Plus className="h-4 w-4 mr-1.5" /> Añadir punto fuerte
+                </Button>
+              </div>
+            </StepCard>
+
+            {/* Qualities (Memoria de Calidades) */}
+            <StepCard title="Memoria de Calidades" subtitle="Se muestran en la sección naranja de acabados y materiales.">
+              <div className="space-y-3 min-w-0">
+                {qualities.map((q, i) => (
+                  <div key={i} className="grid grid-cols-[9rem_minmax(0,1fr)_minmax(0,1fr)_auto] gap-2 items-start">
+                    <Select
+                      value={q.icon}
+                      onValueChange={(v) => {
+                        const next = [...qualities]; next[i] = { ...next[i], icon: v }; setQualities(next)
+                      }}
+                    >
+                      <SelectTrigger className="w-full max-w-[9rem]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PROJECT_ICON_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.id} value={opt.id}>
+                            <div className="flex items-center gap-2">
+                              <opt.Icon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                              <span>{opt.label}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      value={q.title}
+                      onChange={(e) => {
+                        const next = [...qualities]; next[i] = { ...next[i], title: e.target.value }; setQualities(next)
+                      }}
+                      placeholder="Cubiertas"
+                      className="min-w-0"
+                    />
+                    <Input
+                      value={q.description}
+                      onChange={(e) => {
+                        const next = [...qualities]; next[i] = { ...next[i], description: e.target.value }; setQualities(next)
+                      }}
+                      placeholder="Aislamiento y protección térmica de alta eficiencia."
+                      className="min-w-0"
+                    />
+                    <Button type="button" size="icon" variant="ghost" className="text-destructive shrink-0"
+                      onClick={() => setQualities(qualities.filter((_, j) => j !== i))}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                <Button type="button" variant="outline" size="sm"
+                  onClick={() => setQualities([...qualities, { title: "", description: "", icon: "Layers" }])}>
+                  <Plus className="h-4 w-4 mr-1.5" /> Añadir calidad
+                </Button>
+              </div>
+            </StepCard>
+
+            <div className="flex items-center justify-between pt-1">
+              <Button type="button" variant="outline" onClick={() => goTo(3)}>
                 <ChevronLeft className="h-4 w-4 mr-2" /> Atrás
               </Button>
               <Button type="submit" disabled={loading}

@@ -47,27 +47,11 @@ const EMPTY_ROW: PricingItem = {
 }
 
 /**
- * Linked inventory: Total = available + sold (constant when editing existing row).
- * Changing one adjusts the other to preserve total.
+ * Parse any non-negative integer from a form input string.
  */
-function applyAvailableChange(
-  current: { available: number; sold: number },
-  newAvailableRaw: string | number,
-): { available: number; sold: number } {
-  const total  = current.available + current.sold
-  const parsed = typeof newAvailableRaw === "string" ? parseInt(newAvailableRaw, 10) : newAvailableRaw
-  const available = Math.max(0, Math.min(total, Number.isNaN(parsed) ? 0 : parsed))
-  return { available, sold: total - available }
-}
-
-function applySoldChange(
-  current: { available: number; sold: number },
-  newSoldRaw: string | number,
-): { available: number; sold: number } {
-  const total  = current.available + current.sold
-  const parsed = typeof newSoldRaw === "string" ? parseInt(newSoldRaw, 10) : newSoldRaw
-  const sold = Math.max(0, Math.min(total, Number.isNaN(parsed) ? 0 : parsed))
-  return { available: total - sold, sold }
+function parseInventoryValue(raw: string | number): number {
+  const parsed = typeof raw === "string" ? parseInt(raw, 10) : raw
+  return Number.isNaN(parsed) || parsed < 0 ? 0 : parsed
 }
 
 // ─── PDF upload hook ──────────────────────────────────────────────────────────
@@ -338,9 +322,9 @@ function TypologyForm({
         <div className="space-y-2 sm:col-span-2 lg:col-span-1" />
       </div>
 
-      {/* Row 3: description + inventory */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-        <div className="space-y-2 sm:col-span-2">
+      {/* Row 3: description */}
+      <div className="grid grid-cols-1 gap-4 mb-4">
+        <div className="space-y-2">
           <Label htmlFor={`${isEdit ? "edit" : "new"}-desc`} className="text-muted-foreground text-xs">
             Descripción (Las Viviendas)
           </Label>
@@ -353,55 +337,97 @@ function TypologyForm({
             autoComplete="off"
           />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor={`${isEdit ? "edit" : "new"}-available`}>Disponibles</Label>
-          <Input
-            id={`${isEdit ? "edit" : "new"}-available`}
-            type="number"
-            min={0}
-            value={form.available ?? ""}
-            onChange={(e) => {
-              if (isEdit) {
-                const { available, sold } = applyAvailableChange(
-                  { available: form.available ?? 0, sold: form.sold ?? 0 },
-                  e.target.value,
-                )
-                onChange({ available, sold })
-              } else {
-                onChange({ available: Math.max(0, parseInt(e.target.value, 10) || 0) })
-              }
-            }}
-            className="h-9 text-center"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor={`${isEdit ? "edit" : "new"}-sold`}>Vendidas</Label>
-          <Input
-            id={`${isEdit ? "edit" : "new"}-sold`}
-            type="number"
-            min={0}
-            value={form.sold ?? ""}
-            onChange={(e) => {
-              if (isEdit) {
-                const { available, sold } = applySoldChange(
-                  { available: form.available ?? 0, sold: form.sold ?? 0 },
-                  e.target.value,
-                )
-                onChange({ available, sold })
-              } else {
-                onChange({ sold: Math.max(0, parseInt(e.target.value, 10) || 0) })
-              }
-            }}
-            className="h-9 text-center"
-          />
-        </div>
       </div>
 
-      {isEdit && (
-        <p className="text-xs text-muted-foreground mb-4">
-          Al editar, Disponibles y Vendidas están vinculados al total ({(form.available ?? 0) + (form.sold ?? 0)} viviendas).
-        </p>
-      )}
+      {/* Row 4: inventory — Total (stock) + Vendidas (editable) → Disponibles (derived) */}
+      {(() => {
+        const total = (form.available ?? 0) + (form.sold ?? 0)
+        const sold  = form.sold ?? 0
+        const disponibles = Math.max(0, total - sold)
+        return (
+          <div className="rounded-xl border border-border bg-muted/30 p-4 mb-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-semibold text-foreground uppercase tracking-wider">
+                Inventario
+              </p>
+              <button
+                type="button"
+                onClick={() => onChange({ available: 0, sold: 0 })}
+                className="text-[11px] text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1"
+                aria-label="Resetear inventario a cero"
+              >
+                <X className="h-3 w-3" />
+                Resetear a 0
+              </button>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              {/* Total stock — editable. Changes available, keeps sold constant. */}
+              <div className="space-y-1.5">
+                <Label htmlFor={`${isEdit ? "edit" : "new"}-total`} className="text-xs font-medium text-foreground">
+                  Total viviendas
+                </Label>
+                <Input
+                  id={`${isEdit ? "edit" : "new"}-total`}
+                  type="number"
+                  min={0}
+                  placeholder="ej. 10"
+                  value={total === 0 ? "" : total}
+                  onChange={(e) => {
+                    const newTotal = e.target.value === "" ? 0 : parseInventoryValue(e.target.value)
+                    const newSold  = Math.min(sold, newTotal)
+                    onChange({ available: newTotal - newSold, sold: newSold })
+                  }}
+                  className="h-9 text-center font-semibold"
+                />
+              </div>
+
+              {/* Vendidas — editable, capped at total. Disponibles auto-deducts. */}
+              <div className="space-y-1.5">
+                <Label htmlFor={`${isEdit ? "edit" : "new"}-sold`} className="text-xs font-medium text-slate-500">
+                  Vendidas
+                </Label>
+                <Input
+                  id={`${isEdit ? "edit" : "new"}-sold`}
+                  type="number"
+                  min={0}
+                  max={total}
+                  placeholder="0"
+                  value={sold === 0 ? "" : sold}
+                  onChange={(e) => {
+                    const newSold      = e.target.value === "" ? 0 : parseInventoryValue(e.target.value)
+                    const cappedSold   = Math.min(newSold, total)
+                    onChange({ sold: cappedSold, available: total - cappedSold })
+                  }}
+                  className="h-9 text-center font-medium"
+                />
+              </div>
+
+              {/* Disponibles — read-only, derived = Total - Vendidas */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                  Disponibles
+                </Label>
+                <div
+                  className={`h-9 flex items-center justify-center rounded-md border text-sm font-bold transition-colors ${
+                    disponibles > 0
+                      ? "border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400"
+                      : "border-dashed border-border bg-muted/50 text-muted-foreground"
+                  }`}
+                  aria-label={`${disponibles} disponibles`}
+                >
+                  {disponibles}
+                </div>
+              </div>
+            </div>
+
+            <p className="text-[11px] text-muted-foreground mt-2.5 flex items-center gap-1">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary/50 shrink-0" />
+              Disponibles = Total − Vendidas. Cambia "Vendidas" al registrar una venta.
+            </p>
+          </div>
+        )
+      })()}
 
       {/* Row 4: images + PDF */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
