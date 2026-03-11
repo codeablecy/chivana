@@ -123,29 +123,38 @@ function Tour360Dialog({
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) { setLoaded(false); onClose() } }}>
       <DialogContent
-        className="max-w-4xl w-full p-0 gap-0 overflow-hidden bg-foreground border-foreground/20"
-        // Custom close handled below; hide default X
-        style={{ "--tw-shadow": "0 25px 50px -12px rgba(0,0,0,.6)" } as React.CSSProperties}
+        className="w-[min(94vw,1280px)] max-w-none max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden bg-foreground border border-foreground/20 rounded-2xl shadow-2xl [&>button]:hidden"
+        style={
+          {
+            "--tw-shadow": "0 25px 50px -12px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.06)",
+          } as React.CSSProperties
+        }
       >
-        {/* Header */}
-        <DialogHeader className="flex-row items-center justify-between px-5 py-3 border-b border-card/10 shrink-0">
-          <div className="flex items-center gap-2.5">
-            <Rotate3D className="h-4 w-4 text-accent" />
-            <DialogTitle className="text-sm font-semibold text-card">
+        {/* Header — compact, elegant */}
+        <DialogHeader className="flex-row items-center justify-between px-5 py-3.5 border-b border-card/10 shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <Rotate3D className="h-4 w-4 text-accent shrink-0" />
+            <DialogTitle className="text-sm font-semibold text-card truncate">
               Tour 360° · {projectName}
             </DialogTitle>
           </div>
           <button
             onClick={() => { setLoaded(false); onClose() }}
-            className="p-1.5 rounded-lg text-card/60 hover:text-card hover:bg-card/10 transition-colors"
+            className="p-2 rounded-xl text-card/60 hover:text-card hover:bg-card/10 transition-colors shrink-0"
             aria-label="Cerrar tour"
           >
             <X className="h-4 w-4" />
           </button>
         </DialogHeader>
 
-        {/* Iframe */}
-        <div className="relative w-full" style={{ aspectRatio: "16/9" }}>
+        {/* Iframe — viewport-aware height, keeps 16/9 where possible */}
+        <div
+          className="relative w-full flex-1 min-h-0 bg-foreground/95"
+          style={{
+            aspectRatio: "16/9",
+            maxHeight: "calc(90vh - 3.5rem)",
+          }}
+        >
           {!loaded && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-foreground z-10">
               <Loader2 className="h-8 w-8 animate-spin text-accent" />
@@ -158,7 +167,7 @@ function Tour360Dialog({
             allow="xr-spatial-tracking; gyroscope; accelerometer; autoplay; fullscreen"
             allowFullScreen
             onLoad={() => setLoaded(true)}
-            className="w-full h-full border-0"
+            className="w-full h-full border-0 rounded-b-2xl"
           />
         </div>
       </DialogContent>

@@ -37,8 +37,9 @@ function FilterPill({
       type="button"
       onClick={onClick}
       className={cn(
-        "relative flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 whitespace-nowrap",
+        "relative flex items-center gap-1.5 rounded-full px-4 py-2.5 sm:py-2 text-sm font-medium transition-all duration-200 whitespace-nowrap snap-start shrink-0",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+        "active:scale-95",
         active
           ? "bg-foreground text-card shadow-md"
           : "bg-card text-muted-foreground border border-border hover:border-foreground/30 hover:text-foreground hover:bg-muted/50",
@@ -166,12 +167,12 @@ export function ProjectsGrid({ projects }: { projects: Project[] }) {
   return (
     <div className="w-full">
 
-      {/* ── Filter bar ── */}
-      <div className="mb-10 space-y-4">
+      {/* ── Filter bar — mobile: full-width scroll, desktop: inline ── */}
+      <div className="mb-8 sm:mb-10 space-y-3">
 
         {/* City tabs — only rendered when projects span multiple cities */}
         {cityTabs.length > 0 && (
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 sm:-mx-1 sm:px-1 snap-x snap-mandatory sm:snap-none">
             {cityTabs.map((tab) => (
               <FilterPill
                 key={tab.id}
@@ -179,7 +180,7 @@ export function ProjectsGrid({ projects }: { projects: Project[] }) {
                 active={activeCity === tab.value}
                 onClick={() => {
                   setActiveCity(tab.value as string)
-                  setActiveStatus("all") // reset status when city changes
+                  setActiveStatus("all")
                 }}
               />
             ))}
@@ -192,7 +193,7 @@ export function ProjectsGrid({ projects }: { projects: Project[] }) {
         )}
 
         {/* Status tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 sm:-mx-1 sm:px-1 snap-x snap-mandatory sm:snap-none">
           {statusTabs.map((tab) => (
             <FilterPill
               key={tab.id}
@@ -222,14 +223,13 @@ export function ProjectsGrid({ projects }: { projects: Project[] }) {
           : `${filtered.length} proyecto${filtered.length !== 1 ? "s" : ""}${activeCity !== "all" ? ` en ${activeCity}` : ""}`}
       </p>
 
-      {/* ── Grid: count-aware layout — centered when 1–2 items for balanced UI ── */}
+      {/* ── Grid: mobile-first, count-aware on desktop ── */}
       <div
         className={cn(
-          "project-grid-stagger grid gap-6 sm:gap-8",
-          filtered.length === 0 && "grid-cols-1",
-          filtered.length === 1 && "grid-cols-1 max-w-lg mx-auto",
-          filtered.length === 2 && "grid-cols-2 max-w-4xl mx-auto",
-          filtered.length >= 3 && "grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
+          "project-grid-stagger grid grid-cols-1 gap-6 sm:gap-8",
+          filtered.length === 1 && "sm:max-w-lg sm:mx-auto",
+          filtered.length === 2 && "sm:grid-cols-2 sm:max-w-4xl sm:mx-auto",
+          filtered.length >= 3 && "sm:grid-cols-2 xl:grid-cols-3"
         )}
       >
         {filtered.length === 0 ? (
