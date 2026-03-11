@@ -1,12 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { cookies } from "next/headers"
+import { createSupabaseServerClient } from "@/lib/supabase/server"
 import { uploadFile, storagePath, blogStoragePath } from "@/lib/supabase/storage"
 
 const MAX_SIZE = 50 * 1024 * 1024 // 50 MB
 
-async function isAdmin(): Promise<boolean> {
-  const jar = await cookies()
-  return jar.get("admin_session")?.value === "authenticated"
+/** Uses Supabase Auth session (same as admin sign-in). */
+async function isAuthenticated(): Promise<boolean> {
+  const supabase = await createSupabaseServerClient()
+  const { data: { session } } = await supabase.auth.getSession()
+  return !!session?.user
 }
 
 /**
@@ -19,8 +21,8 @@ async function isAdmin(): Promise<boolean> {
  *   postId   - blog post id (required when context=blog)
  */
 export async function POST(req: NextRequest) {
-  // Auth guard — only the admin session can upload
-  if (!(await isAdmin())) {
+  // Auth guard — only authenticated (Supabase) users can upload
+  if (!(await isAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
@@ -75,7 +77,7 @@ export async function POST(req: NextRequest) {
  * Body: { path: string }  — storage path to delete
  */
 export async function DELETE(req: NextRequest) {
-  if (!(await isAdmin())) {
+  if (!(await isAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
