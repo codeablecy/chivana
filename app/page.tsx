@@ -21,6 +21,7 @@ export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
   title: "Inicio",
+  description: "Chivana Real Estate | Viviendas Exclusivas cerca de Madrid",
 }
 
 // hero video id from youtube
