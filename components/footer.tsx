@@ -4,7 +4,52 @@ import { formatPhoneHref, useSettings } from "@/lib/settings-context";
 import { cn } from "@/lib/utils";
 import { Facebook, Instagram, Linkedin } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { FooterMap } from "./footer-map";
+
+const CODEABLE_TEXT = "Codeable";
+const TYPING_MS = 300;
+
+/**
+ * Terminal-style link that types "Codeable" character by character, then shows cursor.
+ * Respects prefers-reduced-motion (shows full text immediately).
+ */
+function TerminalTypingLink() {
+  const [typed, setTyped] = useState("");
+  const [reduceMotion, setReduceMotion] = useState(false);
+
+  useEffect(() => {
+    setReduceMotion(
+      typeof window !== "undefined" &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    );
+  }, []);
+
+  useEffect(() => {
+    if (reduceMotion) {
+      setTyped(CODEABLE_TEXT);
+      return;
+    }
+    if (typed.length >= CODEABLE_TEXT.length) return;
+    const t = setTimeout(() => {
+      setTyped(CODEABLE_TEXT.slice(0, typed.length + 1));
+    }, TYPING_MS);
+    return () => clearTimeout(t);
+  }, [typed, reduceMotion]);
+
+  return (
+    <Link
+      href="https://www.codeable.cloud"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="credit-neon font-medium transition-all duration-300 hover:opacity-90"
+      aria-label="Codeable — design and development"
+    >
+      {typed}
+      <span className="terminal-cursor ml-0.5" aria-hidden />
+    </Link>
+  );
+}
 
 /** Shape passed from layout (getFooterProjects). Sync component — safe in Client and Server trees. */
 export type FooterProject = {
@@ -236,16 +281,7 @@ export function Footer({ projects = [] }: FooterProps) {
               aria-hidden
             >
               <span className="select-none text-navy-foreground/40">$</span>
-              <Link
-                href="https://www.codeable.cloud"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="credit-neon font-medium transition-all duration-300 hover:opacity-90"
-                aria-label="Codeable — design and development"
-              >
-                Codeable
-              </Link>
-              <span className="terminal-cursor" aria-hidden />
+              <TerminalTypingLink />
             </span>
           </p>
         </div>
