@@ -1,7 +1,7 @@
 "use server"
 
 import { redirect } from "next/navigation"
-import { revalidatePath } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
 import {
   getAllProjects,
@@ -31,6 +31,7 @@ import {
   deletePost,
   getSettings,
   updateSettings,
+  SITE_SETTINGS_TAG,
 } from "@/lib/store"
 import type {
   Project,
@@ -356,5 +357,7 @@ export async function saveSettings(
   data: Partial<SiteSettings>,
 ): Promise<{ success: boolean }> {
   await updateSettings(data)
+  revalidateTag(SITE_SETTINGS_TAG)
+  revalidatePath("/", "layout")
   return { success: true }
 }

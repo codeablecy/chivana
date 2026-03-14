@@ -1,5 +1,8 @@
+"use client"
+
 import Link from "next/link";
 import { FooterMap } from "./footer-map";
+import { formatPhoneHref, useSettings } from "@/lib/settings-context";
 
 /** Shape passed from layout (getFooterProjects). Sync component — safe in Client and Server trees. */
 export type FooterProject = {
@@ -27,6 +30,7 @@ interface FooterProps {
 }
 
 export function Footer({ projects = [] }: FooterProps) {
+  const settings = useSettings()
   const sorted =
     projects.length === 0
       ? []
@@ -120,20 +124,31 @@ export function Footer({ projects = [] }: FooterProps) {
                 Contacto
               </h4>
               <div className="flex flex-col gap-2 text-sm text-navy-foreground/70">
-                <Link
-                  href="tel:+34655754978"
-                  className="hover:text-accent transition-colors"
-                >
-                  +34 655 754 978
-                </Link>
-                <Link
-                  href="mailto:info@chivana-realestate.com"
-                  className="hover:text-accent transition-colors"
-                >
-                  info@chivana-realestate.com
-                </Link>
-                <p>Urb. Apr 19, 1P</p>
-                <p>45215 El Viso de San Juan, Toledo, Spain</p>
+                {settings.phone && (
+                  <Link
+                    href={formatPhoneHref(settings.phone)}
+                    className="hover:text-accent transition-colors"
+                  >
+                    {settings.phone}
+                  </Link>
+                )}
+                {settings.email && (
+                  <Link
+                    href={`mailto:${settings.email}`}
+                    className="hover:text-accent transition-colors"
+                  >
+                    {settings.email}
+                  </Link>
+                )}
+                {settings.address && <p>{settings.address}</p>}
+                {(settings.postalCode || settings.city) && (
+                  <p>
+                    {[settings.postalCode, settings.city, settings.province]
+                      .filter(Boolean)
+                      .join(", ")}
+                    {(settings.city || settings.province) && ", Spain"}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -143,7 +158,7 @@ export function Footer({ projects = [] }: FooterProps) {
 
         <div className="border-t border-navy-foreground/10 mt-8 pt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-navy-foreground/60 text-xs">
-            Chivana Real Estate. Todos los derechos reservados. ©{" "}
+            {settings.companyName}. Todos los derechos reservados. ©{" "}
             {new Date().getFullYear()}
           </p>
           <div className="flex items-center gap-4">

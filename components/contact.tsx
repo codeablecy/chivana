@@ -1,79 +1,167 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Phone, Mail, MapPin } from "lucide-react"
+import { Phone, Mail, MapPin, ArrowRight, CheckCircle2 } from "lucide-react"
+import { formatAddressLine, formatPhoneHref, useSettings } from "@/lib/settings-context"
+import { cn } from "@/lib/utils"
+
+/** Build Google Maps URL for office (search by lat/lng or address). */
+function mapsUrl(settings: ReturnType<typeof useSettings>): string {
+  if (settings.officeLat && settings.officeLng) {
+    return `https://www.google.com/maps/search/?api=1&query=${settings.officeLat},${settings.officeLng}`
+  }
+  const q = [settings.address, settings.city, settings.province].filter(Boolean).join(", ")
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`
+}
 
 export function Contact() {
+  const settings = useSettings()
   const [submitted, setSubmitted] = useState(false)
+  const baseAddress = formatAddressLine(settings)
+  const fullAddress = baseAddress
+    ? baseAddress.endsWith("Spain")
+      ? baseAddress
+      : `${baseAddress}${settings.city || settings.province ? ", Spain" : ""}`
+    : ""
+
+  const hasContact = settings.phone || settings.email || settings.address || fullAddress
+
+  const contactItems = [
+    settings.phone && {
+      href: formatPhoneHref(settings.phone),
+      icon: Phone,
+      label: "Teléfono",
+      value: settings.phone,
+      external: false,
+    },
+    settings.email && {
+      href: `mailto:${settings.email}`,
+      icon: Mail,
+      label: "Email",
+      value: settings.email,
+      external: false,
+    },
+    (settings.address || fullAddress) && {
+      href: mapsUrl(settings),
+      icon: MapPin,
+      label: "Oficina de ventas",
+      value: fullAddress || settings.address,
+      external: true,
+    },
+  ].filter(Boolean) as Array<{
+    href: string
+    icon: typeof Phone
+    label: string
+    value: string
+    external: boolean
+  }>
 
   return (
-    <section id="contacto" data-accent-section className="py-16 px-4 lg:py-24 lg:px-8 bg-accent">
+    <section
+      id="contacto"
+      data-accent-section
+      className="py-16 px-4 lg:py-24 lg:px-8 bg-accent scroll-mt-24"
+    >
       <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col gap-10 lg:flex-row lg:gap-16">
-          <div className="lg:flex-1">
-            <p className="text-white/90 font-semibold text-sm tracking-widest uppercase mb-2">
-              Contacto
-            </p>
-            <h2 className="font-serif text-2xl font-bold text-accent-foreground lg:text-4xl mb-4 text-balance">
-              Pedir Cita
-            </h2>
-            <p className="text-accent-foreground/90 leading-relaxed mb-8 max-w-md">
-              Visitanos en nuestra oficina de ventas o contactanos para mas informacion. Estaremos
-              encantados de ayudarte a encontrar tu hogar ideal.
-            </p>
+        {/* Header — brand orange background, light text; same structure as other sections */}
+        <div className="text-center mb-10 lg:mb-12">
+          <p className="text-white/90 font-semibold text-sm tracking-widest uppercase mb-2">
+            Contacto
+          </p>
+          <h2 className="font-serif text-2xl font-bold text-accent-foreground lg:text-4xl text-balance mb-3">
+            Escríbenos o visítanos
+          </h2>
+          <p className="text-accent-foreground/90 max-w-xl mx-auto leading-relaxed">
+            Estaremos encantados de ayudarte a encontrar tu hogar ideal. Responde en poco tiempo.
+          </p>
+        </div>
 
-            <div className="flex flex-col gap-5">
-              <a
-                href="tel:+34655754978"
-                className="flex items-center gap-3 text-accent-foreground hover:text-white transition-colors"
-              >
-                <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-white/10">
-                  <Phone className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-sm text-accent-foreground/70">Telefono</p>
-                  <p className="font-medium">+34 655 754 978</p>
-                </div>
-              </a>
-              <a
-                href="mailto:info@chivana-realestate.com"
-                className="flex items-center gap-3 text-accent-foreground hover:text-white transition-colors"
-              >
-                <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-white/10">
-                  <Mail className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-sm text-accent-foreground/70">Email</p>
-                  <p className="font-medium">info@chivana-realestate.com</p>
-                </div>
-              </a>
-              <div className="flex items-center gap-3 text-accent-foreground">
-                <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-white/10">
-                  <MapPin className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-sm text-accent-foreground/70">Oficina de Ventas</p>
-                  <p className="font-medium">Urb. Apr 19, 1P, 45215 El Viso de San Juan, Toledo, Spain</p>
-                </div>
-              </div>
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-stretch lg:gap-10">
+          {/* Contact cards — Awwwards-style: hover lift, clear affordance */}
+          {hasContact && (
+            <div className="grid grid-cols-1 gap-4 lg:min-w-[320px] lg:max-w-[360px] lg:shrink-0">
+              {contactItems.map((item) => {
+                const Icon = item.icon
+                const content = (
+                  <>
+                    <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-accent/10 text-accent shrink-0 transition-colors group-hover:bg-accent/20">
+                      <Icon className="h-6 w-6" aria-hidden />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        {item.label}
+                      </p>
+                      <p className="font-medium text-foreground mt-0.5 break-words group-hover:text-accent transition-colors">
+                        {item.value}
+                      </p>
+                    </div>
+                    {item.external && (
+                      <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden />
+                    )}
+                  </>
+                )
+                const cardClass = cn(
+                  "group flex items-start gap-4 rounded-xl border border-border bg-background p-5",
+                  "hover:shadow-lg hover:border-accent/30 transition-all duration-200",
+                  "focus-within:ring-2 focus-within:ring-accent focus-within:ring-offset-2 focus-within:border-accent/30"
+                )
+                if (item.external) {
+                  return (
+                    <a
+                      key={item.label}
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={cardClass}
+                      aria-label={`${item.label}: ${item.value}. Abrir en mapa`}
+                    >
+                      {content}
+                    </a>
+                  )
+                }
+                return (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    className={cardClass}
+                    aria-label={`${item.label}: ${item.value}`}
+                  >
+                    {content}
+                  </a>
+                )
+              })}
             </div>
-          </div>
+          )}
 
-          <div className="lg:flex-1">
+          {/* Form card — same border/card style as other sections */}
+          <div className="flex-1 min-w-0">
             {submitted ? (
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 text-center border border-white/10">
-                <div className="flex items-center justify-center h-16 w-16 rounded-full bg-white/20 mx-auto mb-4">
-                  <Mail className="h-8 w-8 text-accent-foreground" />
+              <div
+                className="rounded-xl border border-border bg-background p-8 text-center"
+                role="status"
+                aria-live="polite"
+              >
+                <div className="flex items-center justify-center h-16 w-16 rounded-full bg-emerald-500/10 text-emerald-600 mx-auto mb-4">
+                  <CheckCircle2 className="h-8 w-8" aria-hidden />
                 </div>
-                <h3 className="font-serif text-xl font-bold text-accent-foreground mb-2">
-                  Mensaje Enviado
+                <h3 className="font-serif text-xl font-bold text-foreground mb-2">
+                  Mensaje enviado
                 </h3>
-                <p className="text-accent-foreground/80 text-sm">
+                <p className="text-muted-foreground text-sm">
                   Gracias por contactarnos. Te responderemos lo antes posible.
                 </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-6"
+                  onClick={() => setSubmitted(false)}
+                >
+                  Enviar otro mensaje
+                </Button>
               </div>
             ) : (
               <form
@@ -81,68 +169,85 @@ export function Contact() {
                   e.preventDefault()
                   setSubmitted(true)
                 }}
-                className="bg-white/10 backdrop-blur-sm rounded-xl p-6 flex flex-col gap-4 border border-white/10 lg:p-8"
+                className={cn(
+                  "rounded-xl border border-border bg-background p-6 lg:p-8 flex flex-col gap-4",
+                  "focus-within:border-accent/30 transition-colors"
+                )}
               >
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="text-sm text-accent-foreground/90 mb-1.5 block">
+                    <label htmlFor="contact-name" className="text-sm font-medium text-foreground mb-1.5 block">
                       Nombre
                     </label>
                     <Input
+                      id="contact-name"
                       placeholder="Tu nombre"
                       required
-                      className="bg-white/10 border-white/20 text-accent-foreground placeholder:text-accent-foreground/50"
+                      className="border-border bg-background focus-visible:ring-accent"
                     />
                   </div>
                   <div>
-                    <label className="text-sm text-accent-foreground/90 mb-1.5 block">
+                    <label htmlFor="contact-surname" className="text-sm font-medium text-foreground mb-1.5 block">
                       Apellidos
                     </label>
                     <Input
+                      id="contact-surname"
                       placeholder="Tus apellidos"
                       required
-                      className="bg-white/10 border-white/20 text-accent-foreground placeholder:text-accent-foreground/50"
+                      className="border-border bg-background focus-visible:ring-accent"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm text-accent-foreground/90 mb-1.5 block">
+                  <label htmlFor="contact-email" className="text-sm font-medium text-foreground mb-1.5 block">
                     Email
                   </label>
                   <Input
+                    id="contact-email"
                     type="email"
                     placeholder="tu@email.com"
                     required
-                    className="bg-white/10 border-white/20 text-accent-foreground placeholder:text-accent-foreground/50"
+                    className="border-border bg-background focus-visible:ring-accent"
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-accent-foreground/90 mb-1.5 block">
-                    Telefono
+                  <label htmlFor="contact-phone" className="text-sm font-medium text-foreground mb-1.5 block">
+                    Teléfono
                   </label>
                   <Input
+                    id="contact-phone"
                     type="tel"
                     placeholder="+34 600 000 000"
-                    className="bg-white/10 border-white/20 text-accent-foreground placeholder:text-accent-foreground/50"
+                    className="border-border bg-background focus-visible:ring-accent"
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-accent-foreground/90 mb-1.5 block">
+                  <label htmlFor="contact-message" className="text-sm font-medium text-foreground mb-1.5 block">
                     Mensaje
                   </label>
                   <Textarea
-                    placeholder="Cuentanos que te interesa..."
+                    id="contact-message"
+                    placeholder="Cuéntanos qué te interesa..."
                     rows={4}
-                    className="bg-white/10 border-white/20 text-accent-foreground placeholder:text-accent-foreground/50 resize-none"
+                    className="border-border bg-background resize-none focus-visible:ring-accent"
                   />
                 </div>
-                <Button
-                  type="submit"
-                  size="lg"
-                  className="w-full bg-white text-accent hover:bg-white/90 mt-2"
-                >
-                  Enviar Mensaje
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between pt-2">
+                  <Button
+                    type="submit"
+                    size="lg"
+                    className="bg-accent text-accent-foreground hover:bg-accent/90 focus-visible:ring-accent"
+                  >
+                    Enviar mensaje
+                    <ArrowRight className="h-4 w-4 ml-2" aria-hidden />
+                  </Button>
+                  <Link
+                    href="/citas-visitas"
+                    className="text-sm font-medium text-muted-foreground hover:text-accent transition-colors"
+                  >
+                    Pedir cita →
+                  </Link>
+                </div>
               </form>
             )}
           </div>

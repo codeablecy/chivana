@@ -4,8 +4,12 @@
  * RLS entirely. This is safe because store.ts is never imported by client
  * components; it is only used in Server Components and Server Actions.
  */
+import { unstable_cache } from "next/cache"
 import type { Project, BlogPost, SiteSettings, Phase, PricingItem, Amenity } from "./types"
 import { createAdminClient } from "./supabase/admin"
+
+/** Cache tag for site settings — revalidate when admin saves. */
+export const SITE_SETTINGS_TAG = "site-settings"
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -192,6 +196,17 @@ export async function getSettings(): Promise<SiteSettings> {
     socialInstagram: data.social_instagram,
     socialFacebook: data.social_facebook,
   }
+}
+
+/**
+ * Cached site settings for layout/metadata. Revalidate with revalidateTag(SITE_SETTINGS_TAG).
+ */
+export async function getCachedSettings(): Promise<SiteSettings> {
+  return unstable_cache(
+    async () => getSettings(),
+    [SITE_SETTINGS_TAG],
+    { tags: [SITE_SETTINGS_TAG], revalidate: 3600 }
+  )()
 }
 
 export async function updateSettings(data: Partial<SiteSettings>): Promise<SiteSettings> {

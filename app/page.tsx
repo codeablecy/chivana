@@ -6,16 +6,7 @@ import { FeaturedProjectsDisplay } from "@/components/featured-projects-display"
 import { Navbar } from "@/components/navbar"
 import { Contact } from "@/components/contact"
 import { getActiveProjects, getPublishedPosts } from "@/lib/store"
-import {
-  ArrowRight,
-  Shield,
-  Sun,
-  Leaf,
-  Home,
-  Phone,
-  Mail,
-  MapPin,
-} from "lucide-react"
+import { ArrowRight, Shield, Sun, Leaf, Home } from "lucide-react"
 import { seo } from "@/lib/seo"
 
 export const dynamic = "force-dynamic"
@@ -215,57 +206,6 @@ async function BlogPreview() {
   )
 }
 
-function QuickContact() {
-  return (
-    <section data-accent-section className="py-16 px-4 lg:py-24 lg:px-8 bg-accent">
-      <div className="max-w-7xl mx-auto text-center">
-        <p className="text-white/90 font-semibold text-sm tracking-widest uppercase mb-2">
-          Contacto
-        </p>
-        <h2 className="font-serif text-2xl font-bold text-accent-foreground lg:text-4xl mb-4 text-balance">
-          Quieres Saber Mas?
-        </h2>
-        <p className="text-accent-foreground/90 leading-relaxed mb-8 max-w-xl mx-auto">
-          Visitanos en nuestra oficina de ventas o contactanos para mas informacion. Estaremos
-          encantados de ayudarte a encontrar tu hogar ideal.
-        </p>
-
-        <div className="flex flex-col gap-4 items-center sm:flex-row sm:justify-center sm:gap-8 mb-8">
-          <a
-            href="tel:+34655754978"
-            className="flex items-center gap-2 text-accent-foreground hover:text-white transition-colors"
-          >
-            <Phone className="h-5 w-5" />
-            <span className="font-medium">+34 655 754 978</span>
-          </a>
-          <a
-            href="mailto:info@chivana-realestate.com"
-            className="flex items-center gap-2 text-accent-foreground hover:text-white transition-colors"
-          >
-            <Mail className="h-5 w-5" />
-            <span className="font-medium">info@chivana-realestate.com</span>
-          </a>
-          <div className="flex items-center gap-2 text-accent-foreground/80">
-            <MapPin className="h-5 w-5" />
-            <span>El Viso de San Juan, Toledo</span>
-          </div>
-        </div>
-
-        <Button
-          size="lg"
-          className="bg-white text-accent hover:bg-white/90 text-base px-8"
-          asChild
-        >
-          <Link href="/citas-visitas">
-            Pedir Cita
-            <ArrowRight className="h-4 w-4 ml-2" />
-          </Link>
-        </Button>
-      </div>
-    </section>
-  )
-}
-
 export default function Page() {
   return (
     <>
@@ -275,7 +215,6 @@ export default function Page() {
         <WhyChivana />
         <FeaturedProjects />
         <BlogPreview />
-        <QuickContact />
         <Contact />
       </main>
     </>

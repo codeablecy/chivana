@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetClose, SheetContent } from "@/components/ui/sheet";
+import { formatPhoneHref, useSettings } from "@/lib/settings-context";
 import { cn } from "@/lib/utils";
 import { Mail, Menu, Phone, X } from "lucide-react";
 import Link from "next/link";
@@ -16,6 +17,7 @@ const navLinks = [
 ];
 
 export function Navbar() {
+  const settings = useSettings();
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
 
@@ -55,13 +57,15 @@ export function Navbar() {
         </nav>
 
         <div className="hidden lg:flex items-center gap-4">
-          <a
-            href="tel:+34655754978"
-            className="flex items-center gap-2 text-sm text-navy-foreground/80 hover:text-accent transition-colors"
-          >
-            <Phone className="h-4 w-4" />
-            <span>+34 655 754 978</span>
-          </a>
+          {settings.phone && (
+            <Link
+              href={formatPhoneHref(settings.phone)}
+              className="flex items-center gap-2 text-sm text-navy-foreground/80 hover:text-accent transition-colors"
+            >
+              <Phone className="h-4 w-4" />
+              <span>{settings.phone}</span>
+            </Link>
+          )}
           <Button size="sm" asChild>
             <Link href="/#contacto">Quiero Saber Mas</Link>
           </Button>
@@ -122,20 +126,24 @@ export function Navbar() {
           </nav>
 
           <div className="px-5 pb-8 pt-4 border-t border-border space-y-4">
-            <a
-              href="tel:+34655754978"
-              className="flex items-center gap-3 text-sm text-foreground hover:text-accent transition-colors py-2.5"
-            >
-              <Phone className="h-4 w-4 shrink-0" strokeWidth={2} />
-              <span>+34 655 754 978</span>
-            </a>
-            <a
-              href="mailto:info@chivana-realestate.com"
-              className="flex items-center gap-3 text-sm text-foreground hover:text-accent transition-colors py-2.5"
-            >
-              <Mail className="h-4 w-4 shrink-0" strokeWidth={2} />
-              <span className="break-all">info@chivana-realestate.com</span>
-            </a>
+            {settings.phone && (
+              <a
+                href={formatPhoneHref(settings.phone)}
+                className="flex items-center gap-3 text-sm text-foreground hover:text-accent transition-colors py-2.5"
+              >
+                <Phone className="h-4 w-4 shrink-0" strokeWidth={2} />
+                <span>{settings.phone}</span>
+              </a>
+            )}
+            {settings.email && (
+              <a
+                href={`mailto:${settings.email}`}
+                className="flex items-center gap-3 text-sm text-foreground hover:text-accent transition-colors py-2.5"
+              >
+                <Mail className="h-4 w-4 shrink-0" strokeWidth={2} />
+                <span className="break-all">{settings.email}</span>
+              </a>
+            )}
             <SheetClose asChild>
               <Button className="w-full h-12 font-medium" asChild>
                 <Link href="/#contacto">Quiero Saber Mas</Link>
