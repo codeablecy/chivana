@@ -6,6 +6,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server"
 
 export type AuthResult = { error: string } | { success: true }
 
+/** Must match Supabase Dashboard → Auth → URL Configuration (Site URL + Redirect URLs). */
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
 
