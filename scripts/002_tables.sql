@@ -183,5 +183,6 @@ CREATE TABLE site_settings (
   office_hours      text NOT NULL DEFAULT '',
   social_instagram  text NOT NULL DEFAULT '',
   social_facebook   text NOT NULL DEFAULT '',
+  social_linkedin   text NOT NULL DEFAULT '',
   updated_at        timestamptz NOT NULL DEFAULT now()
 );

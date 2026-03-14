@@ -131,4 +131,5 @@ export interface SiteSettings {
   officeHours: string
   socialInstagram: string
   socialFacebook: string
+  socialLinkedIn: string
 }

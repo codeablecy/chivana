@@ -176,7 +176,7 @@ export async function getSettings(): Promise<SiteSettings> {
       phone: "", email: "", address: "", city: "", province: "",
       postalCode: "", officeLat: 0, officeLng: 0,
       metaTitle: "", metaDescription: "", officeHours: "",
-      socialInstagram: "", socialFacebook: "",
+      socialInstagram: "", socialFacebook: "", socialLinkedIn: "",
     }
   }
 
@@ -195,6 +195,7 @@ export async function getSettings(): Promise<SiteSettings> {
     officeHours: data.office_hours,
     socialInstagram: data.social_instagram,
     socialFacebook: data.social_facebook,
+    socialLinkedIn: data.social_linkedin,
   }
 }
 
@@ -226,6 +227,7 @@ export async function updateSettings(data: Partial<SiteSettings>): Promise<SiteS
   if (data.officeHours !== undefined) payload.office_hours = data.officeHours
   if (data.socialInstagram !== undefined) payload.social_instagram = data.socialInstagram
   if (data.socialFacebook !== undefined) payload.social_facebook = data.socialFacebook
+  if (data.socialLinkedIn !== undefined) payload.social_linkedin = data.socialLinkedIn
 
   await db.from("site_settings").upsert({ id: 1, ...payload })
   return getSettings()

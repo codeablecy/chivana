@@ -1,8 +1,10 @@
 "use client"
 
-import Link from "next/link";
-import { FooterMap } from "./footer-map";
-import { formatPhoneHref, useSettings } from "@/lib/settings-context";
+import Link from "next/link"
+import { Instagram, Facebook, Linkedin } from "lucide-react"
+import { FooterMap } from "./footer-map"
+import { formatPhoneHref, useSettings } from "@/lib/settings-context"
+import { cn } from "@/lib/utils"
 
 /** Shape passed from layout (getFooterProjects). Sync component — safe in Client and Server trees. */
 export type FooterProject = {
@@ -161,13 +163,63 @@ export function Footer({ projects = [] }: FooterProps) {
             {settings.companyName}. Todos los derechos reservados. ©{" "}
             {new Date().getFullYear()}
           </p>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
             <Link
               href="/privacy-policy"
               className="text-navy-foreground/60 text-xs hover:text-accent transition-colors"
             >
               Política de Privacidad
             </Link>
+            {/* Social links from Configuración Global — only show when URLs are set */}
+            {(settings.socialInstagram || settings.socialFacebook || settings.socialLinkedIn) && (
+              <span className="inline-flex items-center gap-1 text-navy-foreground/50" aria-label="Redes sociales">
+                {settings.socialInstagram && (
+                  <a
+                    href={settings.socialInstagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cn(
+                      "flex h-9 w-9 items-center justify-center rounded-full text-navy-foreground/60",
+                      "hover:bg-accent/10 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-navy",
+                      "transition-colors duration-200 touch-manipulation"
+                    )}
+                    aria-label="Instagram — abrir en nueva pestaña"
+                  >
+                    <Instagram className="h-4 w-4" aria-hidden />
+                  </a>
+                )}
+                {settings.socialFacebook && (
+                  <a
+                    href={settings.socialFacebook}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cn(
+                      "flex h-9 w-9 items-center justify-center rounded-full text-navy-foreground/60",
+                      "hover:bg-accent/10 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-navy",
+                      "transition-colors duration-200 touch-manipulation"
+                    )}
+                    aria-label="Facebook — abrir en nueva pestaña"
+                  >
+                    <Facebook className="h-4 w-4" aria-hidden />
+                  </a>
+                )}
+                {settings.socialLinkedIn && (
+                  <a
+                    href={settings.socialLinkedIn}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cn(
+                      "flex h-9 w-9 items-center justify-center rounded-full text-navy-foreground/60",
+                      "hover:bg-accent/10 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-navy",
+                      "transition-colors duration-200 touch-manipulation"
+                    )}
+                    aria-label="LinkedIn — abrir en nueva pestaña"
+                  >
+                    <Linkedin className="h-4 w-4" aria-hidden />
+                  </a>
+                )}
+              </span>
+            )}
           </div>
         </div>
         {/* Credit by Codeable — subtle cyberpunk neon */}

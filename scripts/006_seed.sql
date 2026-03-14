@@ -12,7 +12,7 @@ INSERT INTO site_settings (
   address, city, province, postal_code,
   office_lat, office_lng,
   meta_title, meta_description, office_hours,
-  social_instagram, social_facebook
+  social_instagram, social_facebook, social_linkedin
 ) VALUES (
   1,
   'Chivana Real Estate',
@@ -28,7 +28,8 @@ INSERT INTO site_settings (
   'Casas exclusivas a solo 35 km de Madrid y 33 km de Toledo. 4 dormitorios, 3 banos, amplias, luminosas y sostenibles.',
   'Lunes a Viernes: 10:00h - 14:30h y 15:30h - 19:00h | Sabados: 10:00h - 14:00h',
   'https://instagram.com/chivanarealestate',
-  'https://facebook.com/chivanarealestate'
+  'https://facebook.com/chivanarealestate',
+  ''
 ) ON CONFLICT (id) DO NOTHING;
 
 -- -------------------------------------------------------

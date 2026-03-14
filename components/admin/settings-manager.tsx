@@ -239,8 +239,8 @@ export function SettingsManager() {
           {/* Social */}
           <fieldset className="flex flex-col gap-4 border-t border-border pt-5">
             <legend className="font-semibold text-foreground text-sm mb-1">Redes Sociales</legend>
-            <div className="flex flex-col gap-4 sm:flex-row">
-              <div className="flex-1">
+            <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap">
+              <div className="flex-1 min-w-[200px]">
                 <Label htmlFor="socialInstagram">Instagram</Label>
                 <Input
                   id="socialInstagram"
@@ -250,13 +250,23 @@ export function SettingsManager() {
                   className="mt-1.5"
                 />
               </div>
-              <div className="flex-1">
+              <div className="flex-1 min-w-[200px]">
                 <Label htmlFor="socialFacebook">Facebook</Label>
                 <Input
                   id="socialFacebook"
                   value={settings.socialFacebook}
                   onChange={(e) => updateField("socialFacebook", e.target.value)}
                   placeholder="https://facebook.com/..."
+                  className="mt-1.5"
+                />
+              </div>
+              <div className="flex-1 min-w-[200px]">
+                <Label htmlFor="socialLinkedIn">LinkedIn</Label>
+                <Input
+                  id="socialLinkedIn"
+                  value={settings.socialLinkedIn}
+                  onChange={(e) => updateField("socialLinkedIn", e.target.value)}
+                  placeholder="https://linkedin.com/company/..."
                   className="mt-1.5"
                 />
               </div>

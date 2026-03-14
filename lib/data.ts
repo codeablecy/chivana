@@ -16,6 +16,7 @@ export const siteSettings: SiteSettings = {
   officeHours: "Lunes a Viernes: 10:00h - 14:30h y 15:30h - 19:00h | Sabados: 10:00h - 14:00h",
   socialInstagram: "https://instagram.com/chivanarealestate",
   socialFacebook: "https://facebook.com/chivanarealestate",
+  socialLinkedIn: "",
 }
 
 export const projects: Project[] = [

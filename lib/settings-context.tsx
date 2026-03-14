@@ -18,6 +18,7 @@ const defaultSettings: SiteSettings = {
   officeHours: "",
   socialInstagram: "",
   socialFacebook: "",
+  socialLinkedIn: "",
 }
 
 const SiteSettingsContext = createContext<SiteSettings>(defaultSettings)
@@ -49,6 +50,7 @@ export function SiteSettingsProvider({ settings, children }: SiteSettingsProvide
       settings.officeHours,
       settings.socialInstagram,
       settings.socialFacebook,
+      settings.socialLinkedIn,
     ]
   )
   return (

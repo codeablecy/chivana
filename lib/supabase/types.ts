@@ -203,6 +203,7 @@ export interface Database {
           office_hours: string
           social_instagram: string
           social_facebook: string
+          social_linkedin: string
           updated_at: string
         }
         Insert: Omit<Database["public"]["Tables"]["site_settings"]["Row"], "id" | "updated_at"> & {

@@ -103,6 +103,7 @@ export default async function RootLayout({
       officeHours: "",
       socialInstagram: "",
       socialFacebook: "",
+      socialLinkedIn: "",
     })),
     getFooterProjects().catch(() => []),
   ])

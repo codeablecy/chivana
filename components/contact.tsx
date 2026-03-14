@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Phone, Mail, MapPin, Clock, ArrowRight, CheckCircle2 } from "lucide-react"
+import { Phone, Mail, MapPin, Clock, ArrowRight, CheckCircle2, Instagram, Facebook, Linkedin } from "lucide-react"
 import { formatAddressLine, formatPhoneHref, useSettings } from "@/lib/settings-context"
 import { cn } from "@/lib/utils"
 
@@ -116,6 +116,56 @@ export function Contact() {
           <p className="text-accent-foreground/90 max-w-xl mx-auto leading-relaxed">
             Estaremos encantados de ayudarte a encontrar tu hogar ideal. Responde en poco tiempo.
           </p>
+          {/* Social links from Configuración Global — Awwwards-style minimal icon row */}
+          {(settings.socialInstagram || settings.socialFacebook || settings.socialLinkedIn) && (
+            <div className="mt-6 flex items-center justify-center gap-2" aria-label="Redes sociales">
+              {settings.socialInstagram && (
+                <a
+                  href={settings.socialInstagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    "flex h-10 w-10 items-center justify-center rounded-full text-accent-foreground/80",
+                    "hover:bg-accent-foreground/10 hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-accent",
+                    "transition-colors duration-200 touch-manipulation"
+                  )}
+                  aria-label="Instagram — abrir en nueva pestaña"
+                >
+                  <Instagram className="h-5 w-5" aria-hidden />
+                </a>
+              )}
+              {settings.socialFacebook && (
+                <a
+                  href={settings.socialFacebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    "flex h-10 w-10 items-center justify-center rounded-full text-accent-foreground/80",
+                    "hover:bg-accent-foreground/10 hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-accent",
+                    "transition-colors duration-200 touch-manipulation"
+                  )}
+                  aria-label="Facebook — abrir en nueva pestaña"
+                >
+                  <Facebook className="h-5 w-5" aria-hidden />
+                </a>
+              )}
+              {settings.socialLinkedIn && (
+                <a
+                  href={settings.socialLinkedIn}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    "flex h-10 w-10 items-center justify-center rounded-full text-accent-foreground/80",
+                    "hover:bg-accent-foreground/10 hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-accent",
+                    "transition-colors duration-200 touch-manipulation"
+                  )}
+                  aria-label="LinkedIn — abrir en nueva pestaña"
+                >
+                  <Linkedin className="h-5 w-5" aria-hidden />
+                </a>
+              )}
+            </div>
+          )}
         </div>
 
         <div
