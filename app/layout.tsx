@@ -1,27 +1,27 @@
-import React from "react"
-import type { Metadata, Viewport } from "next"
-import { Barlow, Belleza } from "next/font/google"
+import type { Metadata, Viewport } from "next";
+import { Barlow, Belleza } from "next/font/google";
+import React from "react";
 
-import "./globals.css"
-import { Toaster } from "sonner"
-import { ConditionalLayoutShell } from "@/components/conditional-layout-shell"
-import { JsonLd } from "@/components/seo-json-ld"
-import { RotatingFavicon } from "@/components/rotating-favicon"
-import { ScrollToTopOnNavigateClient } from "@/components/scroll-to-top-on-navigate-client"
-import { getFooterProjects } from "@/lib/store"
-import { seo } from "@/lib/seo"
+import { ConditionalLayoutShell } from "@/components/conditional-layout-shell";
+import { RotatingFavicon } from "@/components/rotating-favicon";
+import { ScrollToTopOnNavigateClient } from "@/components/scroll-to-top-on-navigate-client";
+import { JsonLd } from "@/components/seo-json-ld";
+import { seo } from "@/lib/seo";
+import { getFooterProjects } from "@/lib/store";
+import { Toaster } from "sonner";
+import "./globals.css";
 
 const barlow = Barlow({
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
-  variable: '--font-barlow',
-})
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-barlow",
+});
 
 const belleza = Belleza({
-  subsets: ['latin'],
-  weight: ['400'],
-  variable: '--font-belleza',
-})
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-belleza",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(seo.baseUrl),
@@ -68,11 +68,11 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true },
   },
   alternates: { canonical: seo.baseUrl },
-}
+};
 
 export const viewport: Viewport = {
   themeColor: "#e69500",
-}
+};
 
 const organizationJsonLd = {
   "@context": "https://schema.org",
@@ -81,8 +81,11 @@ const organizationJsonLd = {
   name: seo.siteName,
   url: seo.baseUrl,
   description: seo.defaultDescription,
-  areaServed: { "@type": "Place", name: "Viso de San Juan, La Sagra, Madrid, Toledo" },
-}
+  areaServed: {
+    "@type": "Place",
+    name: "Viso de San Juan, La Sagra, Madrid, Toledo",
+  },
+};
 
 const websiteJsonLd = {
   "@context": "https://schema.org",
@@ -92,17 +95,17 @@ const websiteJsonLd = {
   description: seo.defaultDescription,
   publisher: { "@id": `${seo.baseUrl}/#organization` },
   inLanguage: "es",
-}
+};
 
 export default async function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
-  const footerProjects = await getFooterProjects().catch(() => [])
+  const footerProjects = await getFooterProjects().catch(() => []);
 
   return (
-    <html lang="es" className="scroll-smooth" translate="no">
+    <html lang="es" className="scroll-smooth" translate="yes">
       <body
         className={`${barlow.variable} ${belleza.variable} font-sans antialiased`}
       >
@@ -116,5 +119,5 @@ export default async function RootLayout({
         <Toaster richColors position="top-center" />
       </body>
     </html>
-  )
+  );
 }
