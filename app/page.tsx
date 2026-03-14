@@ -16,12 +16,22 @@ import {
   Mail,
   MapPin,
 } from "lucide-react"
+import { seo } from "@/lib/seo"
 
 export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
   title: "Inicio",
-  description: "Chivana Real Estate | Viviendas Exclusivas cerca de Madrid",
+  description: seo.defaultDescription,
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    locale: seo.locale,
+    url: "/",
+    siteName: seo.siteName,
+    title: `Inicio | ${seo.siteName}`,
+    description: seo.defaultDescription,
+  },
 }
 
 // hero video id from youtube
