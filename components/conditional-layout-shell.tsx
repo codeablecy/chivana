@@ -11,7 +11,7 @@ interface ConditionalLayoutShellProps {
 }
 
 /**
- * Hides footer and CTA bar on auth pages for a full-screen auth experience.
+ * Hides footer and CTA bar on auth and admin pages for a clean, full-screen experience.
  */
 export function ConditionalLayoutShell({
   projects,
@@ -19,11 +19,12 @@ export function ConditionalLayoutShell({
 }: ConditionalLayoutShellProps) {
   const pathname = usePathname()
   const isAuthPage = pathname?.startsWith("/auth")
+  const isAdminPage = pathname?.startsWith("/admin")
 
   return (
     <>
       {children}
-      {!isAuthPage && (
+      {!isAuthPage && !isAdminPage && (
         <>
           <Footer projects={projects} />
           <CtaBar />
