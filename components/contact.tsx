@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Phone, Mail, MapPin, ArrowRight, CheckCircle2 } from "lucide-react"
+import { Phone, Mail, MapPin, Clock, ArrowRight, CheckCircle2 } from "lucide-react"
 import { formatAddressLine, formatPhoneHref, useSettings } from "@/lib/settings-context"
 import { cn } from "@/lib/utils"
 
@@ -18,6 +18,32 @@ function mapsUrl(settings: ReturnType<typeof useSettings>): string {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`
 }
 
+/** Parsed office hours: period label + time ranges for readable weekday/weekend UI. */
+export type OfficeHoursBlock = { period: string; ranges: string[] }
+
+/**
+ * Parse office_hours string into weekday/weekend blocks for clear, scannable layout.
+ * Handles "Lunes a Viernes: 10:00h - 14:30h y 15:30h - 19:00h | Sabados: 10:00h - 14:00h".
+ */
+function parseOfficeHours(raw: string): OfficeHoursBlock[] {
+  const blocks: OfficeHoursBlock[] = []
+  const segments = raw.split("|").map((s) => s.trim()).filter(Boolean)
+  for (const segment of segments) {
+    const colonIndex = segment.indexOf(":")
+    if (colonIndex === -1) {
+      blocks.push({ period: segment, ranges: [] })
+      continue
+    }
+    const period = segment.slice(0, colonIndex).trim()
+    const rest = segment.slice(colonIndex + 1).trim()
+    const ranges = rest
+      ? rest.split(/\s+y\s+/i).map((r) => r.trim()).filter(Boolean)
+      : []
+    blocks.push({ period, ranges })
+  }
+  return blocks
+}
+
 export function Contact() {
   const settings = useSettings()
   const [submitted, setSubmitted] = useState(false)
@@ -28,7 +54,12 @@ export function Contact() {
       : `${baseAddress}${settings.city || settings.province ? ", Spain" : ""}`
     : ""
 
-  const hasContact = settings.phone || settings.email || settings.address || fullAddress
+  const hasContact =
+    settings.phone ||
+    settings.email ||
+    settings.address ||
+    fullAddress ||
+    (settings.officeHours?.trim() ?? "")
 
   const contactItems = [
     settings.phone && {
@@ -52,8 +83,15 @@ export function Contact() {
       value: fullAddress || settings.address,
       external: true,
     },
+    settings.officeHours?.trim() && {
+      href: null,
+      icon: Clock,
+      label: "Horario de oficina",
+      value: settings.officeHours.trim(),
+      external: false,
+    },
   ].filter(Boolean) as Array<{
-    href: string
+    href: string | null
     icon: typeof Phone
     label: string
     value: string
@@ -80,22 +118,69 @@ export function Contact() {
           </p>
         </div>
 
-        <div className="flex flex-col gap-8 lg:flex-row lg:items-stretch lg:gap-10">
-          {/* Contact cards — Awwwards-style: hover lift, clear affordance */}
+        <div
+          className={cn(
+            "grid gap-8 lg:gap-10 lg:items-stretch",
+            hasContact
+              ? "grid-cols-1 lg:grid-cols-[minmax(320px,360px)_1fr]"
+              : "grid-cols-1"
+          )}
+        >
+          {/* Contact cards — grid row gives equal height; last card grows to fill */}
           {hasContact && (
-            <div className="grid grid-cols-1 gap-4 lg:min-w-[320px] lg:max-w-[360px] lg:shrink-0">
-              {contactItems.map((item) => {
+            <div className="flex min-h-0 flex-col gap-3 lg:h-full">
+              {contactItems.map((item, index) => {
                 const Icon = item.icon
-                const content = (
+                const isOfficeHours = !item.href && item.label.toLowerCase().includes("horario")
+                const parsedHours = isOfficeHours ? parseOfficeHours(item.value) : []
+                const isCompact = !isOfficeHours
+
+                const content = isOfficeHours && parsedHours.length > 0 ? (
                   <>
                     <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-accent/10 text-accent shrink-0 transition-colors group-hover:bg-accent/20">
                       <Icon className="h-6 w-6" aria-hidden />
+                    </div>
+                    <div className="min-w-0 flex-1 space-y-3">
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        {item.label}
+                      </p>
+                      <dl className="space-y-2" aria-label={item.value}>
+                        {parsedHours.map((block) => (
+                          <div key={block.period} className="flex flex-col gap-0.5">
+                            <dt className="text-sm font-semibold text-foreground">
+                              {block.period}
+                            </dt>
+                            <dd className="text-sm text-muted-foreground leading-snug">
+                              {block.ranges.length > 0 ? (
+                                <span className="flex flex-col gap-0.5">
+                                  {block.ranges.map((range, i) => (
+                                    <span key={i}>{range}</span>
+                                  ))}
+                                </span>
+                              ) : (
+                                "—"
+                              )}
+                            </dd>
+                          </div>
+                        ))}
+                      </dl>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div
+                      className={cn(
+                        "flex items-center justify-center rounded-xl bg-accent/10 text-accent shrink-0 transition-colors group-hover:bg-accent/20",
+                        isCompact ? "h-9 w-9" : "h-12 w-12"
+                      )}
+                    >
+                      <Icon className={isCompact ? "h-4 w-4" : "h-6 w-6"} aria-hidden />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         {item.label}
                       </p>
-                      <p className="font-medium text-foreground mt-0.5 break-words group-hover:text-accent transition-colors">
+                      <p className="font-medium text-foreground mt-0.5 break-words text-sm group-hover:text-accent transition-colors leading-snug">
                         {item.value}
                       </p>
                     </div>
@@ -104,11 +189,21 @@ export function Contact() {
                     )}
                   </>
                 )
+                const isLastCard = index === contactItems.length - 1
                 const cardClass = cn(
-                  "group flex items-start gap-4 rounded-xl border border-border bg-background p-5",
+                  "group flex items-start gap-3 rounded-xl border border-border bg-background",
                   "hover:shadow-lg hover:border-accent/30 transition-all duration-200",
-                  "focus-within:ring-2 focus-within:ring-accent focus-within:ring-offset-2 focus-within:border-accent/30"
+                  "focus-within:ring-2 focus-within:ring-accent focus-within:ring-offset-2 focus-within:border-accent/30",
+                  isCompact ? "p-3" : "p-5",
+                  isLastCard && "lg:flex-1 lg:min-h-0"
                 )
+                if (!item.href) {
+                  return (
+                    <div key={item.label} className={cardClass} role="group">
+                      {content}
+                    </div>
+                  )
+                }
                 if (item.external) {
                   return (
                     <a
@@ -170,11 +265,11 @@ export function Contact() {
                   setSubmitted(true)
                 }}
                 className={cn(
-                  "rounded-xl border border-border bg-background p-6 lg:p-8 flex flex-col gap-4",
+                  "rounded-xl border border-border bg-background p-5 lg:p-6 flex flex-col gap-3",
                   "focus-within:border-accent/30 transition-colors"
                 )}
               >
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div>
                     <label htmlFor="contact-name" className="text-sm font-medium text-foreground mb-1.5 block">
                       Nombre
@@ -228,11 +323,11 @@ export function Contact() {
                   <Textarea
                     id="contact-message"
                     placeholder="Cuéntanos qué te interesa..."
-                    rows={4}
+                    rows={3}
                     className="border-border bg-background resize-none focus-visible:ring-accent"
                   />
                 </div>
-                <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between pt-2">
+                <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between pt-1">
                   <Button
                     type="submit"
                     size="lg"

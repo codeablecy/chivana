@@ -26,9 +26,9 @@ export function FeaturedProjectsDisplay({ projects }: { projects: Project[] }) {
   return (
     <section className="py-12 px-0 sm:py-16 sm:px-4 lg:py-24 lg:px-8 bg-background">
       <div className="max-w-7xl mx-auto">
-        {/* Header — mobile: stack, desktop: row */}
-        <div className="flex flex-col gap-4 px-4 sm:px-0 mb-8 sm:mb-12 sm:flex-row sm:items-end sm:justify-between">
-          <div>
+        {/* Header — button right-aligned on all breakpoints for consistent, thumb-friendly UX */}
+        <div className="flex flex-row items-end justify-between gap-3 px-4 sm:px-0 mb-8 sm:mb-12 sm:gap-4">
+          <div className="min-w-0 flex-1 pr-2">
             <p className="text-accent font-semibold text-sm tracking-widest uppercase mb-2">
               Proyectos
             </p>
@@ -41,7 +41,7 @@ export function FeaturedProjectsDisplay({ projects }: { projects: Project[] }) {
           </div>
           <Button
             variant="outline"
-            className="self-start sm:self-auto bg-transparent w-fit sm:shrink-0"
+            className="shrink-0 touch-manipulation bg-transparent w-fit"
             asChild
           >
             <Link href="/projects">
