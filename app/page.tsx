@@ -1,5 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
+import type { Metadata } from "next"
 import { Button } from "@/components/ui/button"
 import { FeaturedProjectsDisplay } from "@/components/featured-projects-display"
 import { Navbar } from "@/components/navbar"
@@ -17,6 +18,10 @@ import {
 } from "lucide-react"
 
 export const dynamic = "force-dynamic"
+
+export const metadata: Metadata = {
+  title: "Inicio",
+}
 
 // hero video id from youtube
 // const HERO_VIDEO_ID = "kjqXD-HJZKU"
