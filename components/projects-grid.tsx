@@ -4,6 +4,10 @@ import { useState, useMemo } from "react"
 import { ProjectCard } from "@/components/project-card"
 import type { Project } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import {
+  getUniqueCitiesCaseInsensitive,
+  normalizeCityKey,
+} from "@/lib/location-utils"
 import { MapPin, Home, Clock, CheckCircle2, LayoutGrid } from "lucide-react"
 
 // ─── Filter definitions ────────────────────────────────────────────────────────
@@ -98,23 +102,20 @@ export function ProjectsGrid({ projects }: { projects: Project[] }) {
   const [activeStatus, setActiveStatus] = useState<StatusFilter>("all")
   const [activeCity,   setActiveCity]   = useState<string>("all")
 
-  // ── Derive unique cities from project data ───────────────────────────────────
-  const cities = useMemo(() => {
-    const seen = new Map<string, number>()
-    for (const p of projects) {
-      const city = p.location.city?.trim()
-      if (!city) continue
-      seen.set(city, (seen.get(city) ?? 0) + 1)
-    }
-    // Sort descending by project count
-    return Array.from(seen.entries())
-      .sort((a, b) => b[1] - a[1])
-      .map(([city, count]) => ({ city, count }))
-  }, [projects])
+  // ── Derive unique cities (case-insensitive: "madrid" + "Madrid" → one "Madrid") ─
+  const cities = useMemo(
+    () => getUniqueCitiesCaseInsensitive(projects),
+    [projects],
+  )
 
-  // ── Counts per status (respecting city filter) ────────────────────────────────
+  // ── Counts per status (respecting city filter; match by normalized key) ───────
   const cityFiltered = useMemo(
-    () => activeCity === "all" ? projects : projects.filter((p) => p.location.city === activeCity),
+    () =>
+      activeCity === "all"
+        ? projects
+        : projects.filter(
+            (p) => normalizeCityKey(p.location.city) === normalizeCityKey(activeCity),
+          ),
     [projects, activeCity],
   )
 
@@ -132,32 +133,39 @@ export function ProjectsGrid({ projects }: { projects: Project[] }) {
   )
 
   // ── Status tabs ───────────────────────────────────────────────────────────────
-  const statusTabs: FilterTab[] = [
-    { id: "all",          label: "Todos",        icon: LayoutGrid,   count: statusCounts.all,           type: "status", value: "all"          },
-    { id: "active",       label: "En Venta",     icon: CheckCircle2, count: statusCounts.active,        type: "status", value: "active"       },
-    { id: "coming-soon",  label: "Próximamente", icon: Clock,        count: statusCounts["coming-soon"],type: "status", value: "coming-soon"  },
-    { id: "sold-out",     label: "Agotados",     icon: Home,         count: statusCounts["sold-out"],   type: "status", value: "sold-out"     },
-  ].filter((t) => t.value === "all" || t.count > 0) // hide status with zero projects
+  const statusTabs: FilterTab[] = (
+    [
+      { id: "all",          label: "Todos",        icon: LayoutGrid,   count: statusCounts.all,           type: "status" as const, value: "all"          },
+      { id: "active",       label: "En Venta",     icon: CheckCircle2, count: statusCounts.active,        type: "status" as const, value: "active"       },
+      { id: "coming-soon",  label: "Próximamente", icon: Clock,        count: statusCounts["coming-soon"],type: "status" as const, value: "coming-soon"  },
+      { id: "sold-out",     label: "Agotados",     icon: Home,         count: statusCounts["sold-out"],   type: "status" as const, value: "sold-out"     },
+    ] as FilterTab[]
+  ).filter((t) => t.value === "all" || t.count > 0) // hide status with zero projects
 
   // ── City tabs (only shown when > 1 city) ─────────────────────────────────────
-  const cityTabs: FilterTab[] = cities.length > 1 ? [
-    {
-      id: "city-all",
-      label: "Todas las zonas",
-      icon: MapPin,
-      count: projects.length,
-      type: "city",
-      value: "all",
-    },
-    ...cities.map(({ city, count }) => ({
-      id:    `city-${city}`,
-      label: city,
-      icon:  MapPin,
-      count,
-      type:  "city" as const,
-      value: city,
-    })),
-  ] : []
+  const cityTabs: FilterTab[] =
+    cities.length > 1
+      ? [
+          {
+            id: "city-all",
+            label: "Todas las zonas",
+            icon: MapPin,
+            count: projects.length,
+            type: "city",
+            value: "all",
+          },
+          ...cities.map(
+            ({ city, count }): FilterTab => ({
+              id: `city-${city}`,
+              label: city,
+              icon: MapPin,
+              count,
+              type: "city",
+              value: city,
+            }),
+          ),
+        ]
+      : []
 
   function resetFilters() {
     setActiveStatus("all")
