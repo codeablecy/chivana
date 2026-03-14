@@ -23,6 +23,7 @@ import {
   Loader2,
 } from "lucide-react"
 import type { Project, PricingItem } from "@/lib/types"
+import { toCityDisplayName } from "@/lib/location-utils"
 
 // ─── Stat helpers ──────────────────────────────────────────────────────────────
 
@@ -286,7 +287,7 @@ export function ProjectCard({ project, variant = "full" }: ProjectCardProps) {
               <div className="flex items-center gap-1 mt-1">
                 <MapPin className="h-3.5 w-3.5 text-card/75 shrink-0" />
                 <span className="text-card/75 text-sm truncate">
-                  {[project.location.city, project.location.province]
+                  {[toCityDisplayName(project.location.city), toCityDisplayName(project.location.province)]
                     .filter(Boolean)
                     .join(", ")}
                 </span>

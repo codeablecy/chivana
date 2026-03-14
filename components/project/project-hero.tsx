@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Home, Bath, Ruler, TreePine, ArrowLeft, MapPin, Building2 } from "lucide-react"
 import type { Project, PricingItem } from "@/lib/types"
+import { toCityDisplayName } from "@/lib/location-utils"
 
 // ─── Stat helpers ──────────────────────────────────────────────────────────────
 
@@ -121,7 +122,11 @@ export function ProjectHero({ project }: { project: Project }) {
 
   const barTipologia   = tipologiaBarLabel(stats)
   const barDisponibles = `${project.availableUnits} de ${project.totalUnits} viviendas`
-  const barUbicacion   = [project.location.address, project.location.city, project.location.province].filter(Boolean).join(", ") || "—"
+  const barUbicacion   = [
+    project.location.address,
+    toCityDisplayName(project.location.city),
+    toCityDisplayName(project.location.province),
+  ].filter(Boolean).join(", ") || "—"
 
   return (
     <section className="relative min-h-screen overflow-hidden">

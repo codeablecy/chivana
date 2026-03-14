@@ -1,6 +1,7 @@
 import React from "react"
 import { MapPin, Car, GraduationCap, HeartPulse, Bus, ShoppingCart, TreePine } from "lucide-react"
 import type { Project, Amenity } from "@/lib/types"
+import { toCityDisplayName } from "@/lib/location-utils"
 
 /** True only when the string has at least one non-whitespace character. */
 function hasValue(s: string | undefined | null): boolean {
@@ -31,13 +32,13 @@ function nonEmptyDistances(distances: string[] | undefined | null): string[] {
   return distances.filter((d) => hasValue(d))
 }
 
-/** Address lines to display (only lines that have value). */
+/** Address lines to display (only lines that have value). City/province use title case. */
 function addressLines(loc: Project["location"]): string[] {
   const lines: string[] = []
   const { address, city, province, postalCode } = loc
   if (hasValue(address)) lines.push(address.trim())
-  if (hasValue(city)) lines.push(city.trim())
-  if (hasValue(province)) lines.push(province.trim())
+  if (hasValue(city)) lines.push(toCityDisplayName(city))
+  if (hasValue(province)) lines.push(toCityDisplayName(province))
   if (hasValue(postalCode)) lines.push(`CP: ${postalCode.trim()}, Espana`)
   return lines
 }
@@ -83,7 +84,7 @@ export function ProjectLocation({ project }: { project: Project }) {
           </h2>
           <p className="text-muted-foreground mt-3 max-w-xl mx-auto leading-relaxed">
             {hasValue(project.location.city)
-              ? `La mejor opcion para vivir en ${project.location.city.trim()}. A un paso de Madrid y Toledo.`
+              ? `La mejor opcion para vivir en ${toCityDisplayName(project.location.city)}. A un paso de Madrid y Toledo.`
               : "La mejor opcion para vivir. A un paso de Madrid y Toledo."}
           </p>
         </div>
