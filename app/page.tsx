@@ -21,7 +21,7 @@ import { seo } from "@/lib/seo"
 export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
-  title: "Inicio",
+  title: { absolute: `Inicio | ${seo.siteName}` },
   description: seo.defaultDescription,
   alternates: { canonical: "/" },
   openGraph: {
