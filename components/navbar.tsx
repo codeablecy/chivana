@@ -16,6 +16,17 @@ const navLinks = [
   { label: "Contacto", href: "/#contacto" },
 ];
 
+/** Scroll to #contacto when already on home; avoids no-op when URL is already /#contacto */
+function scrollToContact(e: React.MouseEvent<HTMLAnchorElement>, pathname: string) {
+  if (pathname !== "/") return
+  e.preventDefault()
+  const el = document.getElementById("contacto")
+  if (el) {
+    el.scrollIntoView({ behavior: "smooth", block: "start" })
+    window.history.replaceState(null, "", "/#contacto")
+  }
+}
+
 export function Navbar() {
   const settings = useSettings();
   const [isOpen, setIsOpen] = useState(false);
@@ -44,6 +55,7 @@ export function Navbar() {
             <Link
               key={link.href}
               href={link.href}
+              onClick={(e) => link.href === "/#contacto" && scrollToContact(e, pathname)}
               className={cn(
                 "text-sm font-medium transition-colors",
                 isActive(link.href)
@@ -67,7 +79,9 @@ export function Navbar() {
             </Link>
           )}
           <Button size="sm" asChild>
-            <Link href="/#contacto">Quiero Saber Mas</Link>
+            <Link href="/#contacto" onClick={(e) => scrollToContact(e, pathname)}>
+              Quiero Saber Mas
+            </Link>
           </Button>
         </div>
 
@@ -112,6 +126,7 @@ export function Navbar() {
               <SheetClose key={link.href} asChild>
                 <Link
                   href={link.href}
+                  onClick={(e) => link.href === "/#contacto" && scrollToContact(e, pathname)}
                   className={cn(
                     "flex items-center min-h-[48px] px-4 rounded-xl text-base font-medium transition-all duration-200",
                     isActive(link.href)
@@ -146,7 +161,9 @@ export function Navbar() {
             )}
             <SheetClose asChild>
               <Button className="w-full h-12 font-medium" asChild>
-                <Link href="/#contacto">Quiero Saber Mas</Link>
+                <Link href="/#contacto" onClick={(e) => scrollToContact(e, pathname)}>
+                  Quiero Saber Mas
+                </Link>
               </Button>
             </SheetClose>
           </div>

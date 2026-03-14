@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { FeaturedProjectsDisplay } from "@/components/featured-projects-display"
 import { Navbar } from "@/components/navbar"
 import { Contact } from "@/components/contact"
+import { ContactScrollLink } from "@/components/contact-scroll-link"
 import { getActiveProjects, getPublishedPosts } from "@/lib/store"
 import { ArrowRight, Shield, Sun, Leaf, Home } from "lucide-react"
 import { seo } from "@/lib/seo"
@@ -74,7 +75,7 @@ function HeroBrand() {
               className="border-card/30 text-card hover:bg-card/10 text-base px-8 bg-transparent"
               asChild
             >
-              <Link href="#contacto">Contactar</Link>
+              <ContactScrollLink href="#contacto">Contactar</ContactScrollLink>
             </Button>
           </div>
         </div>
