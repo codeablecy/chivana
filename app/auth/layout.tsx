@@ -2,7 +2,7 @@ import React from "react"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Acceso | Chivana Real Estate",
+  title: "Acceso",
   description: "Inicia sesión en Chivana Real Estate",
 }
 

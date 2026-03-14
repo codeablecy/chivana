@@ -2,7 +2,7 @@ import React from "react"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Admin | Chivana Real Estate",
+  title: "Admin",
   description: "Panel de administracion de Chivana Real Estate",
 }
 

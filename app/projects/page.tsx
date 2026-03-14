@@ -6,7 +6,7 @@ import type { Metadata } from "next"
 export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
-  title: "Proyectos | Chivana Real Estate",
+  title: "Proyectos",
   description:
     "Descubre nuestros proyectos de viviendas exclusivas cerca de Madrid y Toledo.",
 }
