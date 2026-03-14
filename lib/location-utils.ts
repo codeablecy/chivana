@@ -10,17 +10,18 @@ export function normalizeCityKey(city: string | undefined | null): string {
 }
 
 /**
- * Picks a single canonical display name for a city from multiple raw values.
- * Prefers a variant with the first letter uppercase (e.g. "Madrid" over "madrid");
- * otherwise falls back to the first occurrence.
+ * Formats a city name for display using a single case convention: title case
+ * (first letter uppercase, rest lowercase). Bulletproof for any input casing:
+ * madrid, Madrid, MADRID, mAdRid, MADrid, mAdRiD, etc. → "Madrid".
+ *
+ * Uses lower-then-capitalize so every character's case is normalized, not only
+ * the first and the rest as two chunks.
  */
-function pickCanonicalCityName(rawValues: string[]): string {
-  const trimmed = rawValues.map((s) => s.trim()).filter(Boolean)
-  if (trimmed.length === 0) return ""
-  const withLeadingUpper = trimmed.find(
-    (s) => s.length > 0 && s[0] === s[0].toUpperCase(),
-  )
-  return withLeadingUpper ?? trimmed[0] ?? ""
+export function toCityDisplayName(city: string | undefined | null): string {
+  const s = (city ?? "").trim().replace(/\s+/g, " ")
+  if (!s) return ""
+  const lower = s.toLowerCase()
+  return lower.charAt(0).toUpperCase() + lower.slice(1)
 }
 
 /**
@@ -58,10 +59,13 @@ export function getUniqueCitiesCaseInsensitive(
   }
 
   return Array.from(byKey.entries())
-    .map(([, v]) => ({
-      city: pickCanonicalCityName(Array.from(v.rawValues)),
-      count: v.count,
-    }))
+    .map(([, v]) => {
+      const anyRaw = Array.from(v.rawValues)[0] ?? ""
+      return {
+        city: toCityDisplayName(anyRaw),
+        count: v.count,
+      }
+    })
     .filter((x) => x.city)
     .sort((a, b) => b.count - a.count)
 }
