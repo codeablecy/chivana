@@ -12,6 +12,8 @@ import { ProjectQualities } from "@/components/project/project-qualities"
 import { ProjectPricing } from "@/components/project/project-pricing"
 import { ProjectLocation } from "@/components/project/project-location"
 import { ManagementOverlay } from "@/components/admin/management-overlay"
+import { JsonLd } from "@/components/seo-json-ld"
+import { absoluteUrl, seo } from "@/lib/seo"
 
 /** Dynamic rendering ensures phases added in Admin appear immediately on the project page. */
 export const dynamic = "force-dynamic"
@@ -29,9 +31,30 @@ export async function generateMetadata({
   const { slug } = await params
   const project = await getProject(slug)
   if (!project) return { title: "Proyecto no encontrado" }
+
+  const url = `/projects/${project.slug}`
+  const img =
+    project.heroImage?.startsWith("http") ? project.heroImage : absoluteUrl(project.heroImage)
+
   return {
-    title: `${project.name} | Chivana Real Estate`,
+    title: project.name,
     description: project.tagline,
+    alternates: { canonical: url },
+    openGraph: {
+      type: "website",
+      locale: seo.locale,
+      url,
+      siteName: seo.siteName,
+      title: project.name,
+      description: project.tagline,
+      images: project.heroImage ? [{ url: img, width: 1200, height: 630, alt: project.name }] : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: project.name,
+      description: project.tagline,
+      images: project.heroImage ? [img] : [],
+    },
   }
 }
 
@@ -45,9 +68,28 @@ export default async function ProjectDetailPage({
   if (!project) notFound()
 
   const isComingSoon = project.status === "coming-soon"
+  const pageUrl = absoluteUrl(`/projects/${project.slug}`)
+
+  const listingJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "RealEstateListing",
+    name: project.name,
+    description: project.description || project.tagline,
+    url: pageUrl,
+    image: project.heroImage ? [project.heroImage] : undefined,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: project.location.address,
+      addressLocality: project.location.city,
+      addressRegion: project.location.province,
+      postalCode: project.location.postalCode,
+      addressCountry: "ES",
+    },
+  }
 
   return (
     <>
+      <JsonLd data={listingJsonLd} />
       <Navbar />
       <ManagementOverlay project={project} />
       <main>

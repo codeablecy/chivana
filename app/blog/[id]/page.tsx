@@ -5,6 +5,8 @@ import { Navbar } from "@/components/navbar"
 import { getPost, getPublishedPosts } from "@/lib/store"
 import { ArrowLeft, Clock, Calendar, ArrowRight } from "lucide-react"
 import type { Metadata } from "next"
+import { JsonLd } from "@/components/seo-json-ld"
+import { absoluteUrl, seo } from "@/lib/seo"
 
 export const dynamic = "force-dynamic"
 
@@ -16,13 +18,28 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
   const post = await getPost(id)
   if (!post) return { title: "Artículo no encontrado" }
+
+  const url = `/blog/${post.id}`
+  const img = post.image?.startsWith("http") ? post.image : absoluteUrl(post.image)
+
   return {
-    title: `${post.title} | Blog Chivana`,
+    title: post.title,
     description: post.excerpt,
+    alternates: { canonical: url },
     openGraph: {
+      type: "article",
+      locale: seo.locale,
+      url,
+      siteName: seo.siteName,
       title: post.title,
       description: post.excerpt,
-      images: post.image ? [{ url: post.image }] : [],
+      images: post.image ? [{ url: img, width: 1200, height: 630, alt: post.title }] : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt,
+      images: post.image ? [img] : [],
     },
   }
 }
@@ -37,6 +54,19 @@ export default async function BlogPostPage({ params }: Props) {
   if (!post || !post.published) notFound()
 
   const others = related.filter((p) => p.id !== post.id).slice(0, 3)
+  const pageUrl = absoluteUrl(`/blog/${post.id}`)
+
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    description: post.excerpt,
+    datePublished: post.date,
+    image: post.image ? [post.image] : undefined,
+    mainEntityOfPage: pageUrl,
+    author: { "@type": "Organization", name: seo.siteName },
+    publisher: { "@type": "Organization", name: seo.siteName },
+  }
 
   // Split content into paragraphs for rendering (plain text stored in DB)
   const paragraphs = post.content
@@ -46,6 +76,7 @@ export default async function BlogPostPage({ params }: Props) {
 
   return (
     <>
+      <JsonLd data={articleJsonLd} />
       <Navbar />
       <main className="min-h-screen bg-background">
 

@@ -1,11 +1,22 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { Navbar } from "@/components/navbar"
+import { seo } from "@/lib/seo"
 
 export const metadata: Metadata = {
-  title: "Política de privacidad | Chivana Real Estate | El Mirador",
+  title: "Política de privacidad",
   description:
     "Política de privacidad de Chivana Real Estate. Información sobre el tratamiento de datos personales, cookies, contacto y derechos.",
+  alternates: { canonical: "/privacy-policy" },
+  openGraph: {
+    type: "article",
+    locale: seo.locale,
+    url: "/privacy-policy",
+    siteName: seo.siteName,
+    title: "Política de privacidad",
+    description:
+      "Política de privacidad de Chivana Real Estate. Información sobre el tratamiento de datos personales, cookies, contacto y derechos.",
+  },
 }
 
 /**
