@@ -1,6 +1,46 @@
 import React from "react"
-import { MapPin, Clock, Car, GraduationCap, HeartPulse, Bus, ShoppingCart, TreePine } from "lucide-react"
+import { MapPin, Car, GraduationCap, HeartPulse, Bus, ShoppingCart, TreePine } from "lucide-react"
 import type { Project, Amenity } from "@/lib/types"
+
+/** True only when the string has at least one non-whitespace character. */
+function hasValue(s: string | undefined | null): boolean {
+  return typeof s === "string" && s.trim() !== ""
+}
+
+/** True when at least one address field (address, city, province, postalCode) has a value. */
+function hasAddressContent(loc: Project["location"]): boolean {
+  return (
+    hasValue(loc.address) ||
+    hasValue(loc.city) ||
+    hasValue(loc.province) ||
+    hasValue(loc.postalCode)
+  )
+}
+
+/** True when distances array exists and has at least one non-empty item. */
+function hasDistances(distances: string[] | undefined | null): boolean {
+  return (
+    Array.isArray(distances) &&
+    distances.some((d) => hasValue(d))
+  )
+}
+
+/** Returns only non-empty distance strings, for safe rendering. */
+function nonEmptyDistances(distances: string[] | undefined | null): string[] {
+  if (!Array.isArray(distances)) return []
+  return distances.filter((d) => hasValue(d))
+}
+
+/** Address lines to display (only lines that have value). */
+function addressLines(loc: Project["location"]): string[] {
+  const lines: string[] = []
+  const { address, city, province, postalCode } = loc
+  if (hasValue(address)) lines.push(address.trim())
+  if (hasValue(city)) lines.push(city.trim())
+  if (hasValue(province)) lines.push(province.trim())
+  if (hasValue(postalCode)) lines.push(`CP: ${postalCode.trim()}, Espana`)
+  return lines
+}
 
 const amenityIcons: Record<Amenity["type"], React.ElementType> = {
   education: GraduationCap,
@@ -42,7 +82,9 @@ export function ProjectLocation({ project }: { project: Project }) {
             Donde estamos?
           </h2>
           <p className="text-muted-foreground mt-3 max-w-xl mx-auto leading-relaxed">
-            La mejor opcion para vivir en {project.location.city}. A un paso de Madrid y Toledo.
+            {hasValue(project.location.city)
+              ? `La mejor opcion para vivir en ${project.location.city.trim()}. A un paso de Madrid y Toledo.`
+              : "La mejor opcion para vivir. A un paso de Madrid y Toledo."}
           </p>
         </div>
 
@@ -66,54 +108,43 @@ export function ProjectLocation({ project }: { project: Project }) {
 
           <div className="lg:flex-1 flex flex-col justify-center">
             <div className="flex flex-col gap-6">
-              <div className="flex items-start gap-4">
-                <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-accent/10 flex-shrink-0">
-                  <MapPin className="h-6 w-6 text-accent" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-foreground mb-1">Direccion</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    {project.location.address}
-                    <br />
-                    {project.location.city}
-                    <br />
-                    {project.location.province}
-                    <br />
-                    {"CP: "}{project.location.postalCode}{", Espana"}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-accent/10 flex-shrink-0">
-                  <Car className="h-6 w-6 text-accent" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-foreground mb-1">Distancias</h3>
-                  <div className="flex flex-col gap-1.5">
-                    {project.location.distances.map((d) => (
-                      <div key={d} className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <span className="h-1.5 w-1.5 rounded-full bg-accent flex-shrink-0" />
-                        {d}
-                      </div>
-                    ))}
+              {hasAddressContent(project.location) && (
+                <div className="flex items-start gap-4">
+                  <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-accent/10 flex-shrink-0">
+                    <MapPin className="h-6 w-6 text-accent" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground mb-1">Direccion</h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      {addressLines(project.location).map((line, i) => (
+                        <React.Fragment key={i}>
+                          {i > 0 && <br />}
+                          {line}
+                        </React.Fragment>
+                      ))}
+                    </p>
                   </div>
                 </div>
-              </div>
+              )}
 
-              <div className="flex items-start gap-4">
-                <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-accent/10 flex-shrink-0">
-                  <Clock className="h-6 w-6 text-accent" />
+              {hasDistances(project.location.distances) && (
+                <div className="flex items-start gap-4">
+                  <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-accent/10 flex-shrink-0">
+                    <Car className="h-6 w-6 text-accent" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground mb-1">Distancias</h3>
+                    <div className="flex flex-col gap-1.5">
+                      {nonEmptyDistances(project.location.distances).map((d, i) => (
+                        <div key={`${d}-${i}`} className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <span className="h-1.5 w-1.5 rounded-full bg-accent flex-shrink-0" />
+                          {d.trim()}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-foreground mb-1">Horario de Oficina</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    Lunes a Viernes: 10:00h - 14:30h y 15:30h - 19:00h
-                    <br />
-                    Sabados: 10:00h - 14:00h
-                  </p>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
