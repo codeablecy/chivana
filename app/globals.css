@@ -85,6 +85,34 @@
         0 0 12px rgba(0, 255, 136, 0.25);
     }
   }
+
+  /* macOS Terminal-style cursor blink (Awwwards-style polish) */
+  @keyframes terminal-cursor-blink {
+    0%,
+    45% {
+      opacity: 1;
+    }
+    50%,
+    100% {
+      opacity: 0;
+    }
+  }
+  .terminal-cursor {
+    display: inline-block;
+    width: 0.5em;
+    height: 1em;
+    margin-left: 1px;
+    vertical-align: -0.1em;
+    background-color: hsl(160 100% 50%);
+    box-shadow: 0 0 6px rgba(0, 255, 136, 0.6);
+    animation: terminal-cursor-blink 1.05s step-end infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .terminal-cursor {
+      animation: none;
+      opacity: 1;
+    }
+  }
 }
 
 @layer base {

@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { Instagram, Facebook, Linkedin } from "lucide-react"
-import { FooterMap } from "./footer-map"
-import { formatPhoneHref, useSettings } from "@/lib/settings-context"
-import { cn } from "@/lib/utils"
+import { formatPhoneHref, useSettings } from "@/lib/settings-context";
+import { cn } from "@/lib/utils";
+import { Facebook, Instagram, Linkedin } from "lucide-react";
+import Link from "next/link";
+import { FooterMap } from "./footer-map";
 
 /** Shape passed from layout (getFooterProjects). Sync component — safe in Client and Server trees. */
 export type FooterProject = {
@@ -32,7 +32,7 @@ interface FooterProps {
 }
 
 export function Footer({ projects = [] }: FooterProps) {
-  const settings = useSettings()
+  const settings = useSettings();
   const sorted =
     projects.length === 0
       ? []
@@ -171,8 +171,13 @@ export function Footer({ projects = [] }: FooterProps) {
               Política de Privacidad
             </Link>
             {/* Social links from Configuración Global — only show when URLs are set */}
-            {(settings.socialInstagram || settings.socialFacebook || settings.socialLinkedIn) && (
-              <span className="inline-flex items-center gap-1 text-navy-foreground/50" aria-label="Redes sociales">
+            {(settings.socialInstagram ||
+              settings.socialFacebook ||
+              settings.socialLinkedIn) && (
+              <span
+                className="inline-flex items-center gap-1 text-navy-foreground/50"
+                aria-label="Redes sociales"
+              >
                 {settings.socialInstagram && (
                   <a
                     href={settings.socialInstagram}
@@ -181,7 +186,7 @@ export function Footer({ projects = [] }: FooterProps) {
                     className={cn(
                       "flex h-9 w-9 items-center justify-center rounded-full text-navy-foreground/60",
                       "hover:bg-accent/10 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-navy",
-                      "transition-colors duration-200 touch-manipulation"
+                      "transition-colors duration-200 touch-manipulation",
                     )}
                     aria-label="Instagram — abrir en nueva pestaña"
                   >
@@ -196,7 +201,7 @@ export function Footer({ projects = [] }: FooterProps) {
                     className={cn(
                       "flex h-9 w-9 items-center justify-center rounded-full text-navy-foreground/60",
                       "hover:bg-accent/10 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-navy",
-                      "transition-colors duration-200 touch-manipulation"
+                      "transition-colors duration-200 touch-manipulation",
                     )}
                     aria-label="Facebook — abrir en nueva pestaña"
                   >
@@ -211,7 +216,7 @@ export function Footer({ projects = [] }: FooterProps) {
                     className={cn(
                       "flex h-9 w-9 items-center justify-center rounded-full text-navy-foreground/60",
                       "hover:bg-accent/10 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-navy",
-                      "transition-colors duration-200 touch-manipulation"
+                      "transition-colors duration-200 touch-manipulation",
                     )}
                     aria-label="LinkedIn — abrir en nueva pestaña"
                   >
@@ -222,19 +227,26 @@ export function Footer({ projects = [] }: FooterProps) {
             )}
           </div>
         </div>
-        {/* Credit by Codeable — subtle cyberpunk neon */}
+        {/* Credit by Codeable — macOS terminal + cyberpunk neon (Awwwards-style) */}
         <div className="mt-6 pt-4 border-t border-navy-foreground/5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-navy-foreground/40">
-            Built & maintained by{" "}
-            <Link
-              href="https://www.codeable.cloud"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="credit-neon font-medium tracking-normal normal-case text-navy-foreground/70 transition-all duration-300"
-              aria-label="Codeable — design and development"
+          <p className="text-[10px] uppercase tracking-[0.2em] text-navy-foreground/40 flex flex-wrap items-baseline gap-1">
+            <span>Built & maintained by</span>
+            <span
+              className="inline-flex items-baseline gap-0.5 font-mono text-[11px] normal-case tracking-normal text-navy-foreground/50"
+              aria-hidden
             >
-              Codeable
-            </Link>
+              <span className="select-none text-navy-foreground/40">$</span>
+              <Link
+                href="https://www.codeable.cloud"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="credit-neon font-medium transition-all duration-300 hover:opacity-90"
+                aria-label="Codeable — design and development"
+              >
+                Codeable
+              </Link>
+              <span className="terminal-cursor" aria-hidden />
+            </span>
           </p>
         </div>
       </div>
