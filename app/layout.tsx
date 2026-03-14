@@ -102,7 +102,7 @@ export default async function RootLayout({
   const footerProjects = await getFooterProjects().catch(() => [])
 
   return (
-    <html lang="es" className="scroll-smooth">
+    <html lang="es" className="scroll-smooth" translate="no">
       <body
         className={`${barlow.variable} ${belleza.variable} font-sans antialiased`}
       >
