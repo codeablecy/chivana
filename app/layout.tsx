@@ -5,6 +5,7 @@ import { Barlow, Belleza } from "next/font/google"
 import "./globals.css"
 import { Toaster } from "sonner"
 import { ConditionalLayoutShell } from "@/components/conditional-layout-shell"
+import { RotatingFavicon } from "@/components/rotating-favicon"
 import { ScrollToTopOnNavigateClient } from "@/components/scroll-to-top-on-navigate-client"
 import { getFooterProjects } from "@/lib/store"
 
@@ -42,6 +43,7 @@ export default async function RootLayout({
       <body
         className={`${barlow.variable} ${belleza.variable} font-sans antialiased`}
       >
+        <RotatingFavicon />
         <ScrollToTopOnNavigateClient />
         <ConditionalLayoutShell projects={footerProjects}>
           {children}

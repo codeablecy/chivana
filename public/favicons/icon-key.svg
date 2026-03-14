@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Simple key: round bow with hole, straight shaft, one tooth -->
+  <path
+    fill="#e69500"
+    fill-rule="evenodd"
+    d="M10 14a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 3a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm5-1h9v4H15v-4zm7 0h4v8h-4v-8z"
+    clip-rule="evenodd"
+  />
+</svg>
