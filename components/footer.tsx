@@ -8,9 +8,12 @@ import { FooterMap } from "./footer-map";
 
 const CODEABLE_TEXT = "Codeable";
 
+/** Em dash (—) for a typographic tagline; reads as "Codeable — web and more". Use "--" for a stronger terminal vibe. */
+const SLOGAN_TEXT = "— web and more";
+
 /**
- * Terminal-style link with smooth CSS-driven typing reveal (no choppy character steps).
- * Respects prefers-reduced-motion (shows full text immediately, no animation).
+ * Terminal-style link with smooth typing reveal + Awwwards-style hover slogan.
+ * On hover, "web and more" slides in with a subtle fade. Respects prefers-reduced-motion.
  */
 function TerminalTypingLink() {
   return (
@@ -18,12 +21,15 @@ function TerminalTypingLink() {
       href="https://www.codeable.cloud"
       target="_blank"
       rel="noopener noreferrer"
-      className="credit-neon font-medium transition-all duration-300 hover:opacity-90"
-      aria-label="Codeable — design and development"
+      className="credit-neon font-medium transition-all duration-300 hover:opacity-90 inline-flex items-baseline"
+      aria-label="Codeable — web and more, design and development"
     >
       <span className="terminal-typing-reveal">
         {CODEABLE_TEXT}
         <span className="terminal-cursor ml-0.5" aria-hidden />
+      </span>
+      <span className="credit-slogan-reveal">
+        <span className="credit-slogan-inner">{SLOGAN_TEXT}</span>
       </span>
     </Link>
   );
