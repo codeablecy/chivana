@@ -51,10 +51,10 @@ export function FeaturedProjectsDisplay({ projects }: { projects: Project[] }) {
           </Button>
         </div>
 
-        {/* Mobile: horizontal scroll with snap */}
+        {/* Mobile: horizontal scroll with snap — pl/pr so first and last cards have inset from screen edge */}
         <div className="sm:hidden">
           <div
-            className="flex gap-4 overflow-x-auto overflow-y-hidden pb-4 px-4 -mx-4 scroll-smooth snap-x snap-mandatory scrollbar-hide overscroll-x-contain touch-pan-x"
+            className="flex gap-4 overflow-x-auto overflow-y-hidden pb-4 pl-6 pr-6 -mx-4 scroll-smooth snap-x snap-mandatory scrollbar-hide overscroll-x-contain touch-pan-x"
             role="list"
             aria-label="Proyectos destacados"
           >

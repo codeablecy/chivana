@@ -128,21 +128,33 @@ export function ProjectGallery({ gallery }: GalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [embedLoaded, setEmbedLoaded] = useState(false)
-  const [isEmbedFullscreen, setIsEmbedFullscreen] = useState(false)
+  const [embedFullscreenOverlay, setEmbedFullscreenOverlay] = useState(false)
+  const [isNativeFullscreen, setIsNativeFullscreen] = useState(false)
   const viewerRef = useRef<HTMLDivElement>(null)
+
+  /** On mobile/tablet use overlay (Fullscreen API unreliable for iframes on iOS); on desktop use Fullscreen API */
+  const [useOverlayFullscreen, setUseOverlayFullscreen] = useState(true)
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)")
+    setUseOverlayFullscreen(!mq.matches)
+    const handler = () => setUseOverlayFullscreen(!mq.matches)
+    mq.addEventListener("change", handler)
+    return () => mq.removeEventListener("change", handler)
+  }, [])
 
   const items = getDisplayItems(activeTab, gallery)
   const current = items[activeIndex] ?? null
   const hasItems = items.length > 0
+  const isFullscreen = isNativeFullscreen || embedFullscreenOverlay
 
   // Reset index when tab changes
   useEffect(() => { setActiveIndex(0); setEmbedLoaded(false) }, [activeTab])
   useEffect(() => { setEmbedLoaded(false) }, [activeIndex])
 
-  // Sync fullscreen state when user exits via Escape or browser UI
+  // Sync native fullscreen state when user exits via Escape or browser UI (desktop only)
   useEffect(() => {
     const onFullscreenChange = () => {
-      setIsEmbedFullscreen(!!document.fullscreenElement && document.fullscreenElement === viewerRef.current)
+      setIsNativeFullscreen(!!document.fullscreenElement && document.fullscreenElement === viewerRef.current)
     }
     document.addEventListener("fullscreenchange", onFullscreenChange)
     return () => document.removeEventListener("fullscreenchange", onFullscreenChange)
@@ -151,26 +163,43 @@ export function ProjectGallery({ gallery }: GalleryProps) {
   const prev = useCallback(() => setActiveIndex((i) => (i > 0 ? i - 1 : items.length - 1)), [items.length])
   const next = useCallback(() => setActiveIndex((i) => (i < items.length - 1 ? i + 1 : 0)), [items.length])
 
-  /** Toggle fullscreen: enter or exit so "Pantalla completa" also minimizes */
+  /** Toggle fullscreen: overlay on mobile/tablet (reliable); Fullscreen API on desktop */
   const toggleEmbedFullscreen = useCallback(() => {
-    if (document.fullscreenElement === viewerRef.current) {
-      document.exitFullscreen?.()
+    if (useOverlayFullscreen) {
+      setEmbedFullscreenOverlay((v) => !v)
     } else {
-      viewerRef.current?.requestFullscreen?.()
+      if (document.fullscreenElement === viewerRef.current) {
+        document.exitFullscreen?.()
+      } else {
+        viewerRef.current?.requestFullscreen?.()
+      }
     }
-  }, [])
+  }, [useOverlayFullscreen])
 
-  // Keyboard navigation for lightbox
+  // Keyboard navigation for lightbox and embed fullscreen overlay
   useEffect(() => {
-    if (!lightboxOpen) return
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setLightboxOpen(false)
-      if (e.key === "ArrowLeft") prev()
-      if (e.key === "ArrowRight") next()
+      if (e.key === "Escape") {
+        if (embedFullscreenOverlay) setEmbedFullscreenOverlay(false)
+        else if (lightboxOpen) setLightboxOpen(false)
+      }
+      if (lightboxOpen) {
+        if (e.key === "ArrowLeft") prev()
+        if (e.key === "ArrowRight") next()
+      }
     }
     window.addEventListener("keydown", handler)
     return () => window.removeEventListener("keydown", handler)
-  }, [lightboxOpen, prev, next])
+  }, [lightboxOpen, embedFullscreenOverlay, prev, next])
+
+  // Lock body scroll when embed fullscreen overlay is open
+  useEffect(() => {
+    if (embedFullscreenOverlay) {
+      const prevOverflow = document.body.style.overflow
+      document.body.style.overflow = "hidden"
+      return () => { document.body.style.overflow = prevOverflow }
+    }
+  }, [embedFullscreenOverlay])
 
   return (
     <section id="galeria" className="py-16 px-4 lg:py-24 lg:px-8 bg-background">
@@ -248,19 +277,19 @@ export function ProjectGallery({ gallery }: GalleryProps) {
                   />
                   <button
                     type="button"
-                    onClick={toggleEmbedFullscreen}
-                    className="absolute bottom-4 right-4 z-20 flex items-center gap-2 rounded-lg bg-foreground/80 backdrop-blur-sm px-3 py-2 text-sm font-medium text-background hover:bg-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    aria-label={isEmbedFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
+                    onClick={(e) => { e.stopPropagation(); toggleEmbedFullscreen() }}
+                    className="absolute bottom-4 right-4 z-20 flex items-center gap-2 rounded-lg bg-foreground/80 backdrop-blur-sm px-3 py-2.5 min-h-[44px] min-w-[44px] text-sm font-medium text-background hover:bg-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring touch-manipulation"
+                    aria-label={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
                   >
-                    {isEmbedFullscreen ? (
+                    {isFullscreen ? (
                       <>
-                        <Minimize2 className="h-4 w-4" />
-                        Salir
+                        <Minimize2 className="h-4 w-4 sm:h-4 sm:w-4 shrink-0" aria-hidden />
+                        <span className="hidden sm:inline">Salir</span>
                       </>
                     ) : (
                       <>
-                        <Maximize2 className="h-4 w-4" />
-                        Pantalla completa
+                        <Maximize2 className="h-4 w-4 sm:h-4 sm:w-4 shrink-0" aria-hidden />
+                        <span className="hidden sm:inline">Pantalla completa</span>
                       </>
                     )}
                   </button>
@@ -403,7 +432,34 @@ export function ProjectGallery({ gallery }: GalleryProps) {
         </div>
       )}
 
-      {/* Embed fullscreen: handled by Fullscreen API on viewerRef (same iframe, no second playback) */}
+      {/* Embed fullscreen overlay — used on mobile/tablet where Fullscreen API is unreliable for iframes */}
+      {embedFullscreenOverlay && current?.kind === "embed" && (
+        <div
+          className="fixed inset-0 z-[100] bg-black flex flex-col"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Vídeo o tour en pantalla completa"
+        >
+          <div className="flex-1 relative min-h-0 w-full">
+            <iframe
+              src={embedDisplayUrl(current.url)}
+              title={current.title}
+              className="absolute inset-0 w-full h-full border-0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => setEmbedFullscreenOverlay(false)}
+            className="absolute top-4 right-4 z-10 flex items-center gap-2 rounded-lg bg-white/90 backdrop-blur-sm px-3 py-2.5 min-h-[44px] text-sm font-medium text-foreground hover:bg-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring touch-manipulation"
+            aria-label="Salir de pantalla completa"
+          >
+            <Minimize2 className="h-4 w-4 shrink-0" aria-hidden />
+            <span className="hidden sm:inline">Salir</span>
+          </button>
+        </div>
+      )}
     </section>
   )
 }
