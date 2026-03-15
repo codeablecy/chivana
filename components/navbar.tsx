@@ -16,15 +16,17 @@ const navLinks = [
   { label: "Contacto", href: "/#contacto" },
 ];
 
-/** Scroll to #contacto when already on home; avoids no-op when URL is already /#contacto */
-function scrollToContact(e: React.MouseEvent<HTMLAnchorElement>, pathname: string) {
-  if (pathname !== "/") return
+/** Scroll to #contacto when already on home; avoids no-op when URL is already /#contacto. Returns true if scroll was performed. */
+function scrollToContact(e: React.MouseEvent<HTMLAnchorElement>, pathname: string): boolean {
+  if (pathname !== "/") return false
   e.preventDefault()
   const el = document.getElementById("contacto")
   if (el) {
     el.scrollIntoView({ behavior: "smooth", block: "start" })
     window.history.replaceState(null, "", "/#contacto")
+    return true
   }
+  return false
 }
 
 export function Navbar() {
@@ -126,7 +128,11 @@ export function Navbar() {
               <SheetClose key={link.href} asChild>
                 <Link
                   href={link.href}
-                  onClick={(e) => link.href === "/#contacto" && scrollToContact(e, pathname)}
+                  onClick={(e) => {
+                    if (link.href === "/#contacto") {
+                      scrollToContact(e, pathname) && setIsOpen(false)
+                    }
+                  }}
                   className={cn(
                     "flex items-center min-h-[48px] px-4 rounded-xl text-base font-medium transition-all duration-200",
                     isActive(link.href)
@@ -161,7 +167,13 @@ export function Navbar() {
             )}
             <SheetClose asChild>
               <Button className="w-full h-12 font-medium" asChild>
-                <Link href="/#contacto" onClick={(e) => scrollToContact(e, pathname)}>
+                <Link
+                  href="/#contacto"
+                  onClick={(e) => {
+                    scrollToContact(e, pathname)
+                    setIsOpen(false)
+                  }}
+                >
                   Quiero Saber Mas
                 </Link>
               </Button>
