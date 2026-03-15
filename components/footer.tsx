@@ -4,39 +4,15 @@ import { formatPhoneHref, useSettings } from "@/lib/settings-context";
 import { cn } from "@/lib/utils";
 import { Facebook, Instagram, Linkedin } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { FooterMap } from "./footer-map";
 
 const CODEABLE_TEXT = "Codeable";
-const TYPING_MS = 150;
 
 /**
- * Terminal-style link that types "Codeable" character by character, then shows cursor.
- * Respects prefers-reduced-motion (shows full text immediately).
+ * Terminal-style link with smooth CSS-driven typing reveal (no choppy character steps).
+ * Respects prefers-reduced-motion (shows full text immediately, no animation).
  */
 function TerminalTypingLink() {
-  const [typed, setTyped] = useState("");
-  const [reduceMotion, setReduceMotion] = useState(false);
-
-  useEffect(() => {
-    setReduceMotion(
-      typeof window !== "undefined" &&
-        window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-    );
-  }, []);
-
-  useEffect(() => {
-    if (reduceMotion) {
-      setTyped(CODEABLE_TEXT);
-      return;
-    }
-    if (typed.length >= CODEABLE_TEXT.length) return;
-    const t = setTimeout(() => {
-      setTyped(CODEABLE_TEXT.slice(0, typed.length + 1));
-    }, TYPING_MS);
-    return () => clearTimeout(t);
-  }, [typed, reduceMotion]);
-
   return (
     <Link
       href="https://www.codeable.cloud"
@@ -45,8 +21,10 @@ function TerminalTypingLink() {
       className="credit-neon font-medium transition-all duration-300 hover:opacity-90"
       aria-label="Codeable — design and development"
     >
-      {typed}
-      <span className="terminal-cursor ml-0.5" aria-hidden />
+      <span className="terminal-typing-reveal">
+        {CODEABLE_TEXT}
+        <span className="terminal-cursor ml-0.5" aria-hidden />
+      </span>
     </Link>
   );
 }

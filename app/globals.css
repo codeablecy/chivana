@@ -104,6 +104,30 @@
     }
   }
 
+  /* Terminal typing — smooth reveal (no discrete character steps) */
+  @keyframes terminal-typing-reveal {
+    from {
+      max-width: 0;
+      opacity: 1;
+    }
+    to {
+      max-width: 9ch;
+    }
+  }
+  .terminal-typing-reveal {
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    vertical-align: bottom;
+    animation: terminal-typing-reveal 0.85s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .terminal-typing-reveal {
+      animation: none;
+      max-width: none;
+    }
+  }
+
   /* macOS Terminal-style cursor blink (Awwwards-style polish) */
   @keyframes terminal-cursor-blink {
     0%,
