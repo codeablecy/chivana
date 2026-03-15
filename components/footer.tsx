@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { FooterMap } from "./footer-map";
 
 const CODEABLE_TEXT = "Codeable";
-const TYPING_MS = 300;
+const TYPING_MS = 150;
 
 /**
  * Terminal-style link that types "Codeable" character by character, then shows cursor.
@@ -280,7 +280,7 @@ export function Footer({ projects = [] }: FooterProps) {
               className="inline-flex items-baseline gap-0.5 font-mono text-[11px] normal-case tracking-normal text-navy-foreground/50"
               aria-hidden
             >
-              <span className="select-none text-navy-foreground/40">$</span>
+              <span className="select-none text-navy-foreground/40" aria-hidden>❯</span>
               <TerminalTypingLink />
             </span>
           </p>

@@ -34,14 +34,14 @@ const HERO_VIDEO_SRC = `https://www.youtube.com/embed/${HERO_VIDEO_ID}?autoplay=
 function HeroBrand() {
   return (
     <section className="relative min-h-[85vh] flex items-end pb-12 pt-20 lg:items-center lg:pb-0 lg:pt-0 overflow-hidden">
-      {/* YouTube autoplay background (muted for browser autoplay policy) */}
-      <div className="absolute inset-0 min-w-full min-h-full">
+      {/* YouTube autoplay background — contained so 100vw/min-w don't cause horizontal overflow on mobile */}
+      <div className="absolute inset-0 min-w-full min-h-full overflow-hidden">
         <iframe
           src={HERO_VIDEO_SRC}
           title="Chivana Real Estate - Proyecto residencial"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
-          className="absolute top-1/2 left-1/2 w-[100vw] h-[100vh] min-w-[177.78vh] min-h-[56.25vw] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+          className="absolute top-1/2 left-1/2 w-full h-full min-w-[177.78vh] min-h-[56.25vw] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
         />
       </div>
       <div className="absolute inset-0 bg-gradient-to-t from-foreground/90 via-foreground/40 to-foreground/10 lg:bg-gradient-to-r lg:from-foreground/85 lg:via-foreground/50 lg:to-transparent" />

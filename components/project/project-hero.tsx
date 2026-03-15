@@ -130,15 +130,17 @@ export function ProjectHero({ project }: { project: Project }) {
 
   return (
     <section className="relative min-h-screen overflow-hidden">
-      {/* ── Background: video iframe or static image ── */}
+      {/* ── Background: video iframe or static image — wrapper clips so no horizontal overflow on mobile ── */}
       {project.heroVideoUrl ? (
-        <iframe
-          src={buildHeroVideoSrc(project.heroVideoUrl)}
-          title={project.name}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-          className="absolute top-1/2 left-1/2 w-[100vw] h-[100vh] min-w-[177.78vh] min-h-[56.25vw] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-        />
+        <div className="absolute inset-0 overflow-hidden">
+          <iframe
+            src={buildHeroVideoSrc(project.heroVideoUrl)}
+            title={project.name}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="absolute top-1/2 left-1/2 w-full h-full min-w-[177.78vh] min-h-[56.25vw] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+          />
+        </div>
       ) : (
         <Image
           src={project.heroImage || "/placeholder.svg"}
