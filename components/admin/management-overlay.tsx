@@ -49,7 +49,12 @@ export function ManagementOverlay({ project }: ManagementOverlayProps) {
             className="shadow-lg rounded-full h-14 px-6 gap-2"
           >
             <Settings2 className="h-5 w-5" />
-            Editar proyecto
+            <span className="flex flex-col items-start leading-tight">
+              <span>Editar proyecto</span>
+              <span className="text-xs text-muted-foreground">
+                Edit project
+              </span>
+            </span>
           </Button>
         </div>
       )}

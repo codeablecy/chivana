@@ -1,27 +1,16 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useRouter } from "next/navigation"
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
+  deleteProject,
+  saveProjectAmenities,
+  saveProjectDistances,
+  saveProjectFeatures,
+  saveProjectQualities,
+  updateGallery,
+  updateHeroImage,
+  updateHeroVideo,
+  updateProjectFull,
+} from "@/app/admin/actions";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,25 +21,36 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { TagInput } from "./tag-input"
-import { MapPicker } from "./map-picker"
-import { GalleryEditor } from "./gallery-editor"
-import { MediaSectionEditor } from "./media-section-editor"
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  updateProjectFull,
-  updateGallery,
-  updateHeroImage,
-  updateHeroVideo,
-  deleteProject,
-  saveProjectAmenities,
-  saveProjectDistances,
-  saveProjectFeatures,
-  saveProjectQualities,
-} from "@/app/admin/actions"
-import { toast } from "sonner"
-import type { Project, Amenity } from "@/lib/types"
-import { Plus, Trash2 } from "lucide-react"
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import type { Amenity, Project } from "@/lib/types";
+import { Plus, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import * as React from "react";
+import { toast } from "sonner";
+import { GalleryEditor } from "./gallery-editor";
+import { MapPicker } from "./map-picker";
+import { MediaSectionEditor } from "./media-section-editor";
+import { TagInput } from "./tag-input";
 
 const AMENITY_TYPES: { value: Amenity["type"]; label: string }[] = [
   { value: "education", label: "Educación" },
@@ -58,9 +58,9 @@ const AMENITY_TYPES: { value: Amenity["type"]; label: string }[] = [
   { value: "transport", label: "Transporte" },
   { value: "shopping", label: "Compras" },
   { value: "leisure", label: "Ocio" },
-]
+];
 
-import { PROJECT_ICON_OPTIONS } from "@/lib/project-icons"
+import { PROJECT_ICON_OPTIONS } from "@/lib/project-icons";
 
 const SUGGESTED_TAGS = [
   "En Construcción",
@@ -70,18 +70,18 @@ const SUGGESTED_TAGS = [
   "Gimnasio",
   "Seguridad",
   "Jardín",
-]
+];
 
 const STATUS_OPTIONS: { value: Project["status"]; label: string }[] = [
   { value: "coming-soon", label: "Proximamente" },
   { value: "active", label: "En Venta" },
   { value: "sold-out", label: "Agotado" },
-]
+];
 
 export interface ProjectEditorSheetProps {
-  project: Project
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  project: Project;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 /** Full project edit form with live preview and floating action bar. */
@@ -90,10 +90,10 @@ export function ProjectEditorSheet({
   open,
   onOpenChange,
 }: ProjectEditorSheetProps) {
-  const router = useRouter()
-  const tabsAnchorRef = React.useRef<HTMLDivElement | null>(null)
-  const [saving, setSaving] = React.useState(false)
-  const [deleteConfirm, setDeleteConfirm] = React.useState("")
+  const router = useRouter();
+  const tabsAnchorRef = React.useRef<HTMLDivElement | null>(null);
+  const [saving, setSaving] = React.useState(false);
+  const [deleteConfirm, setDeleteConfirm] = React.useState("");
   const [form, setForm] = React.useState({
     name: project.name,
     tagline: project.tagline,
@@ -121,7 +121,7 @@ export function ProjectEditorSheet({
     distances: [...project.location.distances],
     features: [...project.features],
     qualities: [...project.qualities],
-  })
+  });
 
   React.useEffect(() => {
     if (open) {
@@ -152,9 +152,9 @@ export function ProjectEditorSheet({
         distances: [...project.location.distances],
         features: [...project.features],
         qualities: [...project.qualities],
-      })
+      });
     }
-  }, [open, project])
+  }, [open, project]);
 
   const isDirty = React.useMemo(() => {
     return (
@@ -185,15 +185,17 @@ export function ProjectEditorSheet({
         JSON.stringify(project.gallery.parcela ?? []) ||
       form.heroImage !== project.heroImage ||
       form.heroVideoUrl !== (project.heroVideoUrl ?? "") ||
-      JSON.stringify(form.amenities) !== JSON.stringify(project.location.amenities) ||
-      JSON.stringify(form.distances) !== JSON.stringify(project.location.distances) ||
+      JSON.stringify(form.amenities) !==
+        JSON.stringify(project.location.amenities) ||
+      JSON.stringify(form.distances) !==
+        JSON.stringify(project.location.distances) ||
       JSON.stringify(form.features) !== JSON.stringify(project.features) ||
       JSON.stringify(form.qualities) !== JSON.stringify(project.qualities)
-    )
-  }, [form, project])
+    );
+  }, [form, project]);
 
   const update = (partial: Partial<typeof form>) =>
-    setForm((prev) => ({ ...prev, ...partial }))
+    setForm((prev) => ({ ...prev, ...partial }));
 
   const handleDiscard = () => {
     setForm({
@@ -223,11 +225,11 @@ export function ProjectEditorSheet({
       distances: [...project.location.distances],
       features: [...project.features],
       qualities: [...project.qualities],
-    })
-  }
+    });
+  };
 
   const handleSave = async () => {
-    setSaving(true)
+    setSaving(true);
     try {
       const updateResult = await updateProjectFull(project.slug, {
         name: form.name,
@@ -247,12 +249,12 @@ export function ProjectEditorSheet({
           lng: form.lng,
         },
         tags: form.tags,
-      })
+      });
       if (!updateResult.success) {
         toast.error("Error al guardar", {
           description: "No se pudieron guardar los datos del proyecto.",
-        })
-        return
+        });
+        return;
       }
       const galleryChanged =
         JSON.stringify(form.galleryPhotos) !==
@@ -264,61 +266,76 @@ export function ProjectEditorSheet({
         JSON.stringify(form.galleryTour360) !==
           JSON.stringify(project.gallery.tour360 ?? []) ||
         JSON.stringify(form.galleryParcela) !==
-          JSON.stringify(project.gallery.parcela ?? [])
+          JSON.stringify(project.gallery.parcela ?? []);
       if (galleryChanged) {
-        await updateGallery(project.slug, form.galleryPhotos, form.galleryConstruction, form.galleryVideos, form.galleryTour360, form.galleryParcela)
+        await updateGallery(
+          project.slug,
+          form.galleryPhotos,
+          form.galleryConstruction,
+          form.galleryVideos,
+          form.galleryTour360,
+          form.galleryParcela,
+        );
       }
       if (form.heroImage !== project.heroImage) {
-        await updateHeroImage(project.slug, form.heroImage)
+        await updateHeroImage(project.slug, form.heroImage);
       }
       if (form.heroVideoUrl !== (project.heroVideoUrl ?? "")) {
-        await updateHeroVideo(project.slug, form.heroVideoUrl)
+        await updateHeroVideo(project.slug, form.heroVideoUrl);
       }
-      if (JSON.stringify(form.amenities) !== JSON.stringify(project.location.amenities)) {
-        await saveProjectAmenities(project.slug, form.amenities)
+      if (
+        JSON.stringify(form.amenities) !==
+        JSON.stringify(project.location.amenities)
+      ) {
+        await saveProjectAmenities(project.slug, form.amenities);
       }
-      if (JSON.stringify(form.distances) !== JSON.stringify(project.location.distances)) {
-        await saveProjectDistances(project.slug, form.distances)
+      if (
+        JSON.stringify(form.distances) !==
+        JSON.stringify(project.location.distances)
+      ) {
+        await saveProjectDistances(project.slug, form.distances);
       }
       if (JSON.stringify(form.features) !== JSON.stringify(project.features)) {
-        await saveProjectFeatures(project.slug, form.features)
+        await saveProjectFeatures(project.slug, form.features);
       }
-      if (JSON.stringify(form.qualities) !== JSON.stringify(project.qualities)) {
-        await saveProjectQualities(project.slug, form.qualities)
+      if (
+        JSON.stringify(form.qualities) !== JSON.stringify(project.qualities)
+      ) {
+        await saveProjectQualities(project.slug, form.qualities);
       }
       toast.success("Proyecto actualizado", {
         description: "Los cambios se han guardado correctamente.",
-      })
-      router.refresh()
-      onOpenChange(false)
+      });
+      router.refresh();
+      onOpenChange(false);
     } catch {
       toast.error("Error al guardar", {
         description: "No se pudieron guardar los cambios.",
-      })
+      });
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   const handleDelete = async () => {
-    if (deleteConfirm !== project.name) return
-    setSaving(true)
+    if (deleteConfirm !== project.name) return;
+    setSaving(true);
     try {
-      const res = await deleteProject(project.slug)
+      const res = await deleteProject(project.slug);
       if (res.success) {
-        toast.success("Proyecto eliminado")
-        router.push("/projects")
-        onOpenChange(false)
+        toast.success("Proyecto eliminado");
+        router.push("/projects");
+        onOpenChange(false);
       } else {
-        toast.error("No se pudo eliminar el proyecto")
+        toast.error("No se pudo eliminar el proyecto");
       }
     } catch {
-      toast.error("Error al eliminar")
+      toast.error("Error al eliminar");
     } finally {
-      setSaving(false)
-      setDeleteConfirm("")
+      setSaving(false);
+      setDeleteConfirm("");
     }
-  }
+  };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -327,7 +344,14 @@ export function ProjectEditorSheet({
         className="w-full sm:max-w-2xl lg:max-w-4xl flex flex-col p-0"
       >
         <SheetHeader className="px-6 pt-6 pb-4 border-b">
-          <SheetTitle>Editar proyecto</SheetTitle>
+          <SheetTitle>
+            <span className="flex flex-col gap-0.5">
+              <span>Editar proyecto</span>
+              <span className="text-xs font-normal text-muted-foreground">
+                Edit project
+              </span>
+            </span>
+          </SheetTitle>
         </SheetHeader>
 
         <ScrollArea className="flex-1">
@@ -335,7 +359,10 @@ export function ProjectEditorSheet({
             {/* Live preview */}
             <div className="rounded-xl border border-border bg-muted/30 p-4">
               <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">
-                Vista previa
+                Vista previa{" "}
+                <span className="normal-case text-[11px] text-muted-foreground/80">
+                  (Preview)
+                </span>
               </p>
               <div className="flex items-end gap-4">
                 <div className="flex-1 min-w-0">
@@ -368,19 +395,50 @@ export function ProjectEditorSheet({
               defaultValue="core"
               className="w-full"
               onValueChange={() => {
-                tabsAnchorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+                tabsAnchorRef.current?.scrollIntoView({
+                  behavior: "smooth",
+                  block: "start",
+                });
               }}
             >
-              <TabsList ref={tabsAnchorRef} className="grid w-full grid-cols-4 scroll-mt-2">
-                <TabsTrigger value="core">Core</TabsTrigger>
-                <TabsTrigger value="location">Ubicación</TabsTrigger>
-                <TabsTrigger value="specs">Especificaciones</TabsTrigger>
-                <TabsTrigger value="media">Medios</TabsTrigger>
+              <TabsList
+                ref={tabsAnchorRef}
+                className="grid w-full grid-cols-2 sm:grid-cols-4 scroll-mt-2"
+              >
+                <TabsTrigger value="core">
+                  Core{" "}
+                  <span className="ml-1 text-[11px] text-muted-foreground">
+                    (Core details)
+                  </span>
+                </TabsTrigger>
+                <TabsTrigger value="location">
+                  Ubicación{" "}
+                  <span className="ml-1 text-[11px] text-muted-foreground">
+                    (Location)
+                  </span>
+                </TabsTrigger>
+                <TabsTrigger value="specs">
+                  Especificaciones{" "}
+                  <span className="ml-1 text-[11px] text-muted-foreground">
+                    (Specifications)
+                  </span>
+                </TabsTrigger>
+                <TabsTrigger value="media">
+                  Medios{" "}
+                  <span className="ml-1 text-[11px] text-muted-foreground">
+                    (Media)
+                  </span>
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="core" className="space-y-4 mt-4">
                 <div>
-                  <Label htmlFor="name">Nombre</Label>
+                  <Label htmlFor="name">
+                    Nombre{" "}
+                    <span className="text-xs font-normal text-muted-foreground">
+                      (Project name)
+                    </span>
+                  </Label>
                   <Input
                     id="name"
                     value={form.name}
@@ -390,7 +448,12 @@ export function ProjectEditorSheet({
                   />
                 </div>
                 <div>
-                  <Label htmlFor="tagline">Slogan</Label>
+                  <Label htmlFor="tagline">
+                    Slogan{" "}
+                    <span className="text-xs font-normal text-muted-foreground">
+                      (Tagline)
+                    </span>
+                  </Label>
                   <Input
                     id="tagline"
                     value={form.tagline}
@@ -400,7 +463,12 @@ export function ProjectEditorSheet({
                   />
                 </div>
                 <div>
-                  <Label htmlFor="description">Descripción</Label>
+                  <Label htmlFor="description">
+                    Descripción{" "}
+                    <span className="text-xs font-normal text-muted-foreground">
+                      (Project description)
+                    </span>
+                  </Label>
                   <Textarea
                     id="description"
                     value={form.description}
@@ -411,7 +479,12 @@ export function ProjectEditorSheet({
                   />
                 </div>
                 <div>
-                  <Label>Etiquetas (amenidades)</Label>
+                  <Label>
+                    Etiquetas (amenidades){" "}
+                    <span className="text-xs font-normal text-muted-foreground">
+                      (Highlight tags)
+                    </span>
+                  </Label>
                   <TagInput
                     value={form.tags}
                     onChange={(tags) => update({ tags })}
@@ -424,10 +497,20 @@ export function ProjectEditorSheet({
 
               <TabsContent value="location" className="space-y-4 mt-4">
                 <p className="text-xs text-muted-foreground">
-                  Dirección, ciudad y provincia se muestran en la barra inferior de la ficha del proyecto (sección Ubicación).
+                  Dirección, ciudad y provincia se muestran en la barra inferior
+                  de la ficha del proyecto (sección Ubicación).{" "}
+                  <span className="text-[11px] text-muted-foreground/80">
+                    (Address, city and province are shown in the lower bar of
+                    the project detail page.)
+                  </span>
                 </p>
                 <div>
-                  <Label htmlFor="address">Dirección</Label>
+                  <Label htmlFor="address">
+                    Dirección{" "}
+                    <span className="text-xs font-normal text-muted-foreground">
+                      (Address)
+                    </span>
+                  </Label>
                   <Input
                     id="address"
                     value={form.address}
@@ -436,9 +519,14 @@ export function ProjectEditorSheet({
                     className="mt-1"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <Label htmlFor="city">Ciudad</Label>
+                    <Label htmlFor="city">
+                      Ciudad{" "}
+                      <span className="text-xs font-normal text-muted-foreground">
+                        (City)
+                      </span>
+                    </Label>
                     <Input
                       id="city"
                       value={form.city}
@@ -447,7 +535,12 @@ export function ProjectEditorSheet({
                     />
                   </div>
                   <div>
-                    <Label htmlFor="province">Provincia</Label>
+                    <Label htmlFor="province">
+                      Provincia{" "}
+                      <span className="text-xs font-normal text-muted-foreground">
+                        (Province)
+                      </span>
+                    </Label>
                     <Input
                       id="province"
                       value={form.province}
@@ -457,7 +550,12 @@ export function ProjectEditorSheet({
                   </div>
                 </div>
                 <div>
-                  <Label htmlFor="postalCode">Código postal</Label>
+                  <Label htmlFor="postalCode">
+                    Código postal{" "}
+                    <span className="text-xs font-normal text-muted-foreground">
+                      (Postcode)
+                    </span>
+                  </Label>
                   <Input
                     id="postalCode"
                     value={form.postalCode}
@@ -471,7 +569,12 @@ export function ProjectEditorSheet({
                   onLatLngChange={(lat, lng) => update({ lat, lng })}
                 />
                 <div>
-                  <Label htmlFor="mapEmbedUrl">URL de Google Maps (embed)</Label>
+                  <Label htmlFor="mapEmbedUrl">
+                    URL de Google Maps (embed){" "}
+                    <span className="text-xs font-normal text-muted-foreground">
+                      (Google Maps embed URL)
+                    </span>
+                  </Label>
                   <Input
                     id="mapEmbedUrl"
                     value={form.mapEmbedUrl}
@@ -485,25 +588,50 @@ export function ProjectEditorSheet({
 
                 {/* Distances */}
                 <div>
-                  <Label className="mb-2 block">Distancias clave</Label>
+                  <Label className="mb-2 block">
+                    Distancias clave{" "}
+                    <span className="text-xs font-normal text-muted-foreground">
+                      (Key distances)
+                    </span>
+                  </Label>
                   <div className="space-y-2">
                     {form.distances.map((d, i) => (
                       <div key={i} className="flex gap-2">
-                        <Input value={d}
+                        <Input
+                          value={d}
                           onChange={(e) => {
-                            const next = [...form.distances]; next[i] = e.target.value; update({ distances: next })
+                            const next = [...form.distances];
+                            next[i] = e.target.value;
+                            update({ distances: next });
                           }}
                           placeholder="35 km a Madrid centro"
                           className="flex-1"
                         />
-                        <Button type="button" size="icon" variant="ghost" className="text-destructive shrink-0"
-                          onClick={() => update({ distances: form.distances.filter((_, j) => j !== i) })}>
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="ghost"
+                          className="text-destructive shrink-0"
+                          onClick={() =>
+                            update({
+                              distances: form.distances.filter(
+                                (_, j) => j !== i,
+                              ),
+                            })
+                          }
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     ))}
-                    <Button type="button" variant="outline" size="sm"
-                      onClick={() => update({ distances: [...form.distances, ""] })}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        update({ distances: [...form.distances, ""] })
+                      }
+                    >
                       <Plus className="h-4 w-4 mr-1.5" /> Añadir distancia
                     </Button>
                   </div>
@@ -513,25 +641,45 @@ export function ProjectEditorSheet({
 
                 {/* Amenities */}
                 <div>
-                  <Label className="mb-2 block">Servicios Cercanos</Label>
+                  <Label className="mb-2 block">
+                    Servicios Cercanos{" "}
+                    <span className="text-xs font-normal text-muted-foreground">
+                      (Nearby services)
+                    </span>
+                  </Label>
                   <div className="space-y-2">
                     {form.amenities.map((a, i) => (
-                      <div key={i} className="grid grid-cols-[1fr_18ch_auto_auto] gap-2 items-center">
-                        <Input value={a.name}
+                      <div
+                        key={i}
+                        className="grid grid-cols-1 sm:grid-cols-[1fr_18ch_auto_auto] gap-2 items-center"
+                      >
+                        <Input
+                          value={a.name}
                           onChange={(e) => {
-                            const next = [...form.amenities]; next[i] = { ...next[i], name: e.target.value }; update({ amenities: next })
+                            const next = [...form.amenities];
+                            next[i] = { ...next[i], name: e.target.value };
+                            update({ amenities: next });
                           }}
                           placeholder="Centro de Salud"
                         />
-                        <Input value={a.distance}
+                        <Input
+                          value={a.distance}
                           onChange={(e) => {
-                            const next = [...form.amenities]; next[i] = { ...next[i], distance: e.target.value }; update({ amenities: next })
+                            const next = [...form.amenities];
+                            next[i] = { ...next[i], distance: e.target.value };
+                            update({ amenities: next });
                           }}
                           placeholder="800 m"
                         />
-                        <Select value={a.type}
+                        <Select
+                          value={a.type}
                           onValueChange={(v) => {
-                            const next = [...form.amenities]; next[i] = { ...next[i], type: v as Amenity["type"] }; update({ amenities: next })
+                            const next = [...form.amenities];
+                            next[i] = {
+                              ...next[i],
+                              type: v as Amenity["type"],
+                            };
+                            update({ amenities: next });
                           }}
                         >
                           <SelectTrigger className="w-28 text-xs">
@@ -539,27 +687,63 @@ export function ProjectEditorSheet({
                           </SelectTrigger>
                           <SelectContent>
                             {AMENITY_TYPES.map((t) => (
-                              <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                              <SelectItem key={t.value} value={t.value}>
+                                {t.label}
+                              </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
-                        <Button type="button" size="icon" variant="ghost" className="text-destructive"
-                          onClick={() => update({ amenities: form.amenities.filter((_, j) => j !== i) })}>
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="ghost"
+                          className="text-destructive"
+                          onClick={() =>
+                            update({
+                              amenities: form.amenities.filter(
+                                (_, j) => j !== i,
+                              ),
+                            })
+                          }
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     ))}
-                    <Button type="button" variant="outline" size="sm"
-                      onClick={() => update({ amenities: [...form.amenities, { name: "", distance: "", type: "education" as Amenity["type"] }] })}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        update({
+                          amenities: [
+                            ...form.amenities,
+                            {
+                              name: "",
+                              distance: "",
+                              type: "education" as Amenity["type"],
+                            },
+                          ],
+                        })
+                      }
+                    >
                       <Plus className="h-4 w-4 mr-1.5" /> Añadir servicio
                     </Button>
                   </div>
                 </div>
               </TabsContent>
 
-              <TabsContent value="specs" className="space-y-4 mt-4 min-w-0 overflow-hidden">
+              <TabsContent
+                value="specs"
+                className="space-y-4 mt-4 min-w-0 overflow-hidden"
+              >
                 <div>
-                  <Label htmlFor="status">Estado</Label>
+                  <Label htmlFor="status">
+                    Estado{" "}
+                    <span className="text-xs font-normal text-muted-foreground">
+                      (Sales status)
+                    </span>
+                  </Label>
                   <Select
                     value={form.status}
                     onValueChange={(v) =>
@@ -579,7 +763,12 @@ export function ProjectEditorSheet({
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="totalUnits">Total de unidades</Label>
+                  <Label htmlFor="totalUnits">
+                    Total de unidades{" "}
+                    <span className="text-xs font-normal text-muted-foreground">
+                      (Total units)
+                    </span>
+                  </Label>
                   <Input
                     id="totalUnits"
                     type="number"
@@ -590,7 +779,12 @@ export function ProjectEditorSheet({
                   />
                 </div>
                 <div>
-                  <Label htmlFor="constructionStart">Inicio construcción</Label>
+                  <Label htmlFor="constructionStart">
+                    Inicio construcción{" "}
+                    <span className="text-xs font-normal text-muted-foreground">
+                      (Construction start)
+                    </span>
+                  </Label>
                   <Input
                     id="constructionStart"
                     value={form.constructionStartDate}
@@ -602,7 +796,12 @@ export function ProjectEditorSheet({
                   />
                 </div>
                 <div>
-                  <Label htmlFor="constructionEnd">Fin construcción</Label>
+                  <Label htmlFor="constructionEnd">
+                    Fin construcción{" "}
+                    <span className="text-xs font-normal text-muted-foreground">
+                      (Construction end)
+                    </span>
+                  </Label>
                   <Input
                     id="constructionEnd"
                     value={form.constructionEndDate}
@@ -618,13 +817,24 @@ export function ProjectEditorSheet({
 
                 {/* Features (USPs) */}
                 <div className="min-w-0">
-                  <Label className="mb-2 block">Puntos fuertes</Label>
+                  <Label className="mb-2 block">
+                    Puntos fuertes{" "}
+                    <span className="text-xs font-normal text-muted-foreground">
+                      (Key selling points)
+                    </span>
+                  </Label>
                   <div className="space-y-2">
                     {form.features.map((f, i) => (
-                      <div key={i} className="grid grid-cols-[9rem_minmax(0,1fr)_auto] gap-2 items-start">
-                        <Select value={f.icon}
+                      <div
+                        key={i}
+                        className="grid grid-cols-[9rem_minmax(0,1fr)_auto] gap-2 items-start"
+                      >
+                        <Select
+                          value={f.icon}
                           onValueChange={(v) => {
-                            const next = [...form.features]; next[i] = { ...next[i], icon: v }; update({ features: next })
+                            const next = [...form.features];
+                            next[i] = { ...next[i], icon: v };
+                            update({ features: next });
                           }}
                         >
                           <SelectTrigger className="text-xs w-full max-w-[9rem]">
@@ -642,29 +852,58 @@ export function ProjectEditorSheet({
                           </SelectContent>
                         </Select>
                         <div className="min-w-0 grid grid-cols-2 gap-2">
-                          <Input value={f.title}
+                          <Input
+                            value={f.title}
                             onChange={(e) => {
-                              const next = [...form.features]; next[i] = { ...next[i], title: e.target.value }; update({ features: next })
+                              const next = [...form.features];
+                              next[i] = { ...next[i], title: e.target.value };
+                              update({ features: next });
                             }}
                             placeholder="Luminosas"
                             className="min-w-0"
                           />
-                          <Input value={f.description}
+                          <Input
+                            value={f.description}
                             onChange={(e) => {
-                              const next = [...form.features]; next[i] = { ...next[i], description: e.target.value }; update({ features: next })
+                              const next = [...form.features];
+                              next[i] = {
+                                ...next[i],
+                                description: e.target.value,
+                              };
+                              update({ features: next });
                             }}
                             placeholder="Descripción breve"
                             className="min-w-0"
                           />
                         </div>
-                        <Button type="button" size="icon" variant="ghost" className="text-destructive shrink-0"
-                          onClick={() => update({ features: form.features.filter((_, j) => j !== i) })}>
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="ghost"
+                          className="text-destructive shrink-0"
+                          onClick={() =>
+                            update({
+                              features: form.features.filter((_, j) => j !== i),
+                            })
+                          }
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     ))}
-                    <Button type="button" variant="outline" size="sm"
-                      onClick={() => update({ features: [...form.features, { title: "", description: "", icon: "Sun" }] })}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        update({
+                          features: [
+                            ...form.features,
+                            { title: "", description: "", icon: "Sun" },
+                          ],
+                        })
+                      }
+                    >
                       <Plus className="h-4 w-4 mr-1.5" /> Añadir punto fuerte
                     </Button>
                   </div>
@@ -674,13 +913,24 @@ export function ProjectEditorSheet({
 
                 {/* Qualities */}
                 <div className="min-w-0">
-                  <Label className="mb-2 block">Memoria de Calidades</Label>
+                  <Label className="mb-2 block">
+                    Memoria de Calidades{" "}
+                    <span className="text-xs font-normal text-muted-foreground">
+                      (Specifications / finishes)
+                    </span>
+                  </Label>
                   <div className="space-y-2">
                     {form.qualities.map((q, i) => (
-                      <div key={i} className="grid grid-cols-[9rem_minmax(0,1fr)_auto] gap-2 items-start">
-                        <Select value={q.icon}
+                      <div
+                        key={i}
+                        className="grid grid-cols-[9rem_minmax(0,1fr)_auto] gap-2 items-start"
+                      >
+                        <Select
+                          value={q.icon}
                           onValueChange={(v) => {
-                            const next = [...form.qualities]; next[i] = { ...next[i], icon: v }; update({ qualities: next })
+                            const next = [...form.qualities];
+                            next[i] = { ...next[i], icon: v };
+                            update({ qualities: next });
                           }}
                         >
                           <SelectTrigger className="text-xs w-full max-w-[9rem]">
@@ -698,29 +948,60 @@ export function ProjectEditorSheet({
                           </SelectContent>
                         </Select>
                         <div className="min-w-0 grid grid-cols-2 gap-2">
-                          <Input value={q.title}
+                          <Input
+                            value={q.title}
                             onChange={(e) => {
-                              const next = [...form.qualities]; next[i] = { ...next[i], title: e.target.value }; update({ qualities: next })
+                              const next = [...form.qualities];
+                              next[i] = { ...next[i], title: e.target.value };
+                              update({ qualities: next });
                             }}
                             placeholder="Cubiertas"
                             className="min-w-0"
                           />
-                          <Input value={q.description}
+                          <Input
+                            value={q.description}
                             onChange={(e) => {
-                              const next = [...form.qualities]; next[i] = { ...next[i], description: e.target.value }; update({ qualities: next })
+                              const next = [...form.qualities];
+                              next[i] = {
+                                ...next[i],
+                                description: e.target.value,
+                              };
+                              update({ qualities: next });
                             }}
                             placeholder="Descripción breve"
                             className="min-w-0"
                           />
                         </div>
-                        <Button type="button" size="icon" variant="ghost" className="text-destructive shrink-0"
-                          onClick={() => update({ qualities: form.qualities.filter((_, j) => j !== i) })}>
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="ghost"
+                          className="text-destructive shrink-0"
+                          onClick={() =>
+                            update({
+                              qualities: form.qualities.filter(
+                                (_, j) => j !== i,
+                              ),
+                            })
+                          }
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     ))}
-                    <Button type="button" variant="outline" size="sm"
-                      onClick={() => update({ qualities: [...form.qualities, { title: "", description: "", icon: "Layers" }] })}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        update({
+                          qualities: [
+                            ...form.qualities,
+                            { title: "", description: "", icon: "Layers" },
+                          ],
+                        })
+                      }
+                    >
                       <Plus className="h-4 w-4 mr-1.5" /> Añadir calidad
                     </Button>
                   </div>
@@ -801,7 +1082,9 @@ export function ProjectEditorSheet({
                   <TabsContent value="construccion" className="mt-4">
                     <MediaSectionEditor
                       items={form.galleryConstruction}
-                      onChange={(items) => update({ galleryConstruction: items })}
+                      onChange={(items) =>
+                        update({ galleryConstruction: items })
+                      }
                       type="construction"
                       addPlaceholder="URL de imagen de obra"
                       projectSlug={project.slug}
@@ -866,5 +1149,5 @@ export function ProjectEditorSheet({
         </div>
       </SheetContent>
     </Sheet>
-  )
+  );
 }
