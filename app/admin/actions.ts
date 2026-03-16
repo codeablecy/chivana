@@ -203,6 +203,10 @@ export async function updateHeroVideo(
 
 export async function deleteProject(slug: string): Promise<{ success: boolean }> {
   const ok = await storeDeleteProject(slug)
+  if (ok) {
+    revalidatePath("/projects")
+    revalidatePath("/")
+  }
   return { success: ok }
 }
 

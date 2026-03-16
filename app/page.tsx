@@ -148,7 +148,7 @@ function WhyChivana() {
 }
 
 async function FeaturedProjects() {
-  const projects = await getActiveProjects()
+  const projects = (await getActiveProjects()).slice(0, 3)
   return <FeaturedProjectsDisplay projects={projects} />
 }
 

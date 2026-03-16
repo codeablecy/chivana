@@ -324,8 +324,9 @@ export function ProjectEditorSheet({
       const res = await deleteProject(project.slug);
       if (res.success) {
         toast.success("Proyecto eliminado");
-        router.push("/projects");
         onOpenChange(false);
+        await router.push("/projects");
+        router.refresh();
       } else {
         toast.error("No se pudo eliminar el proyecto");
       }

@@ -231,21 +231,33 @@ export function ProjectsGrid({ projects }: { projects: Project[] }) {
           : `${filtered.length} proyecto${filtered.length !== 1 ? "s" : ""}${activeCity !== "all" ? ` en ${activeCity}` : ""}`}
       </p>
 
-      {/* ── Grid: mobile-first, count-aware on desktop ── */}
+      {/* ── Flex layout: items reflow when list changes (e.g. after delete); last row centered ── */}
       <div
         className={cn(
-          "project-grid-stagger grid grid-cols-1 gap-6 sm:gap-8",
-          filtered.length === 1 && "sm:max-w-lg sm:mx-auto",
-          filtered.length === 2 && "sm:grid-cols-2 sm:max-w-4xl sm:mx-auto",
-          filtered.length >= 3 && "sm:grid-cols-2 xl:grid-cols-3"
+          "project-grid-stagger flex flex-wrap justify-center gap-6 sm:gap-8",
+          filtered.length === 1 && "sm:max-w-lg",
+          filtered.length === 2 && "sm:max-w-4xl"
         )}
       >
         {filtered.length === 0 ? (
-          <EmptyState onReset={resetFilters} />
+          <div className="w-full">
+            <EmptyState onReset={resetFilters} />
+          </div>
         ) : (
-          filtered.map((project) => (
-            <ProjectCard key={project.slug} project={project} />
-          ))
+          filtered.map((project) => {
+            const n = filtered.length
+            const baseWidth =
+              n === 1
+                ? "w-full sm:max-w-lg"
+                : n === 2
+                  ? "w-full sm:w-[calc((100%-2rem)/2)]"
+                  : "w-full sm:w-[calc((100%-2rem)/2)] xl:w-[calc((100%-4rem)/3)]"
+            return (
+              <div key={project.slug} className={cn("flex-shrink-0", baseWidth)}>
+                <ProjectCard project={project} />
+              </div>
+            )
+          })
         )}
       </div>
     </div>
