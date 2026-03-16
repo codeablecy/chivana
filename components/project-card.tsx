@@ -24,6 +24,7 @@ import {
 } from "lucide-react"
 import type { Project, PricingItem } from "@/lib/types"
 import { toCityDisplayName } from "@/lib/location-utils"
+import { parsePriceEuropean, formatPriceForCard } from "@/lib/format"
 
 // ─── Stat helpers ──────────────────────────────────────────────────────────────
 
@@ -39,29 +40,35 @@ function rangeStr(min: number, max: number, unit = ""): string {
 }
 
 interface CardStats {
-  rooms:     { min: number; max: number } | null
-  baths:     { min: number; max: number } | null
-  areaM2:    { min: number; max: number } | null
-  fromPrice: string | null
+  rooms: { min: number; max: number } | null
+  baths: { min: number; max: number } | null
+  areaM2: { min: number; max: number } | null
+  /** Resolved minimum price as number (supports European format e.g. 1.450.000). */
+  minPriceNum: number | null
+  /** Literal label when no numeric price (e.g. "Consultar"). */
+  fromPriceLiteral: string | null
 }
 
 function buildCardStats(pricing: PricingItem[]): CardStats {
-  if (!pricing.length) return { rooms: null, baths: null, areaM2: null, fromPrice: null }
+  if (!pricing.length) return { rooms: null, baths: null, areaM2: null, minPriceNum: null, fromPriceLiteral: null }
 
-  const rooms  = pricing.map((p) => p.rooms).filter((r): r is number => r != null)
-  const baths  = pricing.map((p) => p.baths).filter((b): b is number => b != null)
-  const areas  = pricing.map((p) => parseNum(p.area)).filter((a): a is number => a !== null)
-  const prices = pricing.map((p) => parseNum(p.price)).filter((n): n is number => n !== null && n > 0)
+  const rooms = pricing.map((p) => p.rooms).filter((r): r is number => r != null)
+  const baths = pricing.map((p) => p.baths).filter((b): b is number => b != null)
+  const areas = pricing.map((p) => parseNum(p.area)).filter((a): a is number => a !== null)
+  const prices = pricing
+    .map((p) => parsePriceEuropean(p.price))
+    .filter((n): n is number => n !== null && n > 0)
 
-  const minPrice = prices.length ? Math.min(...prices) : null
+  const minPriceNum = prices.length ? Math.min(...prices) : null
+  const fromPriceLiteral =
+    !minPriceNum && pricing[0]?.price && pricing[0].price !== "—" ? pricing[0].price : null
 
   return {
-    rooms:     rooms.length  ? { min: Math.min(...rooms),  max: Math.max(...rooms)  } : null,
-    baths:     baths.length  ? { min: Math.min(...baths),  max: Math.max(...baths)  } : null,
-    areaM2:    areas.length  ? { min: Math.min(...areas),  max: Math.max(...areas)  } : null,
-    fromPrice: minPrice
-      ? `Desde ${new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(minPrice)}`
-      : (pricing[0]?.price && pricing[0].price !== "—" ? pricing[0].price : null),
+    rooms: rooms.length ? { min: Math.min(...rooms), max: Math.max(...rooms) } : null,
+    baths: baths.length ? { min: Math.min(...baths), max: Math.max(...baths) } : null,
+    areaM2: areas.length ? { min: Math.min(...areas), max: Math.max(...areas) } : null,
+    minPriceNum,
+    fromPriceLiteral,
   }
 }
 
@@ -324,19 +331,38 @@ export function ProjectCard({ project, variant = "full" }: ProjectCardProps) {
             </div>
           )}
 
-          {/* Price + availability */}
+          {/* Price + availability — Awwwards-style: clear hierarchy, no truncation */}
           <div className="flex items-center justify-between gap-3 min-w-0">
-            <div className="min-w-0">
+            <div className="min-w-0 flex flex-col">
               {project.status === "sold-out" ? (
                 <p className="text-sm font-semibold text-muted-foreground line-through">
-                  {stats.fromPrice ?? "Vendido"}
+                  {stats.minPriceNum
+                    ? formatPriceForCard(stats.minPriceNum).amount
+                    : stats.fromPriceLiteral ?? "Vendido"}
                 </p>
-              ) : stats.fromPrice ? (
-                <p className="text-base font-bold text-accent leading-tight truncate">
-                  {stats.fromPrice}
-                </p>
+              ) : stats.minPriceNum ? (
+                (() => {
+                  const { fromLabel, amount } = formatPriceForCard(stats.minPriceNum)
+                  return (
+                    <>
+                      <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                        {fromLabel}
+                      </span>
+                      <span className="text-lg sm:text-xl font-bold tabular-nums tracking-tight text-accent break-words">
+                        {amount}
+                      </span>
+                    </>
+                  )
+                })()
               ) : (
-                <p className="text-sm font-semibold text-accent">Consultar precio</p>
+                <>
+                  <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                    Precio
+                  </span>
+                  <span className="text-sm font-semibold text-accent">
+                    {stats.fromPriceLiteral ?? "Consultar"}
+                  </span>
+                </>
               )}
             </div>
             <div className="flex items-center gap-1.5 text-sm shrink-0">
