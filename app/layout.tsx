@@ -11,6 +11,7 @@ import { seo } from "@/lib/seo";
 import { getCachedSettings, getFooterProjects } from "@/lib/store";
 import { Toaster } from "sonner";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next"
 
 const barlow = Barlow({
   subsets: ["latin"],
@@ -133,6 +134,7 @@ export default async function RootLayout({
 
   return (
     <html lang="es" className="scroll-smooth" translate="yes">
+      <Analytics />
       <body
         className={`${barlow.variable} ${belleza.variable} font-sans antialiased`}
       >
