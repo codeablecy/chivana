@@ -208,7 +208,7 @@ export function Footer({ projects = [] }: FooterProps) {
                 aria-label="Redes sociales"
               >
                 {settings.socialInstagram && (
-                  <a
+                  <Link
                     href={settings.socialInstagram}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -220,13 +220,12 @@ export function Footer({ projects = [] }: FooterProps) {
                     aria-label="Instagram — abrir en nueva pestaña"
                   >
                     <Instagram className="h-4 w-4" aria-hidden />
-                  </a>
+                  </Link>
                 )}
                 {settings.socialFacebook && (
-                  <a
+                  <Link
                     href={settings.socialFacebook}
                     target="_blank"
-                    rel="noopener noreferrer"
                     className={cn(
                       "flex h-9 w-9 items-center justify-center rounded-full text-navy-foreground/60",
                       "hover:bg-accent/10 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-navy",
@@ -235,13 +234,11 @@ export function Footer({ projects = [] }: FooterProps) {
                     aria-label="Facebook — abrir en nueva pestaña"
                   >
                     <Facebook className="h-4 w-4" aria-hidden />
-                  </a>
+                  </Link>
                 )}
                 {settings.socialLinkedIn && (
-                  <a
+                  <Link
                     href={settings.socialLinkedIn}
-                    target="_blank"
-                    rel="noopener noreferrer"
                     className={cn(
                       "flex h-9 w-9 items-center justify-center rounded-full text-navy-foreground/60",
                       "hover:bg-accent/10 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-navy",
@@ -250,7 +247,7 @@ export function Footer({ projects = [] }: FooterProps) {
                     aria-label="LinkedIn — abrir en nueva pestaña"
                   >
                     <Linkedin className="h-4 w-4" aria-hidden />
-                  </a>
+                  </Link>
                 )}
               </span>
             )}
@@ -264,7 +261,9 @@ export function Footer({ projects = [] }: FooterProps) {
               className="inline-flex items-baseline gap-0.5 font-mono text-[11px] normal-case tracking-normal text-navy-foreground/50"
               aria-hidden
             >
-              <span className="select-none text-navy-foreground/40" aria-hidden>❯</span>
+              <span className="select-none text-navy-foreground/40" aria-hidden>
+                ❯
+              </span>
               <TerminalTypingLink />
             </span>
           </p>
