@@ -94,11 +94,11 @@ export default async function ProjectDetailPage({
       <ManagementOverlay project={project} />
       <main>
         <ProjectHero project={project} />
-        {project.phases.length > 0 && <ProjectPhases phases={project.phases} />}
         {(project.gallery.photos.length > 0 ||
           (project.gallery.tour360?.length ?? 0) > 0) && (
-          <ProjectGallery gallery={project.gallery} />
-        )}
+            <ProjectGallery gallery={project.gallery} />
+          )}
+          {project.phases.length > 0 && <ProjectPhases phases={project.phases} />}
         <ProjectAbout project={project} />
         {project.pricing.length > 0 && (
           <ProjectTypes pricing={project.pricing} />
