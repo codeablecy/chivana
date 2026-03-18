@@ -1,5 +1,4 @@
-import React from "react"
-import { getProjectIcon } from "@/lib/project-icons"
+import { getProjectIcon } from "@/lib/project-icons";
 
 /**
  * Full-width orange section with glassmorphism quality cards.
@@ -8,10 +7,13 @@ import { getProjectIcon } from "@/lib/project-icons"
 export function ProjectQualities({
   qualities,
 }: {
-  qualities: { title: string; description: string; icon: string }[]
+  qualities: { title: string; description: string; icon: string }[];
 }) {
   return (
-    <section data-accent-section className="relative py-16 px-4 lg:py-24 lg:px-8 bg-accent overflow-hidden">
+    <section
+      data-accent-section
+      className="relative py-16 px-4 lg:py-24 lg:px-8 bg-accent overflow-hidden"
+    >
       {/* Subtle radial highlight for depth */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(255,255,255,0.12),transparent)]" />
 
@@ -24,17 +26,20 @@ export function ProjectQualities({
             Memoria de Calidades
           </h2>
           <p className="text-white/75 mt-4 max-w-xl mx-auto leading-relaxed text-base">
-            Cada detalle cuenta. Materiales de primera y acabados de lujo en cada rincon.
+            Cada detalle cuenta. Materiales de primera y acabados de lujo en
+            cada rincon.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {qualities.map((q) => {
-            const Icon = getProjectIcon(q.icon)
+        {/* Flex-wrap keeps each row centered for any card count (odd/even) */}
+        <div className="flex flex-wrap justify-center gap-5 items-stretch">
+          {qualities.map((q, idx) => {
+            const Icon = getProjectIcon(q.icon);
             return (
               <div
-                key={q.title}
-                className="group relative bg-white/10 hover:bg-white/[0.16] backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/10"
+                // `title` is not guaranteed unique (e.g. repeated "Zonas Comunes")
+                key={`${q.title}-${idx}`}
+                className="group relative bg-white/10 hover:bg-white/[0.16] backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/10 w-full sm:w-[18rem] flex-none"
               >
                 {/* Icon */}
                 <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-white/20 group-hover:bg-white/25 transition-colors mb-5">
@@ -48,10 +53,10 @@ export function ProjectQualities({
                   {q.description}
                 </p>
               </div>
-            )
+            );
           })}
         </div>
       </div>
     </section>
-  )
+  );
 }

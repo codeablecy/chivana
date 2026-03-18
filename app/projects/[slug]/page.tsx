@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
+import { Fragment, type ReactNode } from "react"
 import { Navbar } from "@/components/navbar"
 import { Contact } from "@/components/contact"
 import { getAllProjects, getProject } from "@/lib/store"
@@ -87,6 +88,64 @@ export default async function ProjectDetailPage({
     },
   }
 
+  const revealSections: Array<{ key: string; node: ReactNode }> = []
+  if (
+    project.gallery.photos.length > 0 ||
+    (project.gallery.tour360?.length ?? 0) > 0
+  ) {
+    revealSections.push({
+      key: "gallery",
+      node: <ProjectGallery gallery={project.gallery} />,
+    })
+  }
+
+  if (project.phases.length > 0) {
+    revealSections.push({
+      key: "phases",
+      node: <ProjectPhases phases={project.phases} />,
+    })
+  }
+
+  // Narrative flow (real-estate best practices):
+  // Gallery -> Phases -> Types -> Pricing -> Qualities -> About -> Location -> Contact
+  if (project.pricing.length > 0) {
+    revealSections.push({
+      key: "types",
+      node: <ProjectTypes pricing={project.pricing} />,
+    })
+  }
+
+  if (project.pricing.length > 0) {
+    revealSections.push({
+      key: "pricing",
+      node: <ProjectPricing pricing={project.pricing} />,
+    })
+  }
+
+  if (project.qualities.length > 0) {
+    revealSections.push({
+      key: "qualities",
+      node: <ProjectQualities qualities={project.qualities} />,
+    })
+  }
+
+  revealSections.push({
+    key: "about",
+    node: <ProjectAbout project={project} />,
+  })
+
+  revealSections.push({
+    key: "location",
+    node: <ProjectLocation project={project} />,
+  })
+
+  if (!isComingSoon) {
+    revealSections.push({
+      key: "contact",
+      node: <Contact />,
+    })
+  }
+
   return (
     <>
       <JsonLd data={listingJsonLd} />
@@ -94,23 +153,9 @@ export default async function ProjectDetailPage({
       <ManagementOverlay project={project} />
       <main>
         <ProjectHero project={project} />
-        {(project.gallery.photos.length > 0 ||
-          (project.gallery.tour360?.length ?? 0) > 0) && (
-            <ProjectGallery gallery={project.gallery} />
-          )}
-          {project.phases.length > 0 && <ProjectPhases phases={project.phases} />}
-        <ProjectAbout project={project} />
-        {project.pricing.length > 0 && (
-          <ProjectTypes pricing={project.pricing} />
-        )}
-        {project.qualities.length > 0 && (
-          <ProjectQualities qualities={project.qualities} />
-        )}
-        {project.pricing.length > 0 && (
-          <ProjectPricing pricing={project.pricing} />
-        )}
-        <ProjectLocation project={project} />
-        {!isComingSoon && <Contact />}
+        {revealSections.map((s) => (
+          <Fragment key={s.key}>{s.node}</Fragment>
+        ))}
       </main>
     </>
   )
