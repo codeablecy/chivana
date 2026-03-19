@@ -1,41 +1,42 @@
-import { notFound } from "next/navigation"
-import type { Metadata } from "next"
-import { Fragment, type ReactNode } from "react"
-import { Navbar } from "@/components/navbar"
-import { Contact } from "@/components/contact"
-import { getAllProjects, getProject } from "@/lib/store"
-import { ProjectHero } from "@/components/project/project-hero"
-import { ProjectPhases } from "@/components/project/project-phases"
-import { ProjectGallery } from "@/components/project/project-gallery"
-import { ProjectAbout } from "@/components/project/project-about"
-import { ProjectTypes } from "@/components/project/project-types"
-import { ProjectQualities } from "@/components/project/project-qualities"
-import { ProjectPricing } from "@/components/project/project-pricing"
-import { ProjectLocation } from "@/components/project/project-location"
-import { ManagementOverlay } from "@/components/admin/management-overlay"
-import { JsonLd } from "@/components/seo-json-ld"
-import { absoluteUrl, seo } from "@/lib/seo"
+import { ManagementOverlay } from "@/components/admin/management-overlay";
+import { Contact } from "@/components/contact";
+import { Navbar } from "@/components/navbar";
+import { ProjectAbout } from "@/components/project/project-about";
+import { ProjectGallery } from "@/components/project/project-gallery";
+import { ProjectHero } from "@/components/project/project-hero";
+import { ProjectLocation } from "@/components/project/project-location";
+import { ProjectPhases } from "@/components/project/project-phases";
+import { ProjectPricing } from "@/components/project/project-pricing";
+import { ProjectQualities } from "@/components/project/project-qualities";
+import { ProjectTypes } from "@/components/project/project-types";
+import { JsonLd } from "@/components/seo-json-ld";
+import { absoluteUrl, seo } from "@/lib/seo";
+import { getAllProjects, getProject } from "@/lib/store";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { Fragment, type ReactNode } from "react";
 
 /** Dynamic rendering ensures phases added in Admin appear immediately on the project page. */
-export const dynamic = "force-dynamic"
+export const dynamic = "force-dynamic";
 
 export async function generateStaticParams() {
-  const projects = await getAllProjects()
-  return projects.map((p) => ({ slug: p.slug }))
+  const projects = await getAllProjects();
+  return projects.map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params
-  const project = await getProject(slug)
-  if (!project) return { title: "Proyecto no encontrado" }
+  const { slug } = await params;
+  const project = await getProject(slug);
+  if (!project) return { title: "Proyecto no encontrado" };
 
-  const url = `/projects/${project.slug}`
-  const img =
-    project.heroImage?.startsWith("http") ? project.heroImage : absoluteUrl(project.heroImage)
+  const url = `/projects/${project.slug}`;
+  const img = project.heroImage?.startsWith("http")
+    ? project.heroImage
+    : absoluteUrl(project.heroImage);
 
   return {
     title: project.name,
@@ -48,7 +49,9 @@ export async function generateMetadata({
       siteName: seo.siteName,
       title: project.name,
       description: project.tagline,
-      images: project.heroImage ? [{ url: img, width: 1200, height: 630, alt: project.name }] : [],
+      images: project.heroImage
+        ? [{ url: img, width: 1200, height: 630, alt: project.name }]
+        : [],
     },
     twitter: {
       card: "summary_large_image",
@@ -56,20 +59,20 @@ export async function generateMetadata({
       description: project.tagline,
       images: project.heroImage ? [img] : [],
     },
-  }
+  };
 }
 
 export default async function ProjectDetailPage({
   params,
 }: {
-  params: Promise<{ slug: string }>
+  params: Promise<{ slug: string }>;
 }) {
-  const { slug } = await params
-  const project = await getProject(slug)
-  if (!project) notFound()
+  const { slug } = await params;
+  const project = await getProject(slug);
+  if (!project) notFound();
 
-  const isComingSoon = project.status === "coming-soon"
-  const pageUrl = absoluteUrl(`/projects/${project.slug}`)
+  const isComingSoon = project.status === "coming-soon";
+  const pageUrl = absoluteUrl(`/projects/${project.slug}`);
 
   const listingJsonLd = {
     "@context": "https://schema.org",
@@ -86,9 +89,9 @@ export default async function ProjectDetailPage({
       postalCode: project.location.postalCode,
       addressCountry: "ES",
     },
-  }
+  };
 
-  const revealSections: Array<{ key: string; node: ReactNode }> = []
+  const revealSections: Array<{ key: string; node: ReactNode }> = [];
   if (
     project.gallery.photos.length > 0 ||
     (project.gallery.tour360?.length ?? 0) > 0
@@ -96,14 +99,14 @@ export default async function ProjectDetailPage({
     revealSections.push({
       key: "gallery",
       node: <ProjectGallery gallery={project.gallery} />,
-    })
+    });
   }
 
   if (project.phases.length > 0) {
     revealSections.push({
       key: "phases",
       node: <ProjectPhases phases={project.phases} />,
-    })
+    });
   }
 
   // Narrative flow (real-estate best practices):
@@ -112,38 +115,38 @@ export default async function ProjectDetailPage({
     revealSections.push({
       key: "types",
       node: <ProjectTypes pricing={project.pricing} />,
-    })
+    });
   }
 
   if (project.pricing.length > 0) {
     revealSections.push({
       key: "pricing",
       node: <ProjectPricing pricing={project.pricing} />,
-    })
+    });
   }
 
   if (project.qualities.length > 0) {
     revealSections.push({
       key: "qualities",
       node: <ProjectQualities qualities={project.qualities} />,
-    })
+    });
   }
 
   revealSections.push({
     key: "about",
     node: <ProjectAbout project={project} />,
-  })
+  });
 
   revealSections.push({
     key: "location",
     node: <ProjectLocation project={project} />,
-  })
+  });
 
   if (!isComingSoon) {
     revealSections.push({
       key: "contact",
       node: <Contact />,
-    })
+    });
   }
 
   return (
@@ -158,5 +161,5 @@ export default async function ProjectDetailPage({
         ))}
       </main>
     </>
-  )
+  );
 }

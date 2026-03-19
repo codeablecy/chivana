@@ -6,9 +6,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 
-const DEFAULT_LAT = 40.14199365784348
-const DEFAULT_LNG = -3.924643621440974
-
 function latLngToBbox(lat: number, lng: number, zoom = 0.01) {
   return `${lng - zoom},${lat - zoom},${lng + zoom},${lat + zoom}`
 }
@@ -22,8 +19,16 @@ export interface MapPickerProps {
 }
 
 /**
- * Map picker: lat/lng inputs + OpenStreetMap embed preview.
- * Coordinates update the map in real-time. For precise placement, copy coordinates from a map service.
+ * Map picker with lat/lng text inputs + OpenStreetMap embed preview.
+ *
+ * Uses `type="text"` with `inputMode="decimal"` instead of `type="number"`
+ * to avoid browser number-input quirks (step rounding, value normalization,
+ * loss of trailing decimals/zeros, and the useEffect sync loop that would
+ * overwrite user input mid-keystroke).
+ *
+ * Focus tracking prevents the parent→child sync from interfering while
+ * the user is actively editing. On blur the value is normalised and any
+ * invalid input reverts to the last known-good prop value.
  */
 export function MapPicker({
   lat,
@@ -34,11 +39,20 @@ export function MapPicker({
 }: MapPickerProps) {
   const [latStr, setLatStr] = React.useState(String(lat))
   const [lngStr, setLngStr] = React.useState(String(lng))
+  const latFocusedRef = React.useRef(false)
+  const lngFocusedRef = React.useRef(false)
 
   React.useEffect(() => {
-    setLatStr(String(lat))
-    setLngStr(String(lng))
-  }, [lat, lng])
+    if (!latFocusedRef.current) {
+      setLatStr(String(lat))
+    }
+  }, [lat])
+
+  React.useEffect(() => {
+    if (!lngFocusedRef.current) {
+      setLngStr(String(lng))
+    }
+  }, [lng])
 
   const handleLatChange = (v: string) => {
     setLatStr(v)
@@ -56,6 +70,28 @@ export function MapPicker({
     }
   }
 
+  const handleLatBlur = () => {
+    latFocusedRef.current = false
+    const n = parseFloat(latStr)
+    if (!Number.isNaN(n) && n >= -90 && n <= 90) {
+      setLatStr(String(n))
+      onLatLngChange(n, lng)
+    } else {
+      setLatStr(String(lat))
+    }
+  }
+
+  const handleLngBlur = () => {
+    lngFocusedRef.current = false
+    const n = parseFloat(lngStr)
+    if (!Number.isNaN(n) && n >= -180 && n <= 180) {
+      setLngStr(String(n))
+      onLatLngChange(lat, n)
+    } else {
+      setLngStr(String(lng))
+    }
+  }
+
   const bbox = latLngToBbox(lat, lng)
   const embedUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(bbox)}&layer=mapnik&marker=${lat}%2C${lng}`
 
@@ -68,12 +104,15 @@ export function MapPicker({
           </Label>
           <Input
             id="map-lat"
-            type="number"
-            step="0.0001"
+            type="text"
+            inputMode="decimal"
             value={latStr}
             onChange={(e) => handleLatChange(e.target.value)}
-            className="mt-1"
+            onFocus={() => { latFocusedRef.current = true }}
+            onBlur={handleLatBlur}
+            className="mt-1 font-mono text-sm"
             placeholder="40.14199365784348"
+            aria-label="Latitud (-90 a 90)"
           />
         </div>
         <div>
@@ -82,12 +121,15 @@ export function MapPicker({
           </Label>
           <Input
             id="map-lng"
-            type="number"
-            step="0.0001"
+            type="text"
+            inputMode="decimal"
             value={lngStr}
             onChange={(e) => handleLngChange(e.target.value)}
-            className="mt-1"
+            onFocus={() => { lngFocusedRef.current = true }}
+            onBlur={handleLngBlur}
+            className="mt-1 font-mono text-sm"
             placeholder="-3.924643621440974"
+            aria-label="Longitud (-180 a 180)"
           />
         </div>
       </div>
