@@ -1,0 +1,1 @@
+1: pnpm exec tsc -> find out if there is/are error/s.
