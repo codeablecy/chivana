@@ -197,8 +197,9 @@ export function ProjectCard({ project, variant = "full" }: ProjectCardProps) {
   const [tourOpen, setTourOpen] = useState(false)
 
   const stats    = buildCardStats(project.pricing)
-  const tour360  = project.gallery?.tour360?.[0]
-  const has360   = !!tour360?.url
+  const heroVtUrl =
+    project.heroVirtualTourUrl?.trim() || project.gallery?.tour360?.[0]?.url
+  const has360 = !!heroVtUrl
   const fallback = project.propertyTypes[0]
 
   const roomsVal = stats.rooms
@@ -395,11 +396,11 @@ export function ProjectCard({ project, variant = "full" }: ProjectCardProps) {
       </article>
 
       {/* Tour 360° modal — outside article so click doesn't bubble into Link */}
-      {has360 && tour360 && (
+      {has360 && heroVtUrl && (
         <Tour360Dialog
           open={tourOpen}
           onClose={() => setTourOpen(false)}
-          tourUrl={tour360.url}
+          tourUrl={heroVtUrl}
           projectName={project.name}
         />
       )}

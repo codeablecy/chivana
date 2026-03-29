@@ -109,7 +109,14 @@ function SpecPill({
 
 // ─── Main component ────────────────────────────────────────────────────────────
 
-export function ProjectHero({ project }: { project: Project }) {
+export function ProjectHero({
+  project,
+  showPricingCta = true,
+}: {
+  project: Project
+  /** When false, hide "Ver Precios" (e.g. price table disabled in Admin). */
+  showPricingCta?: boolean
+}) {
   const isComingSoon = project.status === "coming-soon"
   const stats        = buildStats(project.pricing)
 
@@ -226,14 +233,16 @@ export function ProjectHero({ project }: { project: Project }) {
               >
                 <Link href="#viviendas">Descubrir Tipologías</Link>
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="w-full sm:w-auto rounded-xl border-2 border-card/50 text-card hover:bg-card/15 hover:border-card/70 text-sm sm:text-base px-6 sm:px-8 h-12 bg-transparent backdrop-blur-sm font-medium"
-                asChild
-              >
-                <Link href="#precios">Ver Precios</Link>
-              </Button>
+              {showPricingCta && (
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full sm:w-auto rounded-xl border-2 border-card/50 text-card hover:bg-card/15 hover:border-card/70 text-sm sm:text-base px-6 sm:px-8 h-12 bg-transparent backdrop-blur-sm font-medium"
+                  asChild
+                >
+                  <Link href="#precios">Ver Precios</Link>
+                </Button>
+              )}
             </div>
 
             {/* ── Mobile summary card (below CTAs, above fold) ── */}

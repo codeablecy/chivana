@@ -30,6 +30,9 @@ export interface Database {
           construction_end_date: string | null
           map_embed_url: string | null
           custom_fields: Record<string, string>
+          hero_video_url?: string | null
+          hero_virtual_tour_url?: string | null
+          show_pricing_table?: boolean
           created_at: string
           updated_at: string
         }

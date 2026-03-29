@@ -64,6 +64,16 @@ export interface Project {
    * the static heroImage — exactly like the homepage hero.
    */
   heroVideoUrl?: string
+  /**
+   * Full-width virtual tour / 360 embed below the hero (SSOT presentation layer).
+   * Separate from `gallery.tour360` (gallery tab). Provider-agnostic iframe URL.
+   */
+  heroVirtualTourUrl?: string
+  /**
+   * When true, show the "Los Precios" table section. Default follows DB migration
+   * (existing projects stay visible; new projects opt in).
+   */
+  showPricingTable: boolean
   tags: string[]
   location: {
     address: string

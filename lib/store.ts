@@ -27,12 +27,23 @@ const PROJECT_SELECT = `
   project_qualities(id, title, description, icon, sort_order)
 ` as const
 
+/** Shape of a `project_locations` PostgREST row. */
+interface LocationRow {
+  address?: string
+  city?: string
+  province?: string
+  postal_code?: string
+  lat?: number
+  lng?: number
+  distances?: string[]
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapRow(row: Record<string, any>): Project {
   // PostgREST returns one-to-one relationships (UNIQUE FK) as a plain object,
   // and one-to-many as an array. Handle both to be safe.
   const locRaw = row.project_locations
-  const loc: Record<string, unknown> = Array.isArray(locRaw)
+  const loc: LocationRow = Array.isArray(locRaw)
     ? (locRaw[0] ?? {})
     : (locRaw ?? {})
 
@@ -51,6 +62,10 @@ function mapRow(row: Record<string, any>): Project {
     description: row.description,
     heroImage: row.hero_image,
     heroVideoUrl: row.hero_video_url ?? undefined,
+    heroVirtualTourUrl: row.hero_virtual_tour_url?.trim()
+      ? String(row.hero_virtual_tour_url).trim()
+      : undefined,
+    showPricingTable: row.show_pricing_table ?? true,
     tags: row.tags ?? [],
     status: row.status as Project["status"],
     totalUnits: row.total_units,
@@ -322,6 +337,12 @@ export async function updateProject(
   if (data.constructionEndDate   !== undefined) projectPayload.construction_end_date   = data.constructionEndDate
   if (data.mapEmbedUrl           !== undefined) projectPayload.map_embed_url           = data.mapEmbedUrl
   if (data.customFields          !== undefined) projectPayload.custom_fields           = data.customFields
+  if (data.heroVirtualTourUrl !== undefined) {
+    projectPayload.hero_virtual_tour_url = data.heroVirtualTourUrl?.trim() || null
+  }
+  if (data.showPricingTable !== undefined) {
+    projectPayload.show_pricing_table = data.showPricingTable
+  }
 
   if (Object.keys(projectPayload).length > 0) {
     const { error: projErr } = await db.from("projects").update(projectPayload).eq("slug", slug)
@@ -392,6 +413,8 @@ export async function createProject(project: Project): Promise<Project> {
       construction_end_date: project.constructionEndDate ?? null,
       map_embed_url: project.mapEmbedUrl ?? null,
       custom_fields: project.customFields,
+      hero_virtual_tour_url: project.heroVirtualTourUrl?.trim() || null,
+      show_pricing_table: project.showPricingTable ?? false,
     })
     .select("id")
     .single()

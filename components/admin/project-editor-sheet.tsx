@@ -34,6 +34,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import {
   Sheet,
   SheetContent,
@@ -117,6 +118,8 @@ export function ProjectEditorSheet({
     galleryParcela: [...(project.gallery.parcela ?? [])],
     heroImage: project.heroImage,
     heroVideoUrl: project.heroVideoUrl ?? "",
+    heroVirtualTourUrl: project.heroVirtualTourUrl ?? "",
+    showPricingTable: project.showPricingTable,
     amenities: [...project.location.amenities],
     distances: [...project.location.distances],
     features: [...project.features],
@@ -148,6 +151,8 @@ export function ProjectEditorSheet({
         galleryParcela: [...(project.gallery.parcela ?? [])],
         heroImage: project.heroImage,
         heroVideoUrl: project.heroVideoUrl ?? "",
+        heroVirtualTourUrl: project.heroVirtualTourUrl ?? "",
+        showPricingTable: project.showPricingTable,
         amenities: [...project.location.amenities],
         distances: [...project.location.distances],
         features: [...project.features],
@@ -185,6 +190,8 @@ export function ProjectEditorSheet({
         JSON.stringify(project.gallery.parcela ?? []) ||
       form.heroImage !== project.heroImage ||
       form.heroVideoUrl !== (project.heroVideoUrl ?? "") ||
+      form.heroVirtualTourUrl !== (project.heroVirtualTourUrl ?? "") ||
+      form.showPricingTable !== project.showPricingTable ||
       JSON.stringify(form.amenities) !==
         JSON.stringify(project.location.amenities) ||
       JSON.stringify(form.distances) !==
@@ -221,6 +228,8 @@ export function ProjectEditorSheet({
       galleryParcela: [...(project.gallery.parcela ?? [])],
       heroImage: project.heroImage,
       heroVideoUrl: project.heroVideoUrl ?? "",
+      heroVirtualTourUrl: project.heroVirtualTourUrl ?? "",
+      showPricingTable: project.showPricingTable,
       amenities: [...project.location.amenities],
       distances: [...project.location.distances],
       features: [...project.features],
@@ -249,6 +258,8 @@ export function ProjectEditorSheet({
           lng: form.lng,
         },
         tags: form.tags,
+        heroVirtualTourUrl: form.heroVirtualTourUrl.trim() || undefined,
+        showPricingTable: form.showPricingTable,
       });
       if (!updateResult.success) {
         toast.error("Error al guardar", {
@@ -814,6 +825,23 @@ export function ProjectEditorSheet({
                   />
                 </div>
 
+                <div className="flex flex-row items-center justify-between gap-4 rounded-xl border border-border bg-muted/30 px-4 py-3">
+                  <div className="min-w-0 space-y-1 pr-2">
+                    <Label htmlFor="show-pricing" className="text-sm font-medium">
+                      Mostrar tabla de precios
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Igual que publicar en el blog: la sección &quot;Los Precios&quot;
+                      solo aparece si está activa.
+                    </p>
+                  </div>
+                  <Switch
+                    id="show-pricing"
+                    checked={form.showPricingTable}
+                    onCheckedChange={(v) => update({ showPricingTable: v })}
+                  />
+                </div>
+
                 <Separator />
 
                 {/* Features (USPs) */}
@@ -1010,6 +1038,26 @@ export function ProjectEditorSheet({
               </TabsContent>
 
               <TabsContent value="media" className="space-y-4 mt-4">
+                <div className="rounded-xl border border-border bg-muted/20 p-4 space-y-2">
+                  <Label htmlFor="hero-vt-url">
+                    Tour virtual bajo hero (embed)
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Independiente del Tour 360° de la galería. Cualquier proveedor
+                    con URL de embed o iframe (Matterport, Wizio, etc.).
+                  </p>
+                  <Input
+                    id="hero-vt-url"
+                    type="url"
+                    placeholder="URL de embed o enlace público (cualquier proveedor)"
+                    value={form.heroVirtualTourUrl}
+                    onChange={(e) =>
+                      update({ heroVirtualTourUrl: e.target.value })
+                    }
+                    className="mt-1 font-mono text-sm"
+                  />
+                </div>
+
                 <Tabs defaultValue="fotos" className="w-full">
                   <TabsList className="flex flex-wrap gap-2 p-2 rounded-full bg-muted/80 w-full h-auto">
                     <TabsTrigger

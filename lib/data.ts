@@ -258,6 +258,7 @@ export const projects: Project[] = [
     status: "active",
     totalUnits: 44,
     availableUnits: 3,
+    showPricingTable: true,
     customFields: {},
   },
   {
@@ -394,6 +395,7 @@ export const projects: Project[] = [
     status: "coming-soon",
     totalUnits: 30,
     availableUnits: 30,
+    showPricingTable: true,
     customFields: {},
   },
 ]

@@ -22,6 +22,7 @@ import { GalleryEditor } from "./gallery-editor"
 import type { PricingItem, Amenity } from "@/lib/types"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+import { Switch } from "@/components/ui/switch"
 
 // ─── Steps config ─────────────────────────────────────────────────────────────
 
@@ -112,6 +113,8 @@ export function ProjectCreator() {
   const [heroImage, setHeroImage] = useState("")
   const [galleryPhotos, setGalleryPhotos] = useState<{ src: string; alt: string }[]>([])
   const [tour360Url, setTour360Url] = useState("")
+  const [heroVirtualTourUrl, setHeroVirtualTourUrl] = useState("")
+  const [showPricingTable, setShowPricingTable] = useState(false)
   const [videoEmbedUrl, setVideoEmbedUrl] = useState("")
   const [pricing, setPricing] = useState<PricingItem[]>([])
   const [amenities, setAmenities] = useState<Amenity[]>([])
@@ -192,6 +195,8 @@ export function ProjectCreator() {
       distances: distances.filter(Boolean).length > 0 ? distances.filter(Boolean) : undefined,
       features: features.length > 0 ? features : undefined,
       qualities: qualities.length > 0 ? qualities : undefined,
+      heroVirtualTourUrl: heroVirtualTourUrl.trim() || undefined,
+      showPricingTable,
     })
 
     if (result.success) {
@@ -206,7 +211,7 @@ export function ProjectCreator() {
   function reset() {
     setSubmitted(false); setStep(1); setMaxReached(1)
     setFormData({ name: "", slug: "", tagline: "", description: "", address: "", city: "", province: "", postalCode: "", lat: "40.14199365784348", lng: "-3.924643621440974", totalUnits: "" })
-    setHeroImage(""); setGalleryPhotos([]); setTour360Url(""); setVideoEmbedUrl("")
+    setHeroImage(""); setGalleryPhotos([]); setTour360Url(""); setHeroVirtualTourUrl(""); setShowPricingTable(false); setVideoEmbedUrl("")
     setPricing([]); setAmenities([]); setDistances([]); setFeatures([]); setQualities([])
   }
 
@@ -357,6 +362,21 @@ export function ProjectCreator() {
                 addButtonLabel="Añadir tipología"
                 projectSlug={formData.slug}
               />
+              <div className="flex flex-row items-center justify-between gap-4 rounded-xl border border-border bg-muted/30 px-4 py-3 mt-6">
+                <div className="min-w-0 space-y-1">
+                  <Label htmlFor="create-show-pricing" className="text-sm font-medium">
+                    Mostrar tabla de precios en la ficha
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Desactivado por defecto (como borrador en el blog). Puedes activarlo cuando quieras publicar precios.
+                  </p>
+                </div>
+                <Switch
+                  id="create-show-pricing"
+                  checked={showPricingTable}
+                  onCheckedChange={setShowPricingTable}
+                />
+              </div>
             </StepCard>
 
             <div className="flex items-center justify-between">
@@ -416,6 +436,22 @@ export function ProjectCreator() {
               )}
             </StepCard>
 
+            <StepCard
+              title="Tour virtual bajo hero"
+              subtitle="Pantalla completa bajo la cabecera; independiente del Tour 360° de la galería. Cualquier URL de embed."
+            >
+              <div className="relative">
+                <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                <Input
+                  type="url"
+                  placeholder="URL de embed o enlace público (cualquier proveedor)"
+                  value={heroVirtualTourUrl}
+                  onChange={(e) => setHeroVirtualTourUrl(e.target.value)}
+                  className="pl-9 font-mono text-sm"
+                />
+              </div>
+            </StepCard>
+
             {/* Video embed */}
             <StepCard title="Vídeo del proyecto" subtitle="Enlace de YouTube o Vimeo. Se mostrará en la pestaña Vídeos de la galería.">
               <div className="space-y-2">
@@ -454,12 +490,12 @@ export function ProjectCreator() {
             </StepCard>
 
             {/* Tour 360° */}
-            <StepCard title="Tour 360°" subtitle="Embed de Matterport, Wizio u otra plataforma. Puedes añadir más después.">
+            <StepCard title="Tour 360°" subtitle="Embed de cualquier plataforma con URL de iframe (Matterport, Wizio…). Puedes añadir más después.">
               <div className="relative">
                 <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 <Input
                   type="url"
-                  placeholder="https://my.matterport.com/show/?m=..."
+                  placeholder="URL de embed o enlace público (cualquier proveedor)"
                   value={tour360Url}
                   onChange={(e) => setTour360Url(e.target.value)}
                   className="pl-9"

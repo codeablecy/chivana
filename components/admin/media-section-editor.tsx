@@ -467,7 +467,7 @@ export function MediaSectionEditor<T extends AnyItem>({
           <p className="text-xs text-muted-foreground">
             {type === "videos"
               ? "Pega el enlace de YouTube o Vimeo. Se normaliza automáticamente."
-              : "Pega la URL de embed de Matterport, Wizio u otra plataforma 3D."}
+              : "Pega la URL de embed de tu plataforma 3D (cualquier proveedor con iframe)."}
           </p>
 
           {/* Embed URL input */}
@@ -477,7 +477,7 @@ export function MediaSectionEditor<T extends AnyItem>({
               <Input
                 placeholder={type === "videos"
                   ? "https://www.youtube.com/watch?v=... o youtu.be/..."
-                  : "https://my.matterport.com/show/?m=... o URL de Wizio"}
+                  : "URL de embed o enlace público (cualquier proveedor)"}
                 value={embedUrl}
                 onChange={(e) => setEmbedUrl(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleAddEmbed()}

@@ -20,7 +20,14 @@ import { useState } from "react";
  * Displays typologies with images (first image = hero), specs, and CTA.
  * Mobile-first, Awwwards-inspired layout.
  */
-export function ProjectTypes({ pricing }: { pricing: PricingItem[] }) {
+export function ProjectTypes({
+  pricing,
+  showPricingSection = true,
+}: {
+  pricing: PricingItem[]
+  /** When false, hide the CTA to the price table section. */
+  showPricingSection?: boolean
+}) {
   const [current, setCurrent] = useState(0);
   const item = pricing[current];
 
@@ -181,9 +188,11 @@ export function ProjectTypes({ pricing }: { pricing: PricingItem[] }) {
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Button className="w-full sm:w-auto" asChild>
-                <Link href="#precios">Ver Precios</Link>
-              </Button>
+              {showPricingSection && (
+                <Button className="w-full sm:w-auto" asChild>
+                  <Link href="#precios">Ver Precios</Link>
+                </Button>
+              )}
               {item.planPdf && (
                 <Button
                   variant="outline"

@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState, useEffect, useCallback, useRef, useMemo } from "react"
 import Image from "next/image"
 import { ChevronLeft, ChevronRight, Maximize2, Minimize2, Globe, Play } from "lucide-react"
+import { embedDisplayUrl, embedTitle, embedThumb } from "@/lib/embed-display-url"
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -21,54 +22,10 @@ interface GalleryProps {
   }
 }
 
-const TABS = ["Fotos", "Vídeos", "Tour 360°", "Parcela", "Construccion"] as const
-type TabId = (typeof TABS)[number]
+const ALL_TABS = ["Fotos", "Vídeos", "Tour 360°", "Parcela", "Construccion"] as const
+type TabId = (typeof ALL_TABS)[number]
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
-
-function ytId(url: string): string | null {
-  const p = [
-    /youtube\.com\/embed\/([^?&/]+)/,
-    /youtube\.com\/watch\?v=([^&]+)/,
-    /youtu\.be\/([^?&/]+)/,
-    /youtube\.com\/shorts\/([^?&/]+)/,
-  ]
-  for (const r of p) { const m = url.match(r); if (m?.[1]) return m[1] }
-  return null
-}
-
-function embedThumb(url: string): string | undefined {
-  const id = ytId(url)
-  return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : undefined
-}
-
-/**
- * Build iframe src for display: minimal branding, autoplay (muted), native controls.
- * YouTube only; other embeds use url as-is.
- */
-function embedDisplayUrl(url: string): string {
-  const id = ytId(url)
-  if (!id) return url
-  const params = new URLSearchParams({
-    autoplay: "1",
-    mute: "1",
-    rel: "0",
-    modestbranding: "1",
-    showinfo: "0",
-    controls: "1",
-    iv_load_policy: "3",
-    fs: "1",
-  })
-  return `https://www.youtube.com/embed/${id}?${params.toString()}`
-}
-
-function embedTitle(url: string): string {
-  if (/youtube\.com|youtu\.be/.test(url)) return "YouTube"
-  if (/vimeo\.com/.test(url)) return "Vimeo"
-  if (/matterport\.com/.test(url)) return "Matterport"
-  if (/wizio/.test(url)) return "Wizio"
-  try { return new URL(url).hostname.replace("www.", "") } catch { return "Embed" }
-}
 
 /** Convert raw gallery arrays to a flat list of DisplayItems for a tab */
 function getDisplayItems(tab: TabId, gallery: GalleryProps["gallery"]): DisplayItem[] {
@@ -97,12 +54,14 @@ function getDisplayItems(tab: TabId, gallery: GalleryProps["gallery"]): DisplayI
     }
 
     case "Tour 360°":
-      return (gallery.tour360 ?? []).map((t) => ({
-        kind: "embed",
-        url: t.url,
-        title: embedTitle(t.url),
-        thumb: t.thumb,
-      }))
+      return (gallery.tour360 ?? [])
+        .filter((t) => t.url?.trim())
+        .map((t) => ({
+          kind: "embed" as const,
+          url: t.url,
+          title: embedTitle(t.url),
+          thumb: t.thumb,
+        }))
 
     case "Parcela": {
       const items: DisplayItem[] = []
@@ -121,19 +80,29 @@ function getDisplayItems(tab: TabId, gallery: GalleryProps["gallery"]): DisplayI
   }
 }
 
+function tabsWithContent(gallery: GalleryProps["gallery"]): TabId[] {
+  return ALL_TABS.filter((tab) => getDisplayItems(tab, gallery).length > 0)
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function ProjectGallery({ gallery }: GalleryProps) {
-  const [activeTab, setActiveTab] = useState<TabId>("Fotos")
+  const availableTabs = useMemo(() => tabsWithContent(gallery), [gallery])
+  const [activeTab, setActiveTab] = useState<TabId>(() => availableTabs[0] ?? "Fotos")
+
+  useEffect(() => {
+    if (availableTabs.length === 0) return
+    setActiveTab((cur) => (availableTabs.includes(cur) ? cur : availableTabs[0]))
+  }, [availableTabs])
   const [activeIndex, setActiveIndex] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [embedLoaded, setEmbedLoaded] = useState(false)
   const [embedFullscreenOverlay, setEmbedFullscreenOverlay] = useState(false)
   const [isNativeFullscreen, setIsNativeFullscreen] = useState(false)
   const viewerRef = useRef<HTMLDivElement>(null)
-
-  /** On mobile/tablet use overlay (Fullscreen API unreliable for iframes on iOS); on desktop use Fullscreen API */
+  /** Mobile/tablet: overlay fullscreen; desktop: Fullscreen API */
   const [useOverlayFullscreen, setUseOverlayFullscreen] = useState(true)
+
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 1024px)")
     setUseOverlayFullscreen(!mq.matches)
@@ -142,7 +111,10 @@ export function ProjectGallery({ gallery }: GalleryProps) {
     return () => mq.removeEventListener("change", handler)
   }, [])
 
-  const items = getDisplayItems(activeTab, gallery)
+  const items = useMemo(
+    () => getDisplayItems(activeTab, gallery),
+    [activeTab, gallery],
+  )
   const current = items[activeIndex] ?? null
   const hasItems = items.length > 0
   const isFullscreen = isNativeFullscreen || embedFullscreenOverlay
@@ -160,8 +132,12 @@ export function ProjectGallery({ gallery }: GalleryProps) {
     return () => document.removeEventListener("fullscreenchange", onFullscreenChange)
   }, [])
 
-  const prev = useCallback(() => setActiveIndex((i) => (i > 0 ? i - 1 : items.length - 1)), [items.length])
-  const next = useCallback(() => setActiveIndex((i) => (i < items.length - 1 ? i + 1 : 0)), [items.length])
+  const prev = useCallback(() => {
+    setActiveIndex((i) => (items.length === 0 ? 0 : i > 0 ? i - 1 : items.length - 1))
+  }, [items.length])
+  const next = useCallback(() => {
+    setActiveIndex((i) => (items.length === 0 ? 0 : i < items.length - 1 ? i + 1 : 0))
+  }, [items.length])
 
   /** Toggle fullscreen: overlay on mobile/tablet (reliable); Fullscreen API on desktop */
   const toggleEmbedFullscreen = useCallback(() => {
@@ -201,6 +177,10 @@ export function ProjectGallery({ gallery }: GalleryProps) {
     }
   }, [embedFullscreenOverlay])
 
+  if (availableTabs.length === 0) {
+    return null
+  }
+
   return (
     <section id="galeria" className="py-16 px-4 lg:py-24 lg:px-8 bg-background">
       <div className="max-w-7xl mx-auto">
@@ -213,15 +193,23 @@ export function ProjectGallery({ gallery }: GalleryProps) {
           </h2>
         </div>
 
-        {/* Tab bar */}
-        <div className="flex flex-wrap justify-center gap-2 mb-8">
-          {TABS.map((tab) => (
+        {/* Tab bar — only categories with media */}
+        {availableTabs.length > 1 && (
+          <div
+            className="flex flex-wrap justify-center gap-2 mb-8"
+            role="tablist"
+            aria-label="Categorías de galería"
+          >
+            {availableTabs.map((tab) => (
               <button
                 key={tab}
+                type="button"
+                role="tab"
+                aria-selected={activeTab === tab}
                 onClick={() => setActiveTab(tab)}
                 className={`px-5 py-2.5 rounded-full text-sm font-medium transition-colors ${
                   activeTab === tab
-                  ? "bg-accent text-accent-foreground"
+                    ? "bg-accent text-accent-foreground"
                     : "bg-muted text-muted-foreground hover:bg-muted/80"
                 }`}
               >
@@ -229,6 +217,7 @@ export function ProjectGallery({ gallery }: GalleryProps) {
               </button>
             ))}
           </div>
+        )}
 
         {/* Main viewer */}
         {hasItems && current ? (

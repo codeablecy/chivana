@@ -3,6 +3,7 @@ import { Contact } from "@/components/contact";
 import { Navbar } from "@/components/navbar";
 import { ProjectAbout } from "@/components/project/project-about";
 import { ProjectGallery } from "@/components/project/project-gallery";
+import { ProjectHeroVirtualTour } from "@/components/project/project-hero-virtual-tour";
 import { ProjectHero } from "@/components/project/project-hero";
 import { ProjectLocation } from "@/components/project/project-location";
 import { ProjectPhases } from "@/components/project/project-phases";
@@ -11,6 +12,7 @@ import { ProjectQualities } from "@/components/project/project-qualities";
 import { ProjectTypes } from "@/components/project/project-types";
 import { JsonLd } from "@/components/seo-json-ld";
 import { absoluteUrl, seo } from "@/lib/seo";
+import { galleryHasAnyTabContent } from "@/lib/project-gallery-utils";
 import { getAllProjects, getProject } from "@/lib/store";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -92,10 +94,7 @@ export default async function ProjectDetailPage({
   };
 
   const revealSections: Array<{ key: string; node: ReactNode }> = [];
-  if (
-    project.gallery.photos.length > 0 ||
-    (project.gallery.tour360?.length ?? 0) > 0
-  ) {
+  if (galleryHasAnyTabContent(project.gallery)) {
     revealSections.push({
       key: "gallery",
       node: <ProjectGallery gallery={project.gallery} />,
@@ -114,11 +113,16 @@ export default async function ProjectDetailPage({
   if (project.pricing.length > 0) {
     revealSections.push({
       key: "types",
-      node: <ProjectTypes pricing={project.pricing} />,
+      node: (
+        <ProjectTypes
+          pricing={project.pricing}
+          showPricingSection={project.showPricingTable}
+        />
+      ),
     });
   }
 
-  if (project.pricing.length > 0) {
+  if (project.showPricingTable && project.pricing.length > 0) {
     revealSections.push({
       key: "pricing",
       node: <ProjectPricing pricing={project.pricing} />,
@@ -155,7 +159,18 @@ export default async function ProjectDetailPage({
       <Navbar />
       <ManagementOverlay project={project} />
       <main>
-        <ProjectHero project={project} />
+        <ProjectHero
+          project={project}
+          showPricingCta={
+            project.showPricingTable && project.pricing.length > 0
+          }
+        />
+        {project.heroVirtualTourUrl?.trim() ? (
+          <ProjectHeroVirtualTour
+            embedUrl={project.heroVirtualTourUrl.trim()}
+            projectName={project.name}
+          />
+        ) : null}
         {revealSections.map((s) => (
           <Fragment key={s.key}>{s.node}</Fragment>
         ))}

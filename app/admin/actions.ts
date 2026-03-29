@@ -1,7 +1,14 @@
 "use server"
 
 import { redirect } from "next/navigation"
-import { revalidatePath, revalidateTag } from "next/cache"
+import { revalidatePath, revalidateTag as _revalidateTag } from "next/cache"
+
+/**
+ * Next.js 16 changed the `revalidateTag` signature to require a second
+ * `profile` argument. Until the stable API settles, cast to the
+ * single-argument shape that works at runtime.
+ */
+const revalidateTag = _revalidateTag as (tag: string) => void
 import { createSupabaseServerClient } from "@/lib/supabase/server"
 import {
   getAllProjects,
@@ -41,6 +48,19 @@ import type {
   PricingItem,
   Amenity,
 } from "@/lib/types"
+
+/**
+ * Simple password-only sign-in used by the admin overlay login form.
+ * The email is read from ADMIN_EMAIL env; only the password is exposed to the UI.
+ */
+export async function login(password: string): Promise<{ success: boolean }> {
+  const supabase = await createSupabaseServerClient()
+  const email = process.env.ADMIN_EMAIL ?? ""
+  const { error } = await supabase.auth.signInWithPassword({ email, password })
+  if (error) return { success: false }
+  revalidatePath("/", "layout")
+  return { success: true }
+}
 
 export async function logout(): Promise<never> {
   const supabase = await createSupabaseServerClient()
@@ -143,6 +163,8 @@ export async function updateProjectFull(
     mapEmbedUrl: string
     location: Partial<Project["location"]>
     tags: string[]
+    heroVirtualTourUrl: string
+    showPricingTable: boolean
   }>,
 ): Promise<{ success: boolean }> {
   const project = await getProject(slug)
@@ -166,6 +188,14 @@ export async function updateProjectFull(
           lng: typeof data.location.lng === "number" ? data.location.lng : project.location.lng,
         }
       : project.location,
+    heroVirtualTourUrl:
+      data.heroVirtualTourUrl !== undefined
+        ? data.heroVirtualTourUrl
+        : project.heroVirtualTourUrl,
+    showPricingTable:
+      data.showPricingTable !== undefined
+        ? data.showPricingTable
+        : project.showPricingTable,
   }
 
   const result = await updateProject(slug, merged)
@@ -258,6 +288,8 @@ export async function addProject(data: {
   distances?: string[]
   features?: { title: string; description: string; icon: string }[]
   qualities?: { title: string; description: string; icon: string }[]
+  heroVirtualTourUrl?: string
+  showPricingTable?: boolean
 }): Promise<{ success: boolean; slug?: string }> {
   const existing = await getProject(data.slug)
   if (existing) return { success: false }
@@ -305,6 +337,8 @@ export async function addProject(data: {
     totalUnits: totalUnits || 1,
     availableUnits,
     customFields: {},
+    heroVirtualTourUrl: data.heroVirtualTourUrl?.trim() || undefined,
+    showPricingTable: data.showPricingTable ?? false,
   }
 
   await createProject(project)
