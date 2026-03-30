@@ -6,8 +6,8 @@ export function ProjectPricing({ pricing }: { pricing: PricingItem[] }) {
   return (
     <section id="precios" className="scroll-mt-20 py-16 px-4 lg:py-24 lg:px-8 bg-card" aria-labelledby="precios-heading">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <p className="text-accent font-semibold text-sm tracking-widest uppercase mb-2">
+        <div className="mb-12">
+          <p className="text-accent font-semibold text-xs tracking-[0.2em] uppercase mb-3">
             Precios
           </p>
           <h2 id="precios-heading" className="font-serif text-2xl font-bold text-foreground lg:text-4xl text-balance">
@@ -69,30 +69,30 @@ export function ProjectPricing({ pricing }: { pricing: PricingItem[] }) {
           ))}
         </div>
 
-        {/* Desktop table */}
+        {/* Desktop table — stronger visual hierarchy */}
         <div className="hidden lg:block rounded-xl border border-border overflow-hidden">
           <table className="w-full">
             <thead>
-              <tr className="bg-muted">
-                <th className="text-left px-6 py-4 text-sm font-semibold text-foreground">
-                  Tipologia
+              <tr className="bg-muted/60 border-b-2 border-border">
+                <th className="text-left px-6 py-4 text-xs font-semibold text-foreground tracking-wider uppercase">
+                  Tipología
                 </th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-foreground">
+                <th className="text-left px-6 py-4 text-xs font-semibold text-foreground tracking-wider uppercase">
                   Superficie
                 </th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-foreground">
+                <th className="text-left px-6 py-4 text-xs font-semibold text-foreground tracking-wider uppercase">
                   Precio
                 </th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-foreground">
+                <th className="text-left px-6 py-4 text-xs font-semibold text-foreground tracking-wider uppercase">
                   Detalles
                 </th>
-                <th className="text-center px-6 py-4 text-sm font-semibold text-foreground">
+                <th className="text-center px-6 py-4 text-xs font-semibold text-foreground tracking-wider uppercase">
                   Disponibles
                 </th>
-                <th className="text-center px-6 py-4 text-sm font-semibold text-foreground">
+                <th className="text-center px-6 py-4 text-xs font-semibold text-foreground tracking-wider uppercase">
                   Vendidas
                 </th>
-                <th className="text-center px-6 py-4 text-sm font-semibold text-foreground">
+                <th className="text-center px-6 py-4 text-xs font-semibold text-foreground tracking-wider uppercase">
                   Plano
                 </th>
               </tr>
@@ -101,16 +101,16 @@ export function ProjectPricing({ pricing }: { pricing: PricingItem[] }) {
               {pricing.map((item, i) => (
                 <tr
                   key={item.type}
-                  className={`border-t border-border ${
-                    item.available > 0 ? "bg-accent/5" : ""
-                  } ${i % 2 === 0 ? "" : "bg-muted/30"}`}
+                  className={`border-t border-border/60 transition-colors hover:bg-muted/20 ${
+                    item.available > 0 ? "bg-accent/5" : i % 2 !== 0 ? "bg-muted/20" : ""
+                  }`}
                 >
                   <td className="px-6 py-4">
                     <span className="font-medium text-foreground text-sm">{item.type}</span>
                   </td>
                   <td className="px-6 py-4 text-sm text-muted-foreground">{item.area}</td>
                   <td className="px-6 py-4">
-                    <span className="font-bold text-accent text-sm">{item.price}</span>
+                    <span className="font-bold text-accent text-base">{item.price}</span>
                   </td>
                   <td className="px-6 py-4 text-sm text-muted-foreground">{item.details}</td>
                   <td className="px-6 py-4 text-center">

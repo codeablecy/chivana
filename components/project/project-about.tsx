@@ -4,7 +4,7 @@ import type { Project } from "@/lib/types"
 
 export function ProjectAbout({ project }: { project: Project }) {
   return (
-    <section className="py-16 px-4 lg:py-24 lg:px-8 bg-card">
+    <section className="py-16 px-4 lg:py-24 lg:px-8 bg-background">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col gap-10 lg:flex-row lg:items-center lg:gap-16">
           <div className="lg:flex-1">
@@ -19,7 +19,7 @@ export function ProjectAbout({ project }: { project: Project }) {
           </div>
 
           <div className="lg:flex-1">
-            <p className="text-accent font-semibold text-sm tracking-widest uppercase mb-2">
+            <p className="text-accent font-semibold text-xs tracking-[0.2em] uppercase mb-3">
               Sobre el proyecto
             </p>
             <h2 className="font-serif text-2xl font-bold text-foreground lg:text-4xl mb-4 text-balance">

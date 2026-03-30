@@ -6,14 +6,14 @@ export function ProjectPhases({ phases }: { phases: Phase[] }) {
   return (
     <section id="fases" className="py-16 px-4 lg:py-24 lg:px-8 bg-card">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <p className="text-accent font-semibold text-sm tracking-widest uppercase mb-2">
+        <div className="mb-12">
+          <p className="text-accent font-semibold text-xs tracking-[0.2em] uppercase mb-3">
             Avance de proyecto
           </p>
           <h2 className="font-serif text-2xl font-bold text-foreground lg:text-4xl text-balance">
             Avance de Ventas
           </h2>
-          <p className="text-muted-foreground mt-3 max-w-xl mx-auto leading-relaxed">
+          <p className="text-muted-foreground mt-3 max-w-xl leading-relaxed">
             No te quedes sin la tuya. Descubre las fases de nuestro proyecto y las viviendas
             disponibles.
           </p>

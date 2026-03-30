@@ -80,17 +80,17 @@ export function ProjectLocation({ project }: { project: Project }) {
   return (
     <section id="ubicacion" className="py-16 px-4 lg:py-24 lg:px-8 bg-card">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <p className="text-accent font-semibold text-sm tracking-widest uppercase mb-2">
-            Ubicacion y Entorno
+        <div className="mb-12">
+          <p className="text-accent font-semibold text-xs tracking-[0.2em] uppercase mb-3">
+            Ubicación y Entorno
           </p>
           <h2 className="font-serif text-2xl font-bold text-foreground lg:text-4xl text-balance">
-            Donde estamos?
+            ¿Dónde estamos?
           </h2>
-          <p className="text-muted-foreground mt-3 max-w-xl mx-auto leading-relaxed">
+          <p className="text-muted-foreground mt-3 max-w-xl leading-relaxed">
             {hasValue(project.location.city)
-              ? `La mejor opcion para vivir en ${toCityDisplayName(project.location.city)}. A un paso de Madrid y Toledo.`
-              : "La mejor opcion para vivir. A un paso de Madrid y Toledo."}
+              ? `La mejor opción para vivir en ${toCityDisplayName(project.location.city)}. A un paso de Madrid y Toledo.`
+              : "La mejor opción para vivir. A un paso de Madrid y Toledo."}
           </p>
         </div>
 

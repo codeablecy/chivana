@@ -18,28 +18,27 @@ export function ProjectQualities({
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(255,255,255,0.12),transparent)]" />
 
       <div className="relative max-w-7xl mx-auto">
-        <div className="text-center mb-12">
+        <div className="mb-12">
           <p className="text-white/70 font-semibold text-xs tracking-[0.2em] uppercase mb-3">
             Acabados
           </p>
           <h2 className="font-serif text-3xl font-bold text-white lg:text-4xl xl:text-5xl text-balance">
             Memoria de Calidades
           </h2>
-          <p className="text-white/75 mt-4 max-w-xl mx-auto leading-relaxed text-base">
+          <p className="text-white/75 mt-4 max-w-xl leading-relaxed text-base">
             Cada detalle cuenta. Materiales de primera y acabados de lujo en
-            cada rincon.
+            cada rincón.
           </p>
         </div>
 
-        {/* Flex-wrap keeps each row centered for any card count (odd/even) */}
-        <div className="flex flex-wrap justify-center gap-5 items-stretch">
+        {/* CSS grid — clean alignment for any card count */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {qualities.map((q, idx) => {
             const Icon = getProjectIcon(q.icon);
             return (
               <div
-                // `title` is not guaranteed unique (e.g. repeated "Zonas Comunes")
                 key={`${q.title}-${idx}`}
-                className="group relative bg-white/10 hover:bg-white/[0.16] backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/10 w-full sm:w-[18rem] flex-none"
+                className="group relative bg-white/10 hover:bg-white/[0.16] backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/10"
               >
                 {/* Icon */}
                 <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-white/20 group-hover:bg-white/25 transition-colors mb-5">

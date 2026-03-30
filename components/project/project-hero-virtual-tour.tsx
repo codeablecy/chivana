@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import { Maximize2, Minimize2 } from "lucide-react"
-import { embedDisplayUrl, embedTitle } from "@/lib/embed-display-url"
+import { embedDisplayUrl } from "@/lib/embed-display-url"
 import { cn } from "@/lib/utils"
 
 interface ProjectHeroVirtualTourProps {
@@ -19,7 +19,6 @@ export function ProjectHeroVirtualTour({
   projectName,
 }: ProjectHeroVirtualTourProps) {
   const src = embedDisplayUrl(embedUrl)
-  const title = embedTitle(embedUrl)
   const [loaded, setLoaded] = useState(false)
   const [embedFullscreenOverlay, setEmbedFullscreenOverlay] = useState(false)
   const [isNativeFullscreen, setIsNativeFullscreen] = useState(false)
@@ -79,38 +78,39 @@ export function ProjectHeroVirtualTour({
   return (
     <section
       id="tour-virtual"
-      className="relative w-full scroll-mt-20 bg-gradient-to-b from-background via-muted/20 to-background"
+      className="relative w-full scroll-mt-20 bg-foreground"
       aria-labelledby="hero-vt-heading"
     >
       <div className="mx-auto max-w-[100vw] px-0 pt-6 pb-10 sm:pt-8 sm:pb-14 lg:pt-10 lg:pb-16">
-        <div className="mb-6 px-4 text-center sm:px-6 lg:px-8">
-          <p className="text-accent font-semibold text-xs tracking-[0.25em] uppercase mb-2">
+        {/* Left-aligned editorial header — readable against dark bg-foreground */}
+        <div className="mb-6 px-4 sm:px-6 lg:px-8 lg:max-w-7xl lg:mx-auto">
+          <p className="text-accent font-semibold text-xs tracking-[0.25em] uppercase mb-3">
             Experiencia inmersiva
           </p>
           <h2
             id="hero-vt-heading"
-            className="font-serif text-xl font-bold text-foreground sm:text-2xl lg:text-3xl text-balance"
+            className="font-serif text-xl font-bold text-card sm:text-2xl lg:text-3xl text-balance"
           >
             Tour virtual · {projectName}
           </h2>
-          <p className="mt-2 text-sm text-muted-foreground max-w-xl mx-auto">
-            Explora el proyecto en {title} sin salir de la web.
+          <p className="mt-2 text-sm text-card/55 max-w-xl">
+            Explora el proyecto sin salir de la web.
           </p>
         </div>
 
         <div className="relative px-2 sm:px-4 lg:px-6">
           <div
             className={cn(
-              "relative mx-auto overflow-hidden rounded-2xl border border-border/60 bg-muted shadow-2xl shadow-foreground/5",
-              "min-h-[min(72vh,920px)] w-full max-w-[1600px]",
+              "relative mx-auto overflow-hidden rounded-2xl border border-card/10 bg-card/5 shadow-2xl shadow-black/40",
+              "min-h-[min(70vh,880px)] w-full max-w-[1600px]",
             )}
           >
             <div
               ref={viewerRef}
-              className="relative h-[min(72vh,920px)] w-full bg-foreground/5"
+              className="relative h-[min(70vh,880px)] w-full"
             >
               {!loaded && (
-                <div className="absolute inset-0 z-10 flex items-center justify-center bg-muted">
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-foreground/60">
                   <div className="h-10 w-10 animate-spin rounded-full border-2 border-accent border-t-transparent" />
                 </div>
               )}
@@ -128,7 +128,7 @@ export function ProjectHeroVirtualTour({
                   e.stopPropagation()
                   toggleEmbedFullscreen()
                 }}
-                className="absolute bottom-4 right-4 z-20 flex min-h-[44px] min-w-[44px] items-center gap-2 rounded-xl bg-foreground/85 px-3 py-2.5 text-sm font-medium text-background backdrop-blur-sm transition-colors hover:bg-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring touch-manipulation"
+                className="absolute bottom-4 right-4 z-20 flex min-h-[44px] min-w-[44px] items-center gap-2 rounded-xl bg-black/60 px-3 py-2.5 text-sm font-medium text-white backdrop-blur-sm transition-colors hover:bg-black/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent touch-manipulation"
                 aria-label={isFs ? "Salir de pantalla completa" : "Pantalla completa"}
               >
                 {isFs ? (

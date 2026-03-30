@@ -48,14 +48,14 @@ export function ProjectTypes({
       aria-labelledby="viviendas-heading"
     >
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-10 lg:mb-12">
-          <p className="text-accent font-semibold text-sm tracking-widest uppercase mb-2">
+        <div className="mb-10 lg:mb-12">
+          <p className="text-accent font-semibold text-xs tracking-[0.2em] uppercase mb-3">
             Tipologías
           </p>
           <h2 id="viviendas-heading" className="font-serif text-2xl font-bold text-foreground lg:text-4xl text-balance">
             Las Viviendas
           </h2>
-          <p className="text-muted-foreground mt-3 max-w-xl mx-auto leading-relaxed text-sm lg:text-base">
+          <p className="text-muted-foreground mt-3 max-w-xl leading-relaxed text-sm lg:text-base">
             Espacios modernos y funcionales diseñados para tu familia
           </p>
         </div>
@@ -145,8 +145,8 @@ export function ProjectTypes({
               </p>
             )}
 
-            {/* Spec cards — 2x2 on mobile, 4 in row on desktop */}
-            <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-8">
+            {/* Spec cards — 2 cols mobile, 4 cols sm+ */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8">
               <div className="flex flex-col items-center gap-1.5 bg-muted/80 rounded-xl p-4">
                 <Ruler className="h-5 w-5 text-accent shrink-0" />
                 <span className="text-foreground font-bold text-sm">
