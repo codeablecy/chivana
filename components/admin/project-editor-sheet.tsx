@@ -258,7 +258,9 @@ export function ProjectEditorSheet({
           lng: form.lng,
         },
         tags: form.tags,
-        heroVirtualTourUrl: form.heroVirtualTourUrl.trim() || undefined,
+        // Important: when the user clears the input we must persist NULL in DB.
+        // Passing `undefined` means "keep existing". Passing `""` will become NULL in the store layer.
+        heroVirtualTourUrl: form.heroVirtualTourUrl.trim(),
         showPricingTable: form.showPricingTable,
       });
       if (!updateResult.success) {
@@ -1046,16 +1048,30 @@ export function ProjectEditorSheet({
                     Independiente del Tour 360° de la galería. Cualquier proveedor
                     con URL de embed o iframe (Matterport, Wizio, etc.).
                   </p>
-                  <Input
-                    id="hero-vt-url"
-                    type="url"
-                    placeholder="URL de embed o enlace público (cualquier proveedor)"
-                    value={form.heroVirtualTourUrl}
-                    onChange={(e) =>
-                      update({ heroVirtualTourUrl: e.target.value })
-                    }
-                    className="mt-1 font-mono text-sm"
-                  />
+                  <div className="relative">
+                    <Input
+                      id="hero-vt-url"
+                      type="url"
+                      placeholder="URL de embed o enlace público (cualquier proveedor)"
+                      value={form.heroVirtualTourUrl}
+                      onChange={(e) =>
+                        update({ heroVirtualTourUrl: e.target.value })
+                      }
+                      className="mt-1 font-mono text-sm pr-9"
+                    />
+                    {form.heroVirtualTourUrl.trim().length > 0 && (
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        aria-label="Quitar tour virtual"
+                        onClick={() => update({ heroVirtualTourUrl: "" })}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
 
                 <Tabs defaultValue="fotos" className="w-full">

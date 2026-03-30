@@ -302,7 +302,13 @@ export function MediaSectionEditor<T extends AnyItem>({
   const renderEmbedList = (subset: AnyItem[]) => (
     <div className="flex flex-col gap-2">
       {subset.map((item) => {
-        const globalIdx = items.indexOf(item as T)
+        // In Tour 360° mode we may render derived objects (not the same references as `items`),
+        // so `items.indexOf(...)` can return `-1`. When present, prefer `__globalIdx`.
+        const maybeWithGlobalIdx = item as AnyItem & { __globalIdx?: number }
+        const globalIdx =
+          typeof maybeWithGlobalIdx.__globalIdx === "number"
+            ? maybeWithGlobalIdx.__globalIdx
+            : items.indexOf(item as T)
         const embedItem = item as MediaEmbedItem
         const thumb = embedThumb(embedItem.url)
         const label = embedLabel(embedItem.url)
@@ -529,10 +535,18 @@ export function MediaSectionEditor<T extends AnyItem>({
           </div>
 
           {items.length > 0 ? (
-            renderEmbedList(items.map((item) => {
-              const t = item as Tour360Item
-              return { src: "", alt: embedLabel(t.url), url: t.url } as MediaEmbedItem
-            }))
+            renderEmbedList(
+              items.map((item, i) => {
+                const t = item as Tour360Item
+                // Attach original index so delete (Trash2) can remove from the real `items` array.
+                return {
+                  src: "",
+                  alt: embedLabel(t.url),
+                  url: t.url,
+                  __globalIdx: i,
+                } as unknown as MediaEmbedItem & { __globalIdx?: number }
+              }),
+            )
           ) : (
             <div className="rounded-xl border border-dashed border-muted-foreground/20 py-8 text-center">
               <p className="text-sm text-muted-foreground">Sin tours. Añade un URL de embed arriba.</p>
