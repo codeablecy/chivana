@@ -111,6 +111,12 @@ export function Footer({ projects = [] }: FooterProps) {
                   Proyectos
                 </Link>
                 <Link
+                  href="/somos"
+                  className="text-navy-foreground/70 text-sm hover:text-accent transition-colors"
+                >
+                  Somos
+                </Link>
+                <Link
                   href="/citas-visitas"
                   className="text-navy-foreground/70 text-sm hover:text-accent transition-colors"
                 >
