@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 // hero video id from youtube
 // const HERO_VIDEO_ID = "kjqXD-HJZKU"
 const HERO_VIDEO_ID = process.env.NEXT_PUBLIC_HERO_VIDEO_ID || ""
-const HERO_VIDEO_SRC = `https://www.youtube.com/embed/${HERO_VIDEO_ID}?autoplay=1&mute=1&loop=1&playlist=${HERO_VIDEO_ID}&controls=0&rel=0&showinfo=0&modestbranding=1`
+const HERO_VIDEO_SRC = `https://www.youtube.com/embed/${HERO_VIDEO_ID}?autoplay=1&mute=1&loop=1&playlist=${HERO_VIDEO_ID}&controls=0&rel=0&showinfo=0&modestbranding=1&start=9`
 
 function HeroBrand() {
   return (
@@ -83,68 +83,68 @@ function HeroBrand() {
   )
 }
 
-// function WhyChivana() {
-//   const values = [
-//     {
-//       icon: Sun,
-//       title: "Luminosas",
-//       description:
-//         "Amplios ventanales que inundan cada estancia de luz natural durante todo el dia.",
-//     },
-//     {
-//       icon: Shield,
-//       title: "Calidad Premium",
-//       description:
-//         "Materiales de primera y acabados de lujo en cada detalle de nuestras viviendas.",
-//     },
-//     {
-//       icon: Leaf,
-//       title: "Sostenibles",
-//       description:
-//         "Aerotermia, suelo radiante y alta eficiencia energetica para el maximo confort.",
-//     },
-//     {
-//       icon: Home,
-//       title: "Jardin Privado",
-//       description:
-//         "Cada vivienda con jardin propio, espacio al aire libre y opcion de piscina.",
-//     },
-//   ]
+function WhyChivana() {
+  const values = [
+    {
+      icon: Sun,
+      title: "Luminosas",
+      description:
+        "Amplios ventanales que inundan cada estancia de luz natural durante todo el dia.",
+    },
+    {
+      icon: Shield,
+      title: "Calidad Premium",
+      description:
+        "Materiales de primera y acabados de lujo en cada detalle de nuestras viviendas.",
+    },
+    {
+      icon: Leaf,
+      title: "Sostenibles",
+      description:
+        "Aerotermia, suelo radiante y alta eficiencia energetica para el maximo confort.",
+    },
+    {
+      icon: Home,
+      title: "Jardin Privado",
+      description:
+        "Cada vivienda con jardin propio, espacio al aire libre y opcion de piscina.",
+    },
+  ]
 
-//   return (
-//     <section className="py-16 px-4 lg:py-24 lg:px-8 bg-card">
-//       <div className="max-w-7xl mx-auto">
-//         <div className="text-center mb-12">
-//           <p className="text-accent font-semibold text-sm tracking-widest uppercase mb-2">
-//             Por que Chivana
-//           </p>
-//           <h2 className="font-serif text-2xl font-bold text-foreground lg:text-4xl text-balance">
-//             Hogares Pensados Para Ti
-//           </h2>
-//           <p className="text-muted-foreground mt-3 max-w-2xl mx-auto leading-relaxed">
-//             En Chivana Real Estate creamos viviendas que combinan diseno moderno, materiales de
-//             primera calidad y una ubicacion inmejorable.
-//           </p>
-//         </div>
+  return (
+    <section className="py-16 px-4 lg:py-24 lg:px-8 bg-card">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-12">
+          <p className="text-accent font-semibold text-sm tracking-widest uppercase mb-2">
+            Por que Chivana
+          </p>
+          <h2 className="font-serif text-2xl font-bold text-foreground lg:text-4xl text-balance">
+            Hogares Pensados Para Ti
+          </h2>
+          <p className="text-muted-foreground mt-3 max-w-2xl mx-auto leading-relaxed">
+            En Chivana Real Estate creamos viviendas que combinan diseno moderno, materiales de
+            primera calidad y una ubicacion inmejorable.
+          </p>
+        </div>
 
-//         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-//           {values.map((v) => (
-//             <div
-//               key={v.title}
-//               className="flex flex-col items-center text-center bg-background rounded-xl p-6 border border-border"
-//             >
-//               <div className="flex items-center justify-center h-14 w-14 rounded-xl bg-accent/10 mb-4">
-//                 <v.icon className="h-7 w-7 text-accent" />
-//               </div>
-//               <h3 className="font-serif text-lg font-bold text-foreground mb-2">{v.title}</h3>
-//               <p className="text-muted-foreground text-sm leading-relaxed">{v.description}</p>
-//             </div>
-//           ))}
-//         </div>
-//       </div>
-//     </section>
-//   )
-// }
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {values.map((v) => (
+            <div
+              key={v.title}
+              className="flex flex-col items-center text-center bg-background rounded-xl p-6 border border-border"
+            >
+              <div className="flex items-center justify-center h-14 w-14 rounded-xl bg-accent/10 mb-4">
+                <v.icon className="h-7 w-7 text-accent" />
+              </div>
+              <h3 className="font-serif text-lg font-bold text-foreground mb-2">{v.title}</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">{v.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
 
 async function FeaturedProjects() {
   const projects = (await getActiveProjects()).slice(0, 3)
@@ -212,7 +212,7 @@ export default function Page() {
       <Navbar />
       <main>
         <HeroBrand />
-        {/* <WhyChivana /> */}
+        <WhyChivana />
         <FeaturedProjects />
         <BlogPreview />
         <Contact />
