@@ -8,6 +8,7 @@ import { ScrollToTopOnNavigateClient } from "@/components/scroll-to-top-on-navig
 import { JsonLd } from "@/components/seo-json-ld";
 import { SiteSettingsProvider } from "@/lib/settings-context";
 import { seo } from "@/lib/seo";
+import { StyledComponentsRegistry } from "@/lib/styled-components-registry";
 import { getCachedSettings, getFooterProjects } from "@/lib/store";
 import { Toaster } from "sonner";
 import "./globals.css";
@@ -138,16 +139,18 @@ export default async function RootLayout({
       <body
         className={`${barlow.variable} ${belleza.variable} font-sans antialiased`}
       >
-        <SiteSettingsProvider settings={settings}>
-          <JsonLd data={organizationJsonLd} />
-          <JsonLd data={websiteJsonLd} />
-          <RotatingFavicon />
-          <ScrollToTopOnNavigateClient />
-          <ConditionalLayoutShell projects={footerProjects}>
-            {children}
-          </ConditionalLayoutShell>
-          <Toaster richColors position="top-center" />
-        </SiteSettingsProvider>
+        <StyledComponentsRegistry>
+          <SiteSettingsProvider settings={settings}>
+            <JsonLd data={organizationJsonLd} />
+            <JsonLd data={websiteJsonLd} />
+            <RotatingFavicon />
+            <ScrollToTopOnNavigateClient />
+            <ConditionalLayoutShell projects={footerProjects}>
+              {children}
+            </ConditionalLayoutShell>
+            <Toaster richColors position="top-center" />
+          </SiteSettingsProvider>
+        </StyledComponentsRegistry>
       </body>
     </html>
   )

@@ -6,6 +6,7 @@ import { signUpAction } from "../actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import Loader from "@/components/ui/loader"
 import { Mail, Lock, User, ArrowRight } from "lucide-react"
 import { toast } from "sonner"
 
@@ -141,7 +142,13 @@ export default function SignUpPage() {
               className="w-full h-12 bg-accent hover:bg-accent/90 text-accent-foreground font-medium rounded-sm transition-all duration-200 group"
             >
               {pending ? (
-                <span className="animate-pulse">Registrando...</span>
+                <Loader
+                  size="sm"
+                  orientation="horizontal"
+                  label="Registrando..."
+                  tone="inherit"
+                  className="text-accent-foreground"
+                />
               ) : (
                 <>
                   Crear cuenta

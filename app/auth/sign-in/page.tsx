@@ -7,6 +7,7 @@ import { signInAction } from "../actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import Loader from "@/components/ui/loader"
 import { Mail, Lock, ArrowRight } from "lucide-react"
 
 function SignInForm() {
@@ -125,7 +126,13 @@ function SignInForm() {
               className="w-full h-12 bg-accent hover:bg-accent/90 text-accent-foreground font-medium rounded-sm transition-all duration-200 group"
             >
               {pending ? (
-                <span className="animate-pulse">Accediendo...</span>
+                <Loader
+                  size="sm"
+                  orientation="horizontal"
+                  label="Accediendo..."
+                  tone="inherit"
+                  className="text-accent-foreground"
+                />
               ) : (
                 <>
                   Acceder
@@ -160,10 +167,6 @@ export default function SignInPage() {
 
 function SignInPageSkeleton() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="animate-pulse text-muted-foreground text-sm">
-        Cargando...
-      </div>
-    </div>
+    <Loader fullScreen size="lg" label="Preparando acceso" />
   )
 }
