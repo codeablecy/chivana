@@ -1,5 +1,5 @@
-import Loader from "@/components/ui/loader"
+import { Spinner } from "@/components/ui/spinner"
 
 export default function AuthLoading() {
-  return <Loader fullScreen size="lg" label="Cargando acceso" />
+  return <Spinner fullScreen size="lg" label="Cargando acceso" />
 }

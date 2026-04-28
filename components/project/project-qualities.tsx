@@ -31,14 +31,14 @@ export function ProjectQualities({
           </p>
         </div>
 
-        {/* CSS grid — clean alignment for any card count */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        {/* Flex layout keeps incomplete last rows centered, matching `/projects`. */}
+        <div className="flex flex-wrap justify-center gap-5">
           {qualities.map((q, idx) => {
             const Icon = getProjectIcon(q.icon);
             return (
               <div
                 key={`${q.title}-${idx}`}
-                className="group relative bg-white/10 hover:bg-white/[0.16] backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/10"
+                className="group relative w-full sm:w-[calc((100%-1.25rem)/2)] lg:w-[calc((100%-2.5rem)/3)] xl:w-[calc((100%-3.75rem)/4)] bg-white/10 hover:bg-white/[0.16] backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/10"
               >
                 {/* Icon */}
                 <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-white/20 group-hover:bg-white/25 transition-colors mb-5">

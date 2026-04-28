@@ -3,15 +3,17 @@
 import { useEffect, useState } from "react"
 import { usePathname } from "next/navigation"
 
-/** Height of the CTA bar zone from bottom of viewport (px) */
-const CTA_ZONE_HEIGHT = 80
+/** Detection zone size used for floating UI contrast switching. */
+const ZONE_HEIGHT = 80
+
+type AccentZonePosition = "top" | "bottom"
 
 /**
- * Detects when the CTA bar overlaps an accent (orange) section.
+ * Detects when fixed UI overlaps an accent (orange) section.
  * Uses scroll/resize listeners + Intersection Observer to check if any
- * [data-accent-section] element occupies the bottom CTA zone of the viewport.
+ * [data-accent-section] element occupies the requested viewport zone.
  */
-export function useOverAccentSection() {
+export function useOverAccentSection(position: AccentZonePosition = "bottom") {
   const [isOverAccent, setIsOverAccent] = useState(false)
   const pathname = usePathname()
 
@@ -20,14 +22,13 @@ export function useOverAccentSection() {
     if (sections.length === 0) return
 
     const checkOverlap = () => {
-      const viewportBottom = window.innerHeight
-      const ctaZoneTop = viewportBottom - CTA_ZONE_HEIGHT
+      const zoneTop = position === "top" ? 0 : window.innerHeight - ZONE_HEIGHT
+      const zoneBottom = position === "top" ? ZONE_HEIGHT : window.innerHeight
 
       for (const el of sections) {
         const rect = el.getBoundingClientRect()
-        const overlapsCtaZone =
-          rect.top < viewportBottom && rect.bottom > ctaZoneTop
-        if (overlapsCtaZone) {
+        const overlapsZone = rect.top < zoneBottom && rect.bottom > zoneTop
+        if (overlapsZone) {
           setIsOverAccent(true)
           return
         }
@@ -55,7 +56,7 @@ export function useOverAccentSection() {
       window.removeEventListener("scroll", checkOverlap)
       window.removeEventListener("resize", checkOverlap)
     }
-  }, [pathname])
+  }, [pathname, position])
 
   return isOverAccent
 }

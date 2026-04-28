@@ -28,10 +28,13 @@ export function ProjectAbout({ project }: { project: Project }) {
             <p className="text-muted-foreground leading-relaxed mb-8">{project.description}</p>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {project.features.map((feature) => {
+              {project.features.map((feature, index) => {
                 const Icon = getProjectIcon(feature.icon)
                 return (
-                  <div key={feature.title} className="flex items-start gap-3">
+                  <div
+                    key={`${feature.title}-${feature.icon}-${index}`}
+                    className="flex items-start gap-3"
+                  >
                     <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-accent/10 flex-shrink-0">
                       <Icon className="h-5 w-5 text-accent" />
                     </div>

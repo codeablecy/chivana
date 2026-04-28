@@ -5,12 +5,16 @@ import { revalidatePath } from "next/cache"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
 
 export type AuthResult = { error: string } | { success: true }
+type AuthFormState = AuthResult | null
 
 /** Must match Supabase Dashboard → Auth → URL Configuration (Site URL + Redirect URLs). */
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
 
-export async function signInAction(formData: FormData): Promise<AuthResult> {
+export async function signInAction(
+  _prevState: AuthFormState,
+  formData: FormData
+): Promise<AuthResult> {
   const email = formData.get("email") as string
   const password = formData.get("password") as string
 
@@ -29,7 +33,10 @@ export async function signInAction(formData: FormData): Promise<AuthResult> {
   redirect("/admin")
 }
 
-export async function signUpAction(formData: FormData): Promise<AuthResult> {
+export async function signUpAction(
+  _prevState: AuthFormState,
+  formData: FormData
+): Promise<AuthResult> {
   const email = formData.get("email") as string
   const password = formData.get("password") as string
   const name = (formData.get("name") as string)?.trim()

@@ -1,34 +1,53 @@
 "use client"
 
-import { useState } from "react"
+import { useActionState, useEffect } from "react"
 import Link from "next/link"
 import { signUpAction } from "../actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import Loader from "@/components/ui/loader"
+import { Spinner } from "@/components/ui/spinner"
 import { Mail, Lock, User, ArrowRight } from "lucide-react"
 import { toast } from "sonner"
+import { useFormStatus } from "react-dom"
+
+function SignUpSubmitButton() {
+  const { pending } = useFormStatus()
+
+  return (
+    <Button
+      type="submit"
+      disabled={pending}
+      className="w-full h-12 bg-accent hover:bg-accent/90 text-accent-foreground font-medium rounded-sm transition-all duration-200"
+    >
+      {pending ? (
+        <span className="inline-flex items-center gap-2">
+          <Spinner size="sm" className="text-accent-foreground [&_svg]:text-current" />
+          <span>Registrando...</span>
+        </span>
+      ) : (
+        <>
+          Crear cuenta
+          <ArrowRight className="ml-2 h-4 w-4 transition-transform" />
+        </>
+      )}
+    </Button>
+  )
+}
 
 export default function SignUpPage() {
-  const [error, setError] = useState("")
-  const [pending, setPending] = useState(false)
+  const [state, formAction] = useActionState(signUpAction, null)
 
-  async function handleSubmit(formData: FormData) {
-    setPending(true)
-    setError("")
-    const result = await signUpAction(formData)
-    if ("error" in result) {
-      setError(result.error)
-      setPending(false)
-    } else {
+  useEffect(() => {
+    if (state && "success" in state) {
       toast.success(
         "Cuenta creada. Revisa tu email para confirmar el registro.",
         { duration: 6000 }
       )
-      setPending(false)
     }
-  }
+  }, [state])
+
+  const errorMessage = state && "error" in state ? state.error : ""
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
@@ -75,7 +94,7 @@ export default function SignUpPage() {
             </p>
           </div>
 
-          <form action={handleSubmit} className="space-y-5">
+          <form action={formAction} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="name" className="text-sm font-medium text-foreground">
                 Nombre
@@ -130,32 +149,13 @@ export default function SignUpPage() {
               </div>
             </div>
 
-            {error && (
+            {errorMessage && (
               <p className="text-sm text-destructive" role="alert">
-                {error}
+                {errorMessage}
               </p>
             )}
 
-            <Button
-              type="submit"
-              disabled={pending}
-              className="w-full h-12 bg-accent hover:bg-accent/90 text-accent-foreground font-medium rounded-sm transition-all duration-200 group"
-            >
-              {pending ? (
-                <Loader
-                  size="sm"
-                  orientation="horizontal"
-                  label="Registrando..."
-                  tone="inherit"
-                  className="text-accent-foreground"
-                />
-              ) : (
-                <>
-                  Crear cuenta
-                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                </>
-              )}
-            </Button>
+            <SignUpSubmitButton />
           </form>
 
           <p className="text-center text-sm text-muted-foreground">

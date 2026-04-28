@@ -167,10 +167,16 @@ export function ProjectLocation({ project }: { project: Project }) {
         {/* Servicios Cercanos */}
         {project.location.amenities.length > 0 && (
           <div>
-            <div className="text-center mb-8">
-              <h3 className="font-serif text-2xl font-bold text-foreground lg:text-3xl">
+            <div className="mb-8">
+              <p className="text-accent font-semibold text-xs tracking-[0.2em] uppercase mb-3">
+                Entorno
+              </p>
+              <h3 className="font-serif text-2xl font-bold text-foreground lg:text-3xl text-balance">
                 Servicios Cercanos
               </h3>
+              <p className="text-muted-foreground mt-3 max-w-2xl leading-relaxed">
+                Todo lo que necesitas en el dia a dia, a pocos minutos de casa.
+              </p>
             </div>
 
             {/* Flex-wrap keeps each row centered for any card count (odd/even) */}
@@ -181,36 +187,45 @@ export function ProjectLocation({ project }: { project: Project }) {
                 return (
                   <div
                     key={type}
-                    className="bg-background rounded-2xl border border-border/70 p-5 shadow-sm hover:shadow-md transition-shadow duration-200 w-full sm:w-[18rem] lg:w-[18rem] flex-none"
+                    className="group relative w-full sm:w-[18rem] lg:w-[18rem] flex-none overflow-hidden rounded-2xl border border-border/70 bg-gradient-to-br from-background via-background to-muted/40 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-accent/20 hover:shadow-[0_18px_45px_rgba(15,23,42,0.12)]"
                   >
+                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,166,0,0.10),transparent_40%)] opacity-80" />
+                    <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent" />
+
                     {/* Card header */}
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="flex items-center justify-center h-9 w-9 rounded-xl bg-accent/10 flex-shrink-0">
+                    <div className="relative mb-4 flex items-center gap-3">
+                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-accent/20 to-accent/10 ring-1 ring-accent/15 shadow-sm transition-transform duration-300 group-hover:scale-105">
                         <Icon
                           className="h-4 w-4 text-accent"
                           strokeWidth={1.75}
                         />
                       </div>
-                      <h4 className="font-semibold text-foreground text-sm tracking-wide">
-                        {label}
-                      </h4>
+                      <div className="min-w-0">
+                        <h4 className="text-sm font-semibold tracking-wide text-foreground">
+                          {label}
+                        </h4>
+                        <p className="text-xs text-muted-foreground">
+                          {amenities.length} servicio
+                          {amenities.length > 1 ? "s" : ""}
+                        </p>
+                      </div>
                     </div>
 
                     {/* Amenity rows with separators */}
-                    <div className="flex flex-col">
+                    <div className="relative flex flex-col rounded-xl bg-white/50 p-1 ring-1 ring-border/40 backdrop-blur-[2px]">
                       {amenities.map((a, idx) => (
                         <div
-                          key={a.name}
-                          className={`flex items-center justify-between py-2 text-sm ${
+                          key={`${a.name}-${idx}`}
+                          className={`flex items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors duration-200 hover:bg-white/70 ${
                             idx < amenities.length - 1
                               ? "border-b border-border/50"
                               : ""
                           }`}
                         >
-                          <span className="text-muted-foreground leading-snug pr-4">
+                          <span className="leading-snug text-muted-foreground">
                             {a.name}
                           </span>
-                          <span className="text-foreground font-semibold flex-shrink-0 tabular-nums">
+                          <span className="inline-flex flex-shrink-0 items-center rounded-full border border-accent/10 bg-gradient-to-r from-accent/15 to-accent/10 px-2.5 py-1 text-xs font-semibold tabular-nums text-accent shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]">
                             {a.distance}
                           </span>
                         </div>
