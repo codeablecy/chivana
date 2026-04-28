@@ -60,7 +60,7 @@ export function Navbar() {
                 <span className="font-serif text-lg font-bold tracking-[0.08em] text-accent transition-transform duration-300 group-hover:translate-x-0.5 lg:text-xl">
                   CHIVANA
                 </span>
-                <span className="text-[10px] uppercase tracking-[0.32em] text-navy-foreground/78 lg:text-[11px]">
+                <span className="text-[10px] font-medium uppercase text-navy-foreground/70 tracking-[0.32em] lg:text-[11px]">
                   Real Estate
                 </span>
               </Link>
